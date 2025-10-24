@@ -53,8 +53,8 @@ Hummii is a modern service marketplace platform designed for the Canadian market
 - **Zustand** - Client state management
 
 ### Admin Panel
-- **Next.js** - React-based admin interface
-- **React Admin / Refine** - Admin framework
+- **Refine** - React-based admin framework
+- **Next.js** - Modern React framework
 
 ### Infrastructure
 - **Docker** - Containerization
@@ -65,11 +65,13 @@ Hummii is a modern service marketplace platform designed for the Canadian market
 - **Stripe** - Payment processing & identity verification
 - **Google Maps** - Geolocation & mapping
 - **OneSignal** - Email & push notifications
-- **Twilio** - SMS verification
 - **OpenAI** - AI chatbot support
 - **Sentry** - Error tracking
 
-For detailed stack information, see [docs/Stack.md](docs/Stack.md).
+📖 **For detailed stack information, see:**
+- 🌟 [**Stack_EN.md**](docs/Stack_EN.md) - **Primary technical documentation** (English, fully aligned with coding rules)
+- 📄 [Stack.md](docs/Stack.md) - Quick reference (redirects to Stack_EN.md)
+- 📄 [TS.md](docs/TS.md) - Technical specification (Russian)
 
 ---
 
@@ -341,13 +343,33 @@ GitHub Actions automatically runs:
 
 ## 📚 Documentation
 
-- [Project Plan](docs/plan.md) - Roadmap and milestones
-- [Tech Stack](docs/Stack.md) - Detailed technology choices
-- [Security](docs/security.md) - Security measures and compliance
-- [Technical Specification](docs/TS.md) - Full technical specification
-- [API Documentation](docs/api/) - API endpoints and integration guides
-- [Modules](docs/modules/) - Feature specifications
-- [Docker Setup](docker/README.md) - Docker development guide
+### Core Documentation
+- 🌟 [**Stack_EN.md**](docs/Stack_EN.md) - **Complete technical stack** (English, primary reference)
+- 📄 [Technical Specification (TS.md)](docs/TS.md) - Full project specification (Russian)
+- 📊 [Documentation Alignment Summary](docs/ALIGNMENT_SUMMARY.md) - Documentation consistency report
+- 📝 [CHANGELOG_TS.md](docs/CHANGELOG_TS.md) - Documentation change history
+
+### Guides & References
+- 📋 [Project Plan](docs/plan.md) - Roadmap and milestones
+- 🔒 [Security](docs/security.md) - Security measures and PIPEDA compliance
+- 🚀 [Deployment](docs/DEPLOYMENT.md) - Production deployment guide
+- 🐙 [GitHub Setup](docs/GITHUB_SETUP.md) - Repository configuration
+
+### Feature Documentation
+- 📡 [API Documentation](docs/api/) - API endpoints and integrations
+  - [Geolocation](docs/api/geolocation.md)
+  - [OneSignal](docs/api/onesignal.md)
+  - [Verification](docs/api/verification.md)
+- 🎨 [Modules](docs/modules/) - Feature specifications
+  - [Chat System](docs/modules/chat.md)
+  - [Rating System](docs/modules/rating.md)
+  - [Partner Portal](docs/modules/Partner%20Portal.md)
+- ⚙️ [Configurations](docs/configs/)
+  - [SEO Configuration](docs/configs/SEO.md)
+
+### Development
+- 🐳 [Docker Setup](docker/README.md) - Container development guide
+- 🎯 [Coding Rules](.cursor/rules/) - nest.mdc & next.mdc
 
 ---
 

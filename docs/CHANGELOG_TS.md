@@ -165,3 +165,75 @@ The technical specification is now **COMPLETE and READY for development**. All a
 
 *Generated: October 24, 2025*
 
+---
+
+## Updates - October 24, 2025 (Stack Alignment)
+
+### Documentation Improvements ✅
+
+**1. Created Stack_EN.md (English Version)**
+- Complete English translation of technology stack
+- Aligned with nest.mdc and next.mdc coding rules
+- Added missing sections:
+  - API Versioning (`/api/v1/`)
+  - Backend Module Structure
+  - Content Moderation Strategy
+  - Background Jobs & Queues details
+  - Rate Limiting specifications
+  - PIPEDA Compliance details
+  - Testing Strategy
+  - Performance optimization
+
+**2. Technology Decisions Finalized**
+- **Admin Panel:** Refine (as per next.mdc recommendation)
+- **i18n Library:** next-intl (English + French for Canada)
+- **Languages:** English + French (removed Russian - not applicable for Canadian market)
+
+**3. Security Enhancements**
+- Detailed Rate Limiting configuration per endpoint type
+- Content Moderation implementation strategy
+- Field-level encryption for sensitive data (credit cards, SIN)
+- PII masking in logs (emails, phones)
+- User Rights API endpoints for PIPEDA compliance
+
+**4. Testing Standards**
+- Backend: 80%+ coverage for critical code, smoke test endpoint for each controller
+- Frontend: React Testing Library (not Enzyme), accessibility tests with jest-axe
+- Critical paths defined: payments, disputes, subscriptions, notifications, QR codes
+
+**5. Backend Architecture**
+- Module structure defined (core, shared, feature modules)
+- Background job types specified (email, push, image processing, cleanup, webhooks)
+- API versioning strategy: URI-based `/api/v1/`
+
+---
+
+**Summary of Alignment with Coding Rules:**
+
+| Rule Category | Status | Notes |
+|---------------|--------|-------|
+| **Language & Documentation** | ✅ Aligned | Stack_EN.md in English |
+| **Technology Stack** | ✅ Aligned | Matches nest.mdc + next.mdc |
+| **Security** | ✅ Aligned | Rate limiting, PIPEDA, encryption |
+| **Testing** | ✅ Aligned | Jest, Supertest, RTL, coverage targets |
+| **Architecture** | ✅ Aligned | Modular NestJS structure |
+| **Content Moderation** | ✅ Aligned | Auto-moderation + manual review |
+| **API Versioning** | ✅ Aligned | `/api/v1/` URI versioning |
+
+---
+
+**Files Created/Updated:**
+- ✅ Created: `docs/Stack_EN.md`
+- ✅ Updated: `docs/CHANGELOG_TS.md`
+- ✅ Updated: `docs/TS.md`
+
+**Next Actions:**
+- Review and approve Stack_EN.md
+- Begin infrastructure setup (Docker, Prisma schema)
+- Initialize NestJS module structure
+- Initialize Next.js application structure
+
+---
+
+*Updated: October 24, 2025*
+

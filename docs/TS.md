@@ -632,10 +632,16 @@
 - OAuth2.0 (Google, Apple Sign In)
 
 **Защита API:**
-- Rate limiting (100 req/min глобально, 5 req/min для auth)
+- Rate limiting (@nestjs/throttler):
+  - **Глобально:** 100 запросов/мин на IP
+  - **Auth endpoints:** 5 запросов/мин (login, register, password reset)
+  - **Chat/messaging:** 20 сообщений/мин на пользователя
+  - **Создание заказов:** 10 запросов/час на пользователя
+  - **Обновление профиля:** 5 запросов/час на пользователя
+  - **Загрузка файлов:** 10 загрузок/час на пользователя
 - CORS whitelist
 - Helmet.js security headers
-- Request payload limits
+- Request payload limits (10MB max)
 - DDoS protection
 
 **Данные:**
@@ -659,10 +665,29 @@
 - **Data breach notification** - в течение 72 часов
 
 **Модерация:**
-- AI-модерация контента (NSFW, spam)
+- **Автоматическая модерация контента:**
+  - Блокировка телефонных номеров (regex паттерны) → замена на `***`
+  - Блокировка email адресов (regex) → замена на `***`
+  - Блокировка внешних ссылок (кроме URLs платформы)
+  - Блокировка социальных сетей (@instagram, @telegram, @whatsapp)
+  - Фильтр нецензурной лексики (английский + французский канадский)
+- **Реализация:**
+  - Настраиваемые regex паттерны
+  - Возврат флагов модерации (phone, email, link, social)
+  - Замена заблокированного контента на `***` или `[removed]`
+  - Логирование событий модерации для аналитики
+- **Rate limiting для контента:**
+  - Сообщения: 20 в минуту на пользователя
+  - Заказы: 10 в час на пользователя
+  - Обновления профиля: 5 в час на пользователя
+- **Система жалоб:**
+  - Пользователи могут пожаловаться на неподходящий контент
+  - Авто-приостановка после порога (3 жалобы)
+  - Очередь на проверку администратором
+  - Отслеживание повторных нарушителей
+- AI-модерация портфолио (NSFW, spam)
 - Ручная модерация администраторами
 - Captcha на регистрации и критичных действиях
-- Система жалоб и блокировок
 
 **Детали:** См. `docs/security.md`
 
@@ -710,7 +735,7 @@
 - Forms: React Hook Form + Zod
 - Maps: Google Maps API
 - Real-time: Socket.io-client
-- i18n: next-intl (English + возможно French для Канады)
+- i18n: next-intl (English + French для Канады)
 
 **Backend:**
 - Framework: NestJS
@@ -720,10 +745,56 @@
 - ORM: Prisma
 - Real-time: Socket.io
 - File Storage: AWS S3 + CloudFront CDN
-- Queue: Bull (для фоновых задач)
+- Queue: Bull/BullMQ (для фоновых задач)
+- Scheduler: @nestjs/schedule (cron jobs)
+- API Documentation: Swagger/OpenAPI (автогенерация)
+
+**Структура модулей NestJS:**
+```
+api/
+├── src/
+│   ├── core/              # Глобальные артефакты Nest
+│   │   ├── filters/       # Exception filters
+│   │   ├── guards/        # Guards для аутентификации
+│   │   └── interceptors/  # Interceptors
+│   ├── shared/            # Общие сервисы
+│   │   ├── utils/         # Вспомогательные функции
+│   │   └── services/      # Общая бизнес-логика
+│   ├── auth/              # Модуль аутентификации
+│   ├── users/             # Модуль пользователей
+│   │   ├── dto/           # Data Transfer Objects
+│   │   ├── entities/      # Prisma entities
+│   │   ├── services/      # Бизнес-логика
+│   │   └── controllers/   # HTTP контроллеры
+│   ├── orders/            # Модуль заказов
+│   ├── reviews/           # Модуль отзывов и рейтинга
+│   ├── chat/              # Модуль чата (WebSocket)
+│   ├── payments/          # Интеграция Stripe
+│   ├── disputes/          # Система споров
+│   ├── notifications/     # Система уведомлений
+│   ├── categories/        # Управление категориями
+│   └── partners/          # Партнёрский портал
+└── prisma/
+    └── schema.prisma      # Схема базы данных
+```
+
+**Версионирование API:**
+- Базовый URL: `/api/v1/`
+- Стратегия: URI versioning
+- Breaking changes требуют новую версию
+- Обратная совместимость: минимум 2 версии
+
+**Фоновые задачи и очереди:**
+- Система очередей: Bull/BullMQ + Redis
+- Типы задач:
+  - Email Notifications Queue (приоритет: высокий)
+  - Push Notifications Queue (приоритет: средний)
+  - Image Processing Queue (обработка загруженных изображений портфолио)
+  - Data Cleanup Queue (запланированная очистка, еженедельно)
+  - Webhook Retries Queue (повторные попытки Stripe webhooks)
 
 **Admin Panel:**
-- Framework: Refine или React Admin
+- Framework: Refine (рекомендовано правилами next.mdc)
 - Отдельное приложение с доступом к основному API
 
 **Partner Portal:**
