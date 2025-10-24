@@ -1,0 +1,186 @@
+version: 2
+updates:
+  # ====================================
+  # Backend API (NestJS) Dependencies
+  # ====================================
+  - package-ecosystem: "npm"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "DanielFilinski"
+    assignees:
+      - "DanielFilinski"
+    labels:
+      - "dependencies"
+      - "api"
+      - "security"
+    commit-message:
+      prefix: "chore(api)"
+      include: "scope"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Ignore major version updates for stable packages
+      - dependency-name: "@nestjs/*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+      security-patches:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+
+  # ====================================
+  # Frontend (Next.js) Dependencies
+  # ====================================
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "DanielFilinski"
+    assignees:
+      - "DanielFilinski"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "security"
+    commit-message:
+      prefix: "chore(frontend)"
+      include: "scope"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "all"
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+      nextjs:
+        patterns:
+          - "next"
+          - "next-*"
+      security-patches:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+
+  # ====================================
+  # Admin Panel Dependencies
+  # ====================================
+  - package-ecosystem: "npm"
+    directory: "/admin"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "DanielFilinski"
+    assignees:
+      - "DanielFilinski"
+    labels:
+      - "dependencies"
+      - "admin"
+      - "security"
+    commit-message:
+      prefix: "chore(admin)"
+      include: "scope"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "all"
+    groups:
+      security-patches:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+
+  # ====================================
+  # Docker Dependencies
+  # ====================================
+  - package-ecosystem: "docker"
+    directory: "/docker"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "DanielFilinski"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "chore(docker)"
+
+  # ====================================
+  # GitHub Actions Dependencies
+  # ====================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "DanielFilinski"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+    commit-message:
+      prefix: "chore(ci)"
+
+# ====================================
+# Dependabot Configuration Notes
+# ====================================
+# 
+# Security Updates:
+# - Critical and high severity updates are automatically created
+# - Security patches are grouped together for easier review
+# - Updates run weekly to balance security and maintenance burden
+#
+# Version Strategy:
+# - increase: Always increase version (recommended for security)
+# - increase-if-necessary: Only update if required
+# - widen: Widen version range (for flexible dependencies)
+# - lockfile-only: Update lockfile only
+#
+# PIPEDA Compliance:
+# - Regular dependency updates help maintain security compliance
+# - Security patches should be reviewed and merged promptly (within 72h)
+# - Major version updates should be tested thoroughly
+#
+# To enable Dependabot:
+# 1. Go to GitHub repository settings
+# 2. Enable "Dependency graph"
+# 3. Enable "Dependabot alerts"
+# 4. Enable "Dependabot security updates"
+# 5. This config file enables "Dependabot version updates"
+#
+# Additional Security:
+# - Configure GitHub Security Advisories for private repositories
+# - Set up code scanning with CodeQL
+# - Enable secret scanning alerts
+# - Configure branch protection rules requiring reviews
+

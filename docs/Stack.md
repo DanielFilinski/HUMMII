@@ -31,19 +31,93 @@
 - **ORM:** Prisma или TypeORM
 - **Real-time:** Socket.io (для чата)
 - **File Storage:** AWS S3 или аналог (для аватаров, портфолио, документов)
-- **Search:** Elasticsearch 
+- **Search:** Elasticsearch
+- **API Documentation:** Swagger/OpenAPI - автогенерация документации API
+- **Task Queue:** Bull/BullMQ - фоновые задачи (email, notifications)
+- **Scheduler:** @nestjs/schedule - периодические задачи (cleanup, reminders) 
 
 ### Admin Panel
 - **Framework:** React Admin или Refine
 - **Или:** Next.js с собственным интерфейсом
 
 ### Infrastructure
+- **Web Server/Reverse Proxy:** Nginx
+  - Reverse proxy для API и Frontend
+  - Load balancing
+  - SSL/TLS termination
+  - Static files serving
+  - Rate limiting и security headers
 - **Containerization:** Docker + Docker Compose
 <!-- - **Orchestration:** Kubernetes (для продакшена) -->
 - **CI/CD:** GitHub Actions или GitLab CI
 <!-- - **Hosting:**
   - Vercel/Netlify (для фронтенда)
   - AWS/DigitalOcean/Heroku (для бэкенда) -->
+
+### Security
+- **Authentication:**
+  - JWT (access + refresh tokens)
+  - HTTP-only cookies для токенов
+  - Email verification обязательная
+  - 2FA/MFA опциональная (TOTP)
+  - Bcrypt/Argon2 для хеширования паролей
+- **API Protection:**
+  - Rate Limiting (@nestjs/throttler)
+  - CORS configuration
+  - Helmet.js для security headers
+  - CSRF protection
+  - Request payload size limits
+- **Data Protection:**
+  - TLS 1.3 (HTTPS everywhere)
+  - Database encryption at rest (PostgreSQL TDE)
+  - Field-level encryption для PII данных
+  - Secrets Management (AWS Secrets Manager/HashiCorp Vault)
+- **Input Validation:**
+  - Class-validator + class-transformer (NestJS DTOs)
+  - Zod schemas (Frontend)
+  - SQL injection prevention (ORM parameterized queries)
+  - XSS protection (input sanitization)
+  - File upload validation (MIME types, size limits, virus scanning)
+- **Monitoring & Logging:**
+  - Structured logging (Winston/Pino)
+  - PII masking in logs
+  - Audit logs для критических действий
+  - Error tracking (Sentry)
+  - Failed login attempts tracking
+- **Content Moderation:**
+  - Automatic chat moderation (phone, email, links blocking)
+  - Profanity filter
+  - Report/flag system
+  - Rate limiting на сообщения
+- **Compliance:**
+  - PIPEDA/GDPR compliance (Canada)
+  - Privacy Policy & Terms of Service
+  - Cookie consent banner
+  - Data export/deletion endpoints
+  - Data retention policies
+  - WAF (Web Application Firewall) - Cloudflare/AWS WAF
+
+### Testing & Quality
+- **Testing Frameworks:**
+  - Jest - unit tests
+  - Supertest - API integration tests
+  - Playwright или Cypress - E2E tests
+  - React Testing Library - component tests
+- **Code Quality:**
+  - ESLint + Prettier - code formatting
+  - Husky - git hooks для pre-commit checks
+  - lint-staged - staged files linting
+  - Commitlint - commit message conventions
+- **Code Analysis:**
+  - SonarQube или CodeQL - static code analysis
+  - Snyk или Dependabot - dependency vulnerability scanning
+  - npm audit - security auditing
+- **Coverage:**
+  - Jest coverage reports
+  - Minimum 80% coverage для критического кода
+- **Performance Testing:**
+  - k6 или Artillery - load testing
+  - Lighthouse CI - frontend performance
 
 ## Необходимые внешние сервисы
 
