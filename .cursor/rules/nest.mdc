@@ -353,10 +353,230 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Log errors for debugging
   - Implement retry logic where appropriate
 
+### Identity Verification (Stripe Identity)
+
+- Use Stripe Identity API for document verification
+- Support Canadian documents
+  - Driver's License
+  - Passport
+  - Provincial ID Card
+- Implement verification flow
+  - Create VerificationSession via Stripe API
+  - Return session URL to frontend for redirect
+  - Handle webhook verification.session.completed
+  - Update user verification status in database
+  - Grant "Verified" badge on profile
+- Store only verification status and session ID
+  - Never store document images locally
+  - Comply with privacy laws (minimal data retention)
+- Implement verification check guard
+  - Protect certain features (require verification)
+  - Check verification status before allowing actions
+- Set verification expiration (e.g., 2 years)
+  - Send reminder to re-verify before expiration
+  - Implement automated re-verification flow
+
+### Dispute Resolution Module
+
+- Implement dispute lifecycle with clear statuses
+  - OPENED - dispute initiated by user
+  - UNDER_REVIEW - admin investigating evidence
+  - AWAITING_RESPONSE - waiting for party response
+  - RESOLVED - decision made by admin
+  - CLOSED - case closed and archived
+- Create dispute evidence system
+  - Allow photo/screenshot uploads (max 5 files, 5MB each)
+  - Link to related chat messages
+  - Attach order details automatically
+  - Store dispute description (max 2000 chars)
+- Freeze payments during active disputes
+  - Hold funds in escrow until resolution
+  - Prevent withdrawal or transfer
+  - Notify both parties of freeze
+- Implement decision types
+  - FULL_REFUND - 100% refund to client
+  - FULL_PAYMENT - 100% payment to contractor
+  - PARTIAL - custom split (e.g., 60/40)
+  - BLOCK_USER - ban violator and refund
+- Set Service Level Agreement (SLA)
+  - Resolve disputes within 3-5 business days
+  - Auto-escalate if exceeding SLA
+  - Send daily updates to involved parties
+- Track dispute history
+  - Count disputes per user (flag repeat offenders)
+  - Display dispute count in admin panel
+  - Impact rating if disputes exceed threshold (e.g., 3+)
+- Implement admin dashboard
+  - Queue of pending disputes
+  - Filter by status, date, severity
+  - Bulk actions for common decisions
+  - Audit log of admin decisions
+
+### Notification System (OneSignal)
+
+- Implement multi-channel delivery strategy
+  - In-App (Socket.io) - real-time for online users
+  - Email (OneSignal) - for offline or high priority
+  - Push (OneSignal) - if enabled in user settings
+- Define notification priority levels
+  - HIGH PRIORITY (always send immediately)
+    - New response to your order
+    - Payment received/completed
+    - Dispute opened
+    - Security alerts (password change, new login)
+  - MEDIUM PRIORITY (send based on preferences)
+    - New message in chat
+    - Order status changed
+    - New review received
+    - New order in your category
+  - LOW PRIORITY (batch in daily/weekly digest)
+    - Profile view count
+    - Weekly summary
+    - Subscription reminder (7 days before expiration)
+- Implement user notification preferences
+  - Per-channel toggles (email on/off, push on/off)
+  - Frequency settings (instant, daily digest, never)
+  - Category filters (orders, messages, reviews, system)
+- Store notification history in database
+  - id, user_id, type, title, message, priority, read_status, created_at
+  - Mark as read/unread
+  - Auto-delete after 90 days (keep only unread)
+- Implement notification batching
+  - Batch low-priority notifications
+  - Send daily digest at user's preferred time
+  - Group similar notifications (e.g., "5 new profile views")
+- Rate limit notifications
+  - Max 50 notifications per day per user
+  - Prevent spam from system or users
+  - Log excessive notification attempts
+- Create notification templates
+  - Use i18n for English/French support
+  - Personalize with user name and details
+  - Include clear call-to-action links
+
+### Subscription Management (Stripe Subscriptions)
+
+- Define subscription tiers for contractors
+  - Basic (Free): Limited features, max 3 categories
+  - Standard ($X/month): 5 categories, 5% partner discounts
+  - Professional ($Y/month): Unlimited categories, 10% discounts, priority listing
+  - Advanced ($Z/month): All features, 15% discounts, featured profile, no platform fee
+- Integrate Stripe Subscriptions API
+  - Create subscription products and prices in Stripe
+  - Use recurring billing (monthly/yearly options)
+  - Implement subscription creation endpoint
+  - Handle payment method updates
+- Handle subscription lifecycle via webhooks
+  - customer.subscription.created - activate features
+  - customer.subscription.updated - update tier
+  - customer.subscription.deleted - downgrade to free
+  - invoice.payment_succeeded - extend subscription
+  - invoice.payment_failed - notify user, retry payment
+  - invoice.payment_action_required - 3D Secure needed
+- Implement feature gating based on subscription
+  - Check subscription tier before allowing actions
+  - Create @SubscriptionGuard decorator
+  - Return 402 Payment Required for locked features
+- Allow upgrade/downgrade mid-cycle
+  - Prorate billing when changing plans
+  - Immediate feature access on upgrade
+  - Grace period on downgrade (end of billing period)
+- Send subscription reminders
+  - 7 days before expiration
+  - 3 days before expiration
+  - 1 day before expiration
+  - Day of expiration (with renewal link)
+- Implement subscription analytics
+  - Track MRR (Monthly Recurring Revenue)
+  - Churn rate calculation
+  - Conversion rate (free to paid)
+  - Popular plan analysis
+
+### Partner Portal Integration
+
+- Implement QR code generation for contractors
+  - Generate time-limited QR codes (valid for 15 minutes)
+  - Include contractor ID, subscription tier, timestamp
+  - Sign QR data with secret key to prevent forgery
+  - Return QR as base64 image or data URL
+- Verify contractor subscription before QR generation
+  - Check active subscription status
+  - Verify subscription tier (Standard/Professional/Advanced)
+  - Return error if subscription expired or free tier
+- Create QR validation endpoint for partners
+  - Accept QR data from partner scanner
+  - Verify signature and expiration
+  - Check contractor subscription status
+  - Return discount percentage based on tier
+    - Standard → 5%
+    - Professional → 10%
+    - Advanced → 15%
+- Track discount usage for analytics
+  - Store transaction: contractor_id, partner_id, discount_amount, date
+  - Calculate total savings per contractor
+  - Generate monthly reports for contractors
+  - Track partner participation metrics
+- Implement partner management
+  - Partner registration and profile
+  - Partner location and business details
+  - Discount configuration per subscription tier
+  - Active/inactive status toggle
+- Create partner dashboard endpoints
+  - Recent scans and validations
+  - Transaction history
+  - Statistics (daily/weekly/monthly scans)
+  - Top contractors by usage
+
+### Category Management
+
+- Implement hierarchical category structure
+  - Use adjacency list or nested set model
+  - Support parent-child relationships (category → subcategory)
+  - Example: "Repair" → "Electrical", "Plumbing", "Carpentry"
+- Define category schema
+  - id, parent_id, name_en, name_fr, slug, icon, description, order, is_active
+  - Support internationalization (English/French)
+  - Include icon identifier for UI display
+- Limit contractor category selection
+  - Max 5 categories per contractor (3 for free tier)
+  - Validate category IDs on selection
+  - Allow category change (max once per month)
+- Implement category-based features
+  - Search and filter orders by category
+  - Send notifications for new orders in contractor's categories
+  - Display category badges on profiles
+  - Track popular categories for analytics
+- Create category management endpoints
+  - CRUD operations (admin only)
+  - Bulk category assignment
+  - Category tree retrieval (with nesting)
+  - Category search with autocomplete
+- Make categories easily configurable
+  - Admin panel integration for category editing
+  - Drag-and-drop ordering support
+  - Bulk enable/disable categories
+  - Category usage statistics (how many contractors per category)
+
 ### Testing
 
 - Use the standard Jest framework for testing.
 - Write tests for each controller and service.
 - Write end to end tests for each api module.
 - Add a admin/test method to each controller as a smoke test.
+- Test critical business logic thoroughly
+  - Payment flows (success, failure, refund)
+  - Dispute resolution logic
+  - Subscription upgrades/downgrades
+  - Notification delivery logic
+  - QR code generation and validation
+- Mock external services in tests
+  - Stripe API calls
+  - OneSignal API calls
+  - Socket.io events
+  - Google Maps API
+- Test security features
+  - Authentication and authorization
+  - Rate limiting behavior
+  - Input validation and sanitization
+  - CSRF protection
  

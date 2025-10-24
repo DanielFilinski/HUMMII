@@ -771,6 +771,31 @@ describe('LoginForm', () => {
 - Use OneSignal for notifications
 - Implement proper contractor verification flow
 
+### Database Types (Prisma)
+
+- Import database types from Prisma schema
+- Use generated Prisma types for type safety
+- Never define duplicate types manually
+- Extend Prisma types when additional fields needed
+
+```typescript
+// Good - using Prisma types
+import { User, Order, Review } from '@prisma/client';
+
+type UserWithOrders = User & {
+  orders: Order[];
+};
+
+type PublicProfile = Pick<User, 'id' | 'name' | 'avatar' | 'rating'>;
+
+// Bad - manual types that duplicate schema
+interface User {
+  id: string;
+  name: string;
+  email: string; // Duplicates Prisma schema
+}
+```
+
 ### Stripe Integration
 - Never store card details (use Stripe Elements)
 - Verify webhook signatures
@@ -778,6 +803,11 @@ describe('LoginForm', () => {
 - Implement 3D Secure (SCA)
 - Handle payment errors gracefully
 - Show clear payment confirmations
+- Implement Stripe Identity for verification
+  - Create verification session
+  - Redirect to Stripe-hosted flow
+  - Handle completion callback
+  - Display verification badge
 
 ### Google Maps Integration
 - Hide API key on server-side
@@ -785,6 +815,204 @@ describe('LoginForm', () => {
 - Handle geolocation errors
 - Optimize map performance (clustering)
 - Show user location with permission
+- Implement radius-based search (5km, 10km, 25km)
+- Use fuzzy location for privacy (±500m)
+- Show city/district only (not exact address)
+
+### Partner Portal Frontend
+
+- Display partner benefits section in contractor profile
+- Show map of nearby partner stores
+- Implement QR code generation
+  - Generate on button click
+  - Show QR code in modal (valid for 15 minutes)
+  - Display countdown timer
+  - Auto-refresh when expired
+- Show savings statistics
+  - Total savings this month
+  - Total savings all time
+  - Recent discount usage history
+- Implement subscription upsell
+  - Show locked partner benefits for free tier
+  - Display upgrade CTA with benefit comparison
+  - Highlight discount percentages per tier
+
+```typescript
+// Example: QR Code component
+import { useQuery } from '@tanstack/react-query';
+import QRCode from 'qrcode.react';
+
+const PartnerQRCode = () => {
+  const { data, refetch } = useQuery({
+    queryKey: ['partner-qr'],
+    queryFn: fetchPartnerQR,
+    staleTime: 15 * 60 * 1000, // 15 minutes
+  });
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <QRCode value={data.qrData} size={256} />
+      <p className="text-sm text-gray-600">
+        Valid for {data.expiresIn} minutes
+      </p>
+      <button onClick={() => refetch()}>Generate New</button>
+    </div>
+  );
+};
+```
+
+### Admin Panel (Refine)
+
+- Use Refine framework for admin interface
+- Implement role-based access control (admin only)
+- Create moderation queues
+  - User profiles pending verification
+  - Portfolio images needing approval
+  - Reviews flagged by users
+  - Active disputes awaiting decision
+- Implement bulk actions
+  - Approve/reject multiple items
+  - Bulk user actions (ban, verify, delete)
+  - Batch category management
+- Add audit logging UI
+  - Show all admin actions with timestamps
+  - Filter by admin, action type, date range
+  - Export audit logs for compliance
+- Create analytics dashboard
+  - User growth charts
+  - Revenue metrics (MRR, total)
+  - Category popularity
+  - Dispute statistics
+- Implement user management
+  - Search and filter users
+  - View full user details
+  - Edit user information
+  - Ban/unban users
+  - View user activity history
+
+### SEO Optimization
+
+- Generate unique slug URLs for profiles
+  - Format: /performer/{name-city}
+  - Example: /performer/john-plumber-toronto
+  - Auto-increment on duplicates (-2, -3, etc.)
+  - Validate slug uniqueness before save
+- Implement comprehensive OpenGraph tags
+  - og:title (unique per page)
+  - og:description (compelling, 150-160 chars)
+  - og:image (1200x630px, optimized)
+  - og:type (profile, article, website)
+  - twitter:card (summary_large_image)
+  - twitter:title, twitter:description, twitter:image
+- Generate dynamic sitemap.xml
+  - Include all public contractor profiles
+  - Include category pages
+  - Include static pages (about, contact, help)
+  - Update automatically on content changes
+  - Implement sitemap index for large sites
+- Configure robots.txt properly
+  - Allow: /, /performer/*, /category/*, /help/*
+  - Disallow: /admin/*, /api/*, /dashboard/*, /chat/*, /settings/*, /auth/*
+  - Add sitemap location
+- Implement JSON-LD structured data
+  - Schema.org Person for contractor profiles
+  - AggregateRating for reviews display
+  - LocalBusiness for physical services
+  - BreadcrumbList for navigation
+  - Organization for company info
+- Use ISR (Incremental Static Regeneration)
+  - Revalidate profiles every 24 hours
+  - On-demand revalidation on profile update
+  - Static generation for category pages
+  - SSR for authenticated pages only
+- Optimize metadata
+  - Unique title per page (50-60 chars)
+  - Unique description per page (150-160 chars)
+  - Canonical URLs to prevent duplicates
+  - hreflang tags for language versions (en/fr)
+
+```typescript
+// Example: Dynamic metadata for profile
+import { Metadata } from 'next';
+
+export async function generateMetadata({ 
+  params 
+}: Props): Promise<Metadata> {
+  const profile = await fetchProfile(params.slug);
+  
+  return {
+    title: `${profile.name} - ${profile.category} in ${profile.city}`,
+    description: `${profile.description.slice(0, 160)}...`,
+    openGraph: {
+      title: `Hire ${profile.name} on Hummii`,
+      description: profile.description,
+      images: [{ url: profile.avatar, width: 1200, height: 630 }],
+      type: 'profile',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${profile.name} - ${profile.category}`,
+      description: profile.description,
+      images: [profile.avatar],
+    },
+    alternates: {
+      canonical: `https://hummii.ca/performer/${params.slug}`,
+      languages: {
+        'en-CA': `/en/performer/${params.slug}`,
+        'fr-CA': `/fr/performer/${params.slug}`,
+      },
+    },
+  };
+}
+```
+
+### Subscription UI/UX
+
+- Display subscription tiers clearly
+  - Visual comparison table
+  - Highlight recommended plan (Professional)
+  - Show annual savings for yearly billing
+- Implement feature gating UI
+  - Show lock icon on premium features
+  - Display upgrade prompt when clicking locked features
+  - Show feature comparison on hover
+- Create subscription management page
+  - Current plan display with features
+  - Upgrade/downgrade buttons
+  - Cancel subscription option (with confirmation)
+  - Billing history table
+  - Next billing date and amount
+- Handle subscription states
+  - Active: full access
+  - Expiring soon: show renewal banner
+  - Expired: show upgrade prompt, limit features
+  - Cancelled: grace period with reactivation option
+- Implement payment method management
+  - Display current card (last 4 digits)
+  - Update payment method button
+  - Use Stripe Customer Portal for management
+
+### Dispute UI Flow
+
+- Create dispute submission form
+  - Reason selection (dropdown: quality, deadline, payment, other)
+  - Description textarea (max 2000 chars)
+  - Evidence upload (max 5 files, 5MB each)
+  - Submit button with loading state
+- Display dispute status clearly
+  - Status badge (OPENED, UNDER_REVIEW, RESOLVED)
+  - Timeline of events (opened, updated, resolved)
+  - Admin responses and decisions
+  - Upload additional evidence option
+- Show dispute impact
+  - Payment freeze notice (funds in escrow)
+  - Estimated resolution time (3-5 days)
+  - Contact support option
+- Implement dispute resolution notification
+  - Show resolution modal when decision made
+  - Display outcome (refund, payment, partial)
+  - Provide appeal option (if applicable)
+  - Request feedback on dispute process
 
 ---
 
