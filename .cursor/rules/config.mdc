@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+Файлы документации данного проекта, планы и обяснения в файлах типа txt или md пиши на русском. 
+Но комментарии внутри кода или других файлах пиши на ангийском
+
+Очень важно!!! Данный проект будет запускаться в Канаде, где много разных законов о личных данных, безопастности и хранении данных на севрере. Необходимо обеспечить максимальную безопасность взаимодействия пользователя с серисом
+
+## Code Quality & Security Standards
+
+Always apply the following best practices when writing, reviewing, or suggesting code:
+
+### Security
+- Never store sensitive data (passwords, API keys, tokens) in plain text or client-side code
+- Always validate and sanitize user input on both client and server side
+- Use parameterized queries to prevent SQL injection
+- Implement proper authentication and authorization checks
+- Use HTTPS only for all communications
+- Follow OWASP Top 10 security guidelines
+- Ensure GDPR/PIPEDA compliance for data handling in Canada
+- Implement proper error handling without exposing sensitive information
+- Use secure session management and CSRF protection
+- Apply principle of least privilege for all access controls
+
+### Performance
+- Optimize database queries (use indexes, avoid N+1 queries)
+- Implement caching strategies where appropriate
+- Use lazy loading and code splitting for frontend
+- Minimize bundle sizes and optimize assets
+- Use efficient data structures and algorithms
+- Implement pagination for large data sets
+- Profile and monitor performance bottlenecks
+- Use async/await properly to avoid blocking operations
+
+### Code Quality
+- Follow DRY (Don't Repeat Yourself) principle
+- Write clean, readable, and maintainable code
+- Use meaningful variable and function names
+- Implement proper error handling and logging
+- Write modular, reusable components
+- Follow SOLID principles
+- Add comprehensive comments for complex logic
+- Ensure type safety (TypeScript strict mode)
+- Follow consistent code formatting and style guides
+- Write unit tests for critical functionality
