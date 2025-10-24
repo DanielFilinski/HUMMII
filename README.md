@@ -1,6 +1,6 @@
-# 🐝 Hummy
+# 🐝 Hummii
 
-**Hummy** — платформа для связи клиентов с исполнителями услуг в Канаде.  
+**Hummii** — платформа для связи клиентов с исполнителями услуг в Канаде.  
 A platform connecting clients with service providers in Canada.
 
 [![CI/CD](https://github.com/DanielFilinski/HUMMII/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/DanielFilinski/HUMMII/actions)
@@ -25,7 +25,7 @@ A platform connecting clients with service providers in Canada.
 
 ## 🎯 Overview
 
-Hummy is a modern service marketplace platform designed for the Canadian market, featuring:
+Hummii is a modern service marketplace platform designed for the Canadian market, featuring:
 
 - 🔍 **Service Search** - Find contractors by location, category, and ratings
 - 💬 **Real-time Chat** - Secure messaging between clients and contractors
@@ -76,7 +76,7 @@ For detailed stack information, see [docs/Stack.md](docs/Stack.md).
 ## 📁 Project Structure
 
 ```
-Hummy/
+Hummii/
 ├── .github/              # GitHub Actions workflows
 │   ├── workflows/
 │   │   ├── ci.yml       # CI/CD pipeline
@@ -134,7 +134,7 @@ Hummy/
 ```bash
 # 1. Clone repository
 git clone git@github.com:DanielFilinski/HUMMII.git
-cd Hummy
+cd Hummii
 
 # 2. Copy environment file
 cp .env.example .env
@@ -291,7 +291,7 @@ git push origin feature/your-feature-name
 
 ## 🔒 Security & Compliance
 
-Hummy is designed with security as a priority, especially for Canadian market compliance:
+Hummii is designed with security as a priority, especially for Canadian market compliance:
 
 ### Key Security Features
 
@@ -384,8 +384,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-- **Email**: admin@hummy.ca
-- **Website**: [hummy.ca](https://hummy.ca) (coming soon)
+- **Email**: admin@hummii.ca
+- **Website**: [hummii.ca](https://hummii.ca) (coming soon)
 - **GitHub**: [DanielFilinski/HUMMII](https://github.com/DanielFilinski/HUMMII)
 
 ---

@@ -1,11 +1,11 @@
 # Production Deployment Guide
 
-This guide covers deploying Hummy to production using Docker.
+This guide covers deploying Hummii to production using Docker.
 
 ## Prerequisites
 
 - Server with Docker and Docker Compose installed
-- Domain name configured (hummy.ca, api.hummy.ca, admin.hummy.ca)
+- Domain name configured (hummii.ca, api.hummii.ca, admin.hummii.ca)
 - SSL certificates (Let's Encrypt recommended)
 - Database backups configured
 - Monitoring tools setup
@@ -53,13 +53,13 @@ docker compose version
 sudo apt install certbot
 
 # Get certificates
-sudo certbot certonly --standalone -d hummy.ca -d www.hummy.ca
-sudo certbot certonly --standalone -d api.hummy.ca
-sudo certbot certonly --standalone -d admin.hummy.ca
+sudo certbot certonly --standalone -d hummii.ca -d www.hummii.ca
+sudo certbot certonly --standalone -d api.hummii.ca
+sudo certbot certonly --standalone -d admin.hummii.ca
 
 # Copy certificates to project
-sudo cp /etc/letsencrypt/live/hummy.ca/fullchain.pem ./docker/nginx/ssl/
-sudo cp /etc/letsencrypt/live/hummy.ca/privkey.pem ./docker/nginx/ssl/
+sudo cp /etc/letsencrypt/live/hummii.ca/fullchain.pem ./docker/nginx/ssl/
+sudo cp /etc/letsencrypt/live/hummii.ca/privkey.pem ./docker/nginx/ssl/
 sudo chown $USER:$USER ./docker/nginx/ssl/*
 
 # Setup auto-renewal
@@ -82,8 +82,8 @@ sudo crontab -e
 ```bash
 # Clone repository
 cd /opt
-sudo git clone git@github.com:DanielFilinski/HUMMII.git hummy
-cd hummy
+sudo git clone git@github.com:DanielFilinski/HUMMII.git hummii
+cd hummii
 sudo chown -R $USER:$USER .
 
 # Create production .env file
@@ -103,10 +103,10 @@ SESSION_SECRET=$(openssl rand -base64 32)
 REDIS_PASSWORD=$(openssl rand -base64 32)
 
 # API URLs
-APP_URL=https://hummy.ca
-NEXT_PUBLIC_API_URL=https://api.hummy.ca
-FRONTEND_URL=https://hummy.ca
-ADMIN_URL=https://admin.hummy.ca
+APP_URL=https://hummii.ca
+NEXT_PUBLIC_API_URL=https://api.hummii.ca
+FRONTEND_URL=https://hummii.ca
+ADMIN_URL=https://admin.hummii.ca
 
 # Production services
 STRIPE_SECRET_KEY=sk_live_...
@@ -166,20 +166,20 @@ docker compose -f docker-compose.prod.yml exec api npm run create-admin
 
 ```bash
 # API health
-curl https://api.hummy.ca/health
+curl https://api.hummii.ca/health
 
 # Frontend
-curl https://hummy.ca
+curl https://hummii.ca
 
 # Admin
-curl https://admin.hummy.ca
+curl https://admin.hummii.ca
 ```
 
 ### Test Services
 
-1. **Frontend**: https://hummy.ca
-2. **API**: https://api.hummy.ca/api
-3. **Admin Panel**: https://admin.hummy.ca
+1. **Frontend**: https://hummii.ca
+2. **API**: https://api.hummii.ca/api
+3. **Admin Panel**: https://admin.hummii.ca
 4. **WebSocket**: Test chat functionality
 
 ---
@@ -207,10 +207,10 @@ sudo ufw deny 6379  # Redis
 
 ```bash
 # Configure log rotation
-sudo nano /etc/logrotate.d/hummy
+sudo nano /etc/logrotate.d/hummii
 
 # Add:
-/opt/hummy/logs/**/*.log {
+/opt/hummii/logs/**/*.log {
     daily
     rotate 14
     compress
@@ -219,7 +219,7 @@ sudo nano /etc/logrotate.d/hummy
     create 0644 $USER $USER
     sharedscripts
     postrotate
-        docker compose -f /opt/hummy/docker-compose.prod.yml restart nginx
+        docker compose -f /opt/hummii/docker-compose.prod.yml restart nginx
     endscript
 }
 ```
@@ -247,14 +247,14 @@ docker run -d \
 
 ```bash
 # Create backup script
-cat > /opt/hummy/scripts/backup-db.sh << 'EOF'
+cat > /opt/hummii/scripts/backup-db.sh << 'EOF'
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/opt/hummy/backups"
+BACKUP_DIR="/opt/hummii/backups"
 mkdir -p $BACKUP_DIR
 
-docker compose -f /opt/hummy/docker-compose.prod.yml exec -T postgres \
-  pg_dump -U hummy hummy_prod | gzip > $BACKUP_DIR/db_$DATE.sql.gz
+docker compose -f /opt/hummii/docker-compose.prod.yml exec -T postgres \
+  pg_dump -U hummii hummii_prod | gzip > $BACKUP_DIR/db_$DATE.sql.gz
 
 # Keep only last 30 days
 find $BACKUP_DIR -name "db_*.sql.gz" -mtime +30 -delete
@@ -262,11 +262,11 @@ find $BACKUP_DIR -name "db_*.sql.gz" -mtime +30 -delete
 echo "Backup completed: db_$DATE.sql.gz"
 EOF
 
-chmod +x /opt/hummy/scripts/backup-db.sh
+chmod +x /opt/hummii/scripts/backup-db.sh
 
 # Schedule daily backups
 crontab -e
-# Add: 0 2 * * * /opt/hummy/scripts/backup-db.sh
+# Add: 0 2 * * * /opt/hummii/scripts/backup-db.sh
 ```
 
 ### Restore from Backup
@@ -278,7 +278,7 @@ docker compose -f docker-compose.prod.yml stop api frontend admin
 # Restore database
 gunzip -c backups/db_20250101_020000.sql.gz | \
   docker compose -f docker-compose.prod.yml exec -T postgres \
-  psql -U hummy -d hummy_prod
+  psql -U hummii -d hummii_prod
 
 # Restart services
 docker compose -f docker-compose.prod.yml up -d
@@ -292,7 +292,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 ```bash
 # Pull latest changes
-cd /opt/hummy
+cd /opt/hummii
 git pull origin main
 
 # Rebuild and restart
@@ -361,7 +361,7 @@ docker compose -f docker-compose.prod.yml restart api
 docker compose -f docker-compose.prod.yml logs postgres
 
 # Connect to database
-docker compose -f docker-compose.prod.yml exec postgres psql -U hummy -d hummy_prod
+docker compose -f docker-compose.prod.yml exec postgres psql -U hummii -d hummii_prod
 
 # Test connection from API
 docker compose -f docker-compose.prod.yml exec api npm run db:test
@@ -425,7 +425,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 - **Documentation**: `/docs/`
 - **Issues**: https://github.com/DanielFilinski/HUMMII/issues
-- **Email**: admin@hummy.ca
+- **Email**: admin@hummii.ca
 
 ---
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Hummy Quick Start Script
+# Hummii Quick Start Script
 # This script helps quickly start the development environment
 
 set -e
 
-echo "🐝 Hummy Development Environment Setup"
+echo "🐝 Hummii Development Environment Setup"
 echo "======================================"
 echo ""
 
@@ -70,7 +70,7 @@ case $option in
         echo "  - PgAdmin:         http://localhost:5050"
         echo "  - Redis Commander: http://localhost:8081"
         echo ""
-        echo "PgAdmin credentials: admin@hummy.local / admin"
+        echo "PgAdmin credentials: admin@hummii.local / admin"
         ;;
     3)
         echo "🛑 Stopping all services..."

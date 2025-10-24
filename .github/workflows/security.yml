@@ -127,12 +127,12 @@ jobs:
           file: ./docker/${{ matrix.app }}.Dockerfile
           push: false
           load: true
-          tags: hummy-${{ matrix.app }}:scan
+          tags: hummii-${{ matrix.app }}:scan
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: hummy-${{ matrix.app }}:scan
+          image-ref: hummii-${{ matrix.app }}:scan
           format: 'sarif'
           output: 'trivy-results-${{ matrix.app }}.sarif'
           severity: 'CRITICAL,HIGH'
@@ -149,7 +149,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          image: hummy-${{ matrix.app }}:scan
+          image: hummii-${{ matrix.app }}:scan
           args: --severity-threshold=high
 
   # ====================================
@@ -166,7 +166,7 @@ jobs:
       - name: Run OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: 'Hummy'
+          project: 'Hummii'
           path: '.'
           format: 'HTML'
           out: 'reports'
@@ -243,7 +243,7 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: 'Security Alert - Hummy Project'
+          subject: 'Security Alert - Hummii Project'
           to: ${{ secrets.SECURITY_EMAIL }}
           from: GitHub Actions
           body: Security scan failed. Please check the GitHub Actions logs for details.

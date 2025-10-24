@@ -1,6 +1,6 @@
 # GitHub Setup Guide
 
-This guide will help you configure GitHub repository settings for Hummy project.
+This guide will help you configure GitHub repository settings for Hummii project.
 
 ## 1. Enable GitHub Features
 
@@ -61,7 +61,7 @@ SLACK_WEBHOOK_SECURITY=https://hooks.slack.com/services/YOUR/SECURITY/WEBHOOK/UR
 # Email notifications (optional)
 EMAIL_USERNAME=your-email@gmail.com
 EMAIL_PASSWORD=your-gmail-app-password
-SECURITY_EMAIL=security-team@hummy.ca
+SECURITY_EMAIL=security-team@hummii.ca
 
 # GitLeaks (optional, for private repos)
 GITLEAKS_LICENSE=your-gitleaks-license-key

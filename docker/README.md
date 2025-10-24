@@ -1,4 +1,4 @@
-# Hummy - Docker Setup Guide
+# Hummii - Docker Setup Guide
 
 ## Quick Start
 
@@ -12,7 +12,7 @@
 ```bash
 # Clone the repository
 git clone git@github.com:DanielFilinski/HUMMII.git
-cd Hummy
+cd Hummii
 
 # Copy environment file
 cp .env.example .env
@@ -65,7 +65,7 @@ docker-compose logs -f api
 
 # Execute command in container
 docker-compose exec api npm run migration:run
-docker-compose exec postgres psql -U hummy -d hummy_dev
+docker-compose exec postgres psql -U hummii -d hummii_dev
 ```
 
 ## Development Workflow
@@ -103,13 +103,13 @@ docker-compose build api
 
 ```bash
 # PostgreSQL CLI
-docker-compose exec postgres psql -U hummy -d hummy_dev
+docker-compose exec postgres psql -U hummii -d hummii_dev
 
 # Backup database
-docker-compose exec postgres pg_dump -U hummy hummy_dev > backup.sql
+docker-compose exec postgres pg_dump -U hummii hummii_dev > backup.sql
 
 # Restore database
-docker-compose exec -T postgres psql -U hummy -d hummy_dev < backup.sql
+docker-compose exec -T postgres psql -U hummii -d hummii_dev < backup.sql
 ```
 
 ### Redis Access

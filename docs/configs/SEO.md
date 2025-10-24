@@ -59,13 +59,13 @@ export async function generateMetadata({
   const performer = await getPerformerBySlug(params.slug);
   
   return {
-    title: `${performer.name} - ${performer.profession} | Hummy`,
+    title: `${performer.name} - ${performer.profession} | Hummii`,
     description: performer.bio.substring(0, 160),
     openGraph: {
       title: `${performer.name} - ${performer.profession}`,
       description: performer.bio.substring(0, 160),
-      url: `https://hummy.com/performer/${params.slug}`,
-      siteName: 'Hummy',
+      url: `https://hummii.com/performer/${params.slug}`,
+      siteName: 'Hummii',
       images: [
         {
           url: performer.avatar,
@@ -105,14 +105,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categories = await getAllCategories();
   
   const performerUrls = performers.map((performer) => ({
-    url: `https://hummy.com/performer/${performer.slug}`,
+    url: `https://hummii.com/performer/${performer.slug}`,
     lastModified: performer.updatedAt,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
   
   const categoryUrls = categories.map((category) => ({
-    url: `https://hummy.com/category/${category.slug}`,
+    url: `https://hummii.com/category/${category.slug}`,
     lastModified: category.updatedAt,
     changeFrequency: 'daily' as const,
     priority: 0.9,
@@ -120,13 +120,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   return [
     {
-      url: 'https://hummy.com',
+      url: 'https://hummii.com',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: 'https://hummy.com/about',
+      url: 'https://hummii.com/about',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,
@@ -166,7 +166,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://hummy.com/sitemap.xml',
+    sitemap: 'https://hummii.com/sitemap.xml',
   };
 }
 ```
@@ -183,7 +183,7 @@ const jsonLd = {
   name: performer.name,
   jobTitle: performer.profession,
   image: performer.avatar,
-  url: `https://hummy.com/performer/${performer.slug}`,
+  url: `https://hummii.com/performer/${performer.slug}`,
   address: {
     '@type': 'PostalAddress',
     addressLocality: performer.city,
@@ -207,7 +207,7 @@ const jsonLd = {
 
 ```typescript
 // В metadata
-canonical: `https://hummy.com/performer/${params.slug}`,
+canonical: `https://hummii.com/performer/${params.slug}`,
 ```
 
 ### Оптимизация производительности
@@ -228,8 +228,8 @@ export async function generateMetadata({ params }) {
   return {
     alternates: {
       languages: {
-        'en-CA': `https://hummy.com/en/performer/${params.slug}`,
-        'fr-CA': `https://hummy.com/fr/performer/${params.slug}`,
+        'en-CA': `https://hummii.com/en/performer/${params.slug}`,
+        'fr-CA': `https://hummii.com/fr/performer/${params.slug}`,
       },
     },
   };

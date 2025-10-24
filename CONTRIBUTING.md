@@ -1,6 +1,6 @@
-# Contributing to Hummy
+# Contributing to Hummii
 
-Thank you for your interest in contributing to Hummy! 🐝
+Thank you for your interest in contributing to Hummii! 🐝
 
 ## Table of Contents
 
@@ -343,7 +343,7 @@ api/
 **DO NOT** create public issues for security vulnerabilities.
 
 Instead:
-1. Email: security@hummy.ca
+1. Email: security@hummii.ca
 2. Include:
    - Description of vulnerability
    - Steps to reproduce
@@ -382,9 +382,9 @@ When contributing:
 - **Documentation**: Check `/docs/` directory
 - **Issues**: [GitHub Issues](https://github.com/DanielFilinski/HUMMII/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/DanielFilinski/HUMMII/discussions)
-- **Email**: admin@hummy.ca
+- **Email**: admin@hummii.ca
 
 ---
 
-Thank you for contributing to Hummy! 🐝🇨🇦
+Thank you for contributing to Hummii! 🐝🇨🇦
 

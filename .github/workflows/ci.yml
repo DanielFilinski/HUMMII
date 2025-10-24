@@ -174,7 +174,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/hummy-${{ matrix.app }}
+          images: ${{ secrets.DOCKER_USERNAME }}/hummii-${{ matrix.app }}
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
@@ -204,7 +204,7 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: hummy_test
+          POSTGRES_DB: hummii_test
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
         options: >-
@@ -245,7 +245,7 @@ jobs:
       - name: Run E2E tests
         working-directory: ./api
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/hummy_test
+          DATABASE_URL: postgresql://test:test@localhost:5432/hummii_test
           REDIS_HOST: localhost
           REDIS_PORT: 6379
         run: pnpm run test:e2e || echo "E2E tests not configured yet"

@@ -6,17 +6,17 @@ services:
   # ====================================
   postgres:
     image: postgres:15-alpine
-    container_name: hummy-postgres-prod
+    container_name: hummii-postgres-prod
     restart: always
     environment:
-      POSTGRES_DB: ${DATABASE_NAME:-hummy_prod}
+      POSTGRES_DB: ${DATABASE_NAME:-hummii_prod}
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
       interval: 10s
@@ -36,7 +36,7 @@ services:
   # ====================================
   redis:
     image: redis:7-alpine
-    container_name: hummy-redis-prod
+    container_name: hummii-redis-prod
     restart: always
     command: >
       redis-server
@@ -48,7 +48,7 @@ services:
     volumes:
       - redis_prod_data:/data
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
@@ -70,8 +70,8 @@ services:
       target: production
       args:
         NODE_VERSION: 20
-    image: ${DOCKER_USERNAME}/hummy-api:${TAG:-latest}
-    container_name: hummy-api-prod
+    image: ${DOCKER_USERNAME}/hummii-api:${TAG:-latest}
+    container_name: hummii-api-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -92,7 +92,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     deploy:
       replicas: 2
       resources:
@@ -123,8 +123,8 @@ services:
       target: production
       args:
         NODE_VERSION: 20
-    image: ${DOCKER_USERNAME}/hummy-frontend:${TAG:-latest}
-    container_name: hummy-frontend-prod
+    image: ${DOCKER_USERNAME}/hummii-frontend:${TAG:-latest}
+    container_name: hummii-frontend-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -135,7 +135,7 @@ services:
     depends_on:
       - api
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     deploy:
       replicas: 2
       resources:
@@ -162,8 +162,8 @@ services:
       target: production
       args:
         NODE_VERSION: 20
-    image: ${DOCKER_USERNAME}/hummy-admin:${TAG:-latest}
-    container_name: hummy-admin-prod
+    image: ${DOCKER_USERNAME}/hummii-admin:${TAG:-latest}
+    container_name: hummii-admin-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -172,7 +172,7 @@ services:
     depends_on:
       - api
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     deploy:
       resources:
         limits:
@@ -188,7 +188,7 @@ services:
   # ====================================
   nginx:
     image: nginx:alpine
-    container_name: hummy-nginx-prod
+    container_name: hummii-nginx-prod
     restart: always
     ports:
       - "80:80"
@@ -202,7 +202,7 @@ services:
       - frontend
       - admin
     networks:
-      - hummy-prod-network
+      - hummii-prod-network
     deploy:
       resources:
         limits:
@@ -235,7 +235,7 @@ volumes:
 # Networks (Production)
 # ====================================
 networks:
-  hummy-prod-network:
+  hummii-prod-network:
     driver: bridge
     ipam:
       config:

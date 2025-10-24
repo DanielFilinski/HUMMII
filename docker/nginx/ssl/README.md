@@ -11,13 +11,13 @@ This directory should contain your SSL certificates for HTTPS.
 sudo apt install certbot
 
 # Get certificates for all domains
-sudo certbot certonly --standalone -d hummy.ca -d www.hummy.ca
-sudo certbot certonly --standalone -d api.hummy.ca
-sudo certbot certonly --standalone -d admin.hummy.ca
+sudo certbot certonly --standalone -d hummii.ca -d www.hummii.ca
+sudo certbot certonly --standalone -d api.hummii.ca
+sudo certbot certonly --standalone -d admin.hummii.ca
 
 # Copy to this directory
-sudo cp /etc/letsencrypt/live/hummy.ca/fullchain.pem ./fullchain.pem
-sudo cp /etc/letsencrypt/live/hummy.ca/privkey.pem ./privkey.pem
+sudo cp /etc/letsencrypt/live/hummii.ca/fullchain.pem ./fullchain.pem
+sudo cp /etc/letsencrypt/live/hummii.ca/privkey.pem ./privkey.pem
 sudo chown $USER:$USER ./*.pem
 ```
 
@@ -28,7 +28,7 @@ sudo chown $USER:$USER ./*.pem
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout privkey.pem \
   -out fullchain.pem \
-  -subj "/C=CA/ST=Ontario/L=Toronto/O=Hummy/CN=hummy.ca"
+  -subj "/C=CA/ST=Ontario/L=Toronto/O=Hummii/CN=hummii.ca"
 ```
 
 ### Option 3: Commercial Certificate
@@ -66,7 +66,7 @@ Test your SSL configuration:
 ### Certificate Expired
 ```bash
 sudo certbot renew --force-renewal
-sudo cp /etc/letsencrypt/live/hummy.ca/*.pem ./docker/nginx/ssl/
+sudo cp /etc/letsencrypt/live/hummii.ca/*.pem ./docker/nginx/ssl/
 docker compose restart nginx
 ```
 

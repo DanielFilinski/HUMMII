@@ -31,7 +31,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   HUMMY ECOSYSTEM                   │
+│                   HUMMII ECOSYSTEM                   │
 ├─────────────────────────────────────────────────────┤
 │                                                      │
 │  ┌──────────────┐  ┌──────────────┐  ┌───────────┐ │
@@ -127,7 +127,7 @@ Partner Dashboard:
 │   ├── Top Contractors (by visits)
 │   └── Revenue Impact Analysis
 └── Financial
-    ├── Billing from Hummy (if any)
+    ├── Billing from Hummii (if any)
     └── Reports
 ```
 
@@ -140,7 +140,7 @@ Partner Dashboard:
 ```
 1. Contractor with subscription
    ↓
-2. Opens Hummy App → "Partner Discounts" section
+2. Opens Hummii App → "Partner Discounts" section
    ↓
 3. Sees list of partner shops near them
    ↓
@@ -391,7 +391,7 @@ Partner Portal Stack:
 
 ---
 
-## Монетизация для Hummy
+## Монетизация для Hummii
 
 Варианты, как вы можете зарабатывать на этом:
 
