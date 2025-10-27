@@ -1,0 +1,504 @@
+// Prisma Schema for Hummii Platform
+// Database: PostgreSQL with PostGIS extension
+// Last Updated: January 2025
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum UserRole {
+  CLIENT
+  CONTRACTOR
+  ADMIN
+}
+
+enum OrderStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  PENDING_REVIEW
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum OrderType {
+  PUBLIC
+  DIRECT
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum VerificationStatus {
+  PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+// ============================================================================
+// USER MODELS
+// ============================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  avatar    String?
+  role      UserRole @default(CLIENT)
+  isVerified Boolean @default(false)
+
+  // Email verification
+  verificationToken String?
+  verificationTokenExpiry DateTime?
+
+  // Password reset
+  resetToken String?
+  resetTokenExpiry DateTime?
+
+  // Security
+  failedLoginAttempts Int @default(0)
+  lockedUntil DateTime?
+  lastLoginAt DateTime?
+  lastLoginIp String?
+
+  // Contractor specific
+  contractor Contractor?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete for PIPEDA compliance
+
+  // Relations
+  clientOrders Order[] @relation("ClientOrders")
+  contractorOrders Order[] @relation("ContractorOrders")
+  sentMessages Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  givenReviews Review[] @relation("ReviewAuthor")
+  receivedReviews Review[] @relation("ReviewRecipient")
+  notifications Notification[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Contractor {
+  id String @id @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Profile
+  bio String? @db.Text
+  experience Int? // Years of experience
+  hourlyRate Decimal? @db.Decimal(10, 2)
+
+  // Location (PostGIS)
+  location Unsupported("geography(Point, 4326)")?
+  address String?
+  city String?
+  province String?
+  postalCode String?
+  serviceRadius Int @default(50) // km
+
+  // Verification
+  verificationStatus VerificationStatus @default(PENDING)
+  verificationDate DateTime?
+  stripeIdentitySessionId String?
+
+  // Statistics
+  totalOrders Int @default(0)
+  completedOrders Int @default(0)
+  rating Decimal? @db.Decimal(3, 2) // 0.00 to 5.00
+  reviewCount Int @default(0)
+
+  // Availability
+  isAvailable Boolean @default(true)
+
+  // Relations
+  categories ContractorCategory[]
+  portfolio PortfolioItem[]
+  services Service[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contractors")
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String @unique
+  slug String @unique
+  description String? @db.Text
+  icon String?
+  parentId String?
+  parent Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+
+  contractors ContractorCategory[]
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model ContractorCategory {
+  contractorId String
+  categoryId String
+  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([contractorId, categoryId])
+  @@map("contractor_categories")
+}
+
+model PortfolioItem {
+  id String @id @default(uuid())
+  contractorId String
+  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  title String
+  description String? @db.Text
+  images String[] // Array of image URLs
+  order Int @default(0) // Display order
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("portfolio_items")
+}
+
+model Service {
+  id String @id @default(uuid())
+  contractorId String
+  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  name String
+  description String? @db.Text
+  price Decimal? @db.Decimal(10, 2)
+  unit String? // e.g., "per hour", "per project"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+// ============================================================================
+// ORDER MODELS
+// ============================================================================
+
+model Order {
+  id String @id @default(uuid())
+
+  // Order details
+  title String
+  description String @db.Text
+  images String[] // Array of image URLs
+  type OrderType @default(PUBLIC)
+  status OrderStatus @default(DRAFT)
+
+  // Category
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id])
+
+  // Parties
+  clientId String
+  client User @relation("ClientOrders", fields: [clientId], references: [id])
+  contractorId String?
+  contractor User? @relation("ContractorOrders", fields: [contractorId], references: [id])
+
+  // Location
+  location Unsupported("geography(Point, 4326)")?
+  address String
+  city String
+  province String
+  postalCode String
+
+  // Budget
+  budgetMin Decimal? @db.Decimal(10, 2)
+  budgetMax Decimal? @db.Decimal(10, 2)
+  agreedPrice Decimal? @db.Decimal(10, 2)
+
+  // Dates
+  desiredStartDate DateTime?
+  desiredCompletionDate DateTime?
+  actualStartDate DateTime?
+  actualCompletionDate DateTime?
+
+  // Relations
+  proposals Proposal[]
+  messages Message[]
+  reviews Review[]
+  payment Payment?
+  dispute Dispute?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
+
+  @@map("orders")
+}
+
+model Proposal {
+  id String @id @default(uuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  contractorId String
+
+  message String @db.Text
+  proposedPrice Decimal @db.Decimal(10, 2)
+  estimatedDuration String? // e.g., "3 days", "2 weeks"
+
+  status String @default("pending") // pending, accepted, rejected, expired
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("proposals")
+}
+
+// ============================================================================
+// CHAT MODELS
+// ============================================================================
+
+model ChatRoom {
+  id String @id @default(uuid())
+  orderId String @unique
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  closedAt DateTime? // Auto-close 30 days after order completion
+
+  @@map("chat_rooms")
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  roomId String
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender User @relation("SentMessages", fields: [senderId], references: [id])
+
+  receiverId String
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  content String @db.Text
+
+  // Moderation
+  isModerated Boolean @default(false)
+  moderationFlags Json? // {phone: true, email: false, etc}
+
+  // Status
+  isRead Boolean @default(false)
+  readAt DateTime?
+  isEdited Boolean @default(false)
+  editedAt DateTime?
+
+  // Order context
+  orderId String
+  order Order @relation(fields: [orderId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
+
+// ============================================================================
+// REVIEW MODELS
+// ============================================================================
+
+model Review {
+  id String @id @default(uuid())
+
+  orderId String @unique
+  order Order @relation(fields: [orderId], references: [id])
+
+  authorId String
+  author User @relation("ReviewAuthor", fields: [authorId], references: [id])
+
+  recipientId String
+  recipient User @relation("ReviewRecipient", fields: [recipientId], references: [id])
+
+  // Ratings (1-5)
+  qualityRating Int? // Contractor only
+  professionalismRating Int
+  communicationRating Int
+  valueRating Int? // Contractor only
+  paymentRating Int? // Client only
+
+  // Overall rating (calculated)
+  overallRating Decimal @db.Decimal(3, 2)
+
+  comment String? @db.Text
+
+  // Moderation
+  isModerated Boolean @default(false)
+  isPublished Boolean @default(true)
+  moderationNotes String?
+
+  // Response
+  response String? @db.Text
+  respondedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+// ============================================================================
+// PAYMENT MODELS
+// ============================================================================
+
+model Payment {
+  id String @id @default(uuid())
+
+  orderId String @unique
+  order Order @relation(fields: [orderId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+  currency String @default("cad")
+
+  status PaymentStatus @default(PENDING)
+
+  // Stripe
+  stripePaymentIntentId String? @unique
+  stripeCustomerId String?
+  stripePaymentMethodId String?
+
+  // Escrow
+  heldInEscrow Boolean @default(true)
+  releasedAt DateTime?
+
+  // Refund
+  refundAmount Decimal? @db.Decimal(10, 2)
+  refundReason String?
+  refundedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+// ============================================================================
+// DISPUTE MODELS
+// ============================================================================
+
+model Dispute {
+  id String @id @default(uuid())
+
+  orderId String @unique
+  order Order @relation(fields: [orderId], references: [id])
+
+  openedById String
+  reason String @db.Text
+  evidence String[] // Array of evidence URLs
+
+  status String @default("open") // open, in_review, resolved, closed
+
+  resolution String? @db.Text
+  resolvedById String? // Admin user ID
+  resolvedAt DateTime?
+
+  // Fund distribution
+  clientRefundAmount Decimal? @db.Decimal(10, 2)
+  contractorPaymentAmount Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("disputes")
+}
+
+// ============================================================================
+// NOTIFICATION MODELS
+// ============================================================================
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type String // ORDER_UPDATE, NEW_PROPOSAL, MESSAGE, PAYMENT, REVIEW, etc.
+  title String
+  message String @db.Text
+
+  // Data
+  relatedEntityId String? // Order ID, Message ID, etc.
+  relatedEntityType String? // order, message, review, etc.
+
+  isRead Boolean @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+// ============================================================================
+// SESSION MODELS
+// ============================================================================
+
+model Session {
+  id String @id @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshToken String @unique
+
+  // Device info
+  userAgent String?
+  ipAddress String?
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@map("sessions")
+}
+
+// ============================================================================
+// INDEXES
+// ============================================================================
+
+// Add indexes for performance
+@@index([email], map: "idx_users_email")
+@@index([phone], map: "idx_users_phone")
+@@index([role], map: "idx_users_role")
+@@index([clientId], map: "idx_orders_client")
+@@index([contractorId], map: "idx_orders_contractor")
+@@index([status], map: "idx_orders_status")
+@@index([categoryId], map: "idx_orders_category")
+@@index([location], map: "idx_contractors_location", type: Gist)
