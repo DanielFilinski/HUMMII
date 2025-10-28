@@ -86,7 +86,8 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: ../docker/frontend.Dockerfile
+      dockerfile: ./Dockerfile
+      target: development
       args:
         NODE_VERSION: ${NODE_VERSION:-20}
     container_name: hummii-frontend

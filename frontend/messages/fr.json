@@ -1,0 +1,13 @@
+{
+  "common": {
+    "welcome": "Bienvenue sur Hummii",
+    "description": "Plateforme de marché de services pour trouver et embaucher des entrepreneurs au Canada",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite!",
+    "tryAgain": "Réessayer",
+    "notFound": "404 - Page non trouvée",
+    "notFoundDescription": "Impossible de trouver la ressource demandée",
+    "returnHome": "Retour à l'accueil"
+  }
+}
+

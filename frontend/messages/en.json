@@ -1,0 +1,13 @@
+{
+  "common": {
+    "welcome": "Welcome to Hummii",
+    "description": "Service marketplace platform for finding and hiring contractors in Canada",
+    "loading": "Loading...",
+    "error": "Something went wrong!",
+    "tryAgain": "Try again",
+    "notFound": "404 - Page Not Found",
+    "notFoundDescription": "Could not find the requested resource",
+    "returnHome": "Return Home"
+  }
+}
+

@@ -16,10 +16,13 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  ),
   openGraph: {
     type: 'website',
     locale: 'en_CA',
+    alternateLocale: 'fr_CA',
     url: '/',
     title: 'Hummii - Service Marketplace',
     description: 'Find and hire verified contractors in Canada',
@@ -44,9 +47,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html suppressHydrationWarning>
       <body className={inter.className}>{children}</body>
     </html>
   );
 }
-
