@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { EmailModule } from './shared/email/email.module';
+import { AuditModule } from './shared/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
@@ -27,6 +28,7 @@ import { UsersModule } from './users/users.module';
     // Shared modules
     PrismaModule,
     EmailModule,
+    AuditModule, // Global audit logging for PIPEDA compliance
 
     // Feature modules
     AuthModule,

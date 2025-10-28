@@ -59,46 +59,47 @@ enum VerificationStatus {
 // ============================================================================
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  avatar    String?
-  role      UserRole @default(CLIENT)
-  isVerified Boolean @default(false)
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  name       String
+  phone      String?
+  avatar     String?
+  role       UserRole @default(CLIENT)
+  isVerified Boolean  @default(false)
 
   // Email verification
-  verificationToken String?
+  verificationToken       String?
   verificationTokenExpiry DateTime?
 
   // Password reset
-  resetToken String?
+  resetToken       String?
   resetTokenExpiry DateTime?
 
   // Security
-  failedLoginAttempts Int @default(0)
-  lockedUntil DateTime?
-  lastLoginAt DateTime?
-  lastLoginIp String?
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
 
   // Contractor specific
   contractor Contractor?
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete for PIPEDA compliance
 
   // Relations
-  clientOrders Order[] @relation("ClientOrders")
-  contractorOrders Order[] @relation("ContractorOrders")
-  sentMessages Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  givenReviews Review[] @relation("ReviewAuthor")
-  receivedReviews Review[] @relation("ReviewRecipient")
-  notifications Notification[]
-  sessions Session[]
+  clientOrders     Order[]        @relation("ClientOrders")
+  contractorOrders Order[]        @relation("ContractorOrders")
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  givenReviews     Review[]       @relation("ReviewAuthor")
+  receivedReviews  Review[]       @relation("ReviewRecipient")
+  notifications    Notification[]
+  sessions         Session[]
+  auditLogs        AuditLog[]     @relation("AuditLogs")
 
   @@index([email])
   @@index([phone])
@@ -107,41 +108,41 @@ model User {
 }
 
 model Contractor {
-  id String @id @default(uuid())
+  id     String @id @default(uuid())
   userId String @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Profile
-  bio String? @db.Text
+  bio        String?  @db.Text
   experience Int? // Years of experience
   hourlyRate Decimal? @db.Decimal(10, 2)
 
   // Location (PostGIS)
-  location Unsupported("geography(Point, 4326)")?
-  address String?
-  city String?
-  province String?
-  postalCode String?
-  serviceRadius Int @default(50) // km
+  location      Unsupported("geography(Point, 4326)")?
+  address       String?
+  city          String?
+  province      String?
+  postalCode    String?
+  serviceRadius Int                                    @default(50) // km
 
   // Verification
-  verificationStatus VerificationStatus @default(PENDING)
-  verificationDate DateTime?
+  verificationStatus      VerificationStatus @default(PENDING)
+  verificationDate        DateTime?
   stripeIdentitySessionId String?
 
   // Statistics
-  totalOrders Int @default(0)
-  completedOrders Int @default(0)
-  rating Decimal? @db.Decimal(3, 2) // 0.00 to 5.00
-  reviewCount Int @default(0)
+  totalOrders     Int      @default(0)
+  completedOrders Int      @default(0)
+  rating          Decimal? @db.Decimal(3, 2) // 0.00 to 5.00
+  reviewCount     Int      @default(0)
 
   // Availability
   isAvailable Boolean @default(true)
 
   // Relations
   categories ContractorCategory[]
-  portfolio PortfolioItem[]
-  services Service[]
+  portfolio  PortfolioItem[]
+  services   Service[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -150,17 +151,17 @@ model Contractor {
 }
 
 model Category {
-  id String @id @default(uuid())
-  name String @unique
-  slug String @unique
-  description String? @db.Text
-  icon String?
-  parentId String?
-  parent Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryHierarchy")
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?    @db.Text
+  icon        String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
 
   contractors ContractorCategory[]
-  orders Order[]
+  orders      Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -170,23 +171,23 @@ model Category {
 
 model ContractorCategory {
   contractorId String
-  categoryId String
-  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId   String
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([contractorId, categoryId])
   @@map("contractor_categories")
 }
 
 model PortfolioItem {
-  id String @id @default(uuid())
+  id           String     @id @default(uuid())
   contractorId String
-  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
 
-  title String
-  description String? @db.Text
-  images String[] // Array of image URLs
-  order Int @default(0) // Display order
+  title       String
+  description String?  @db.Text
+  images      String[] // Array of image URLs
+  order       Int      @default(0) // Display order
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,14 +196,14 @@ model PortfolioItem {
 }
 
 model Service {
-  id String @id @default(uuid())
+  id           String     @id @default(uuid())
   contractorId String
-  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
 
-  name String
-  description String? @db.Text
-  price Decimal? @db.Decimal(10, 2)
-  unit String? // e.g., "per hour", "per project"
+  name        String
+  description String?  @db.Text
+  price       Decimal? @db.Decimal(10, 2)
+  unit        String? // e.g., "per hour", "per project"
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -218,49 +219,49 @@ model Order {
   id String @id @default(uuid())
 
   // Order details
-  title String
-  description String @db.Text
-  images String[] // Array of image URLs
-  type OrderType @default(PUBLIC)
-  status OrderStatus @default(DRAFT)
+  title       String
+  description String      @db.Text
+  images      String[] // Array of image URLs
+  type        OrderType   @default(PUBLIC)
+  status      OrderStatus @default(DRAFT)
 
   // Category
   categoryId String
-  category Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
 
   // Parties
-  clientId String
-  client User @relation("ClientOrders", fields: [clientId], references: [id])
+  clientId     String
+  client       User    @relation("ClientOrders", fields: [clientId], references: [id])
   contractorId String?
-  contractor User? @relation("ContractorOrders", fields: [contractorId], references: [id])
+  contractor   User?   @relation("ContractorOrders", fields: [contractorId], references: [id])
 
   // Location
-  location Unsupported("geography(Point, 4326)")?
-  address String
-  city String
-  province String
+  location   Unsupported("geography(Point, 4326)")?
+  address    String
+  city       String
+  province   String
   postalCode String
 
   // Budget
-  budgetMin Decimal? @db.Decimal(10, 2)
-  budgetMax Decimal? @db.Decimal(10, 2)
+  budgetMin   Decimal? @db.Decimal(10, 2)
+  budgetMax   Decimal? @db.Decimal(10, 2)
   agreedPrice Decimal? @db.Decimal(10, 2)
 
   // Dates
-  desiredStartDate DateTime?
+  desiredStartDate      DateTime?
   desiredCompletionDate DateTime?
-  actualStartDate DateTime?
-  actualCompletionDate DateTime?
+  actualStartDate       DateTime?
+  actualCompletionDate  DateTime?
 
   // Relations
   proposals Proposal[]
-  messages Message[]
-  reviews Review[]
-  payment Payment?
-  dispute Dispute?
+  messages  Message[]
+  reviews   Review[]
+  payment   Payment?
+  dispute   Dispute?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete
 
   @@index([clientId])
@@ -271,17 +272,17 @@ model Order {
 }
 
 model Proposal {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
   orderId String
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   contractorId String
 
-  message String @db.Text
-  proposedPrice Decimal @db.Decimal(10, 2)
+  message           String  @db.Text
+  proposedPrice     Decimal @db.Decimal(10, 2)
   estimatedDuration String? // e.g., "3 days", "2 weeks"
 
-  status String @default("pending") // pending, accepted, rejected, expired
+  status    String    @default("pending") // pending, accepted, rejected, expired
   expiresAt DateTime?
 
   createdAt DateTime @default(now())
@@ -295,13 +296,13 @@ model Proposal {
 // ============================================================================
 
 model ChatRoom {
-  id String @id @default(uuid())
+  id      String @id @default(uuid())
   orderId String @unique
 
   messages Message[]
 
-  createdAt DateTime @default(now())
-  closedAt DateTime? // Auto-close 30 days after order completion
+  createdAt DateTime  @default(now())
+  closedAt  DateTime? // Auto-close 30 days after order completion
 
   @@map("chat_rooms")
 }
@@ -310,29 +311,29 @@ model Message {
   id String @id @default(uuid())
 
   roomId String
-  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   senderId String
-  sender User @relation("SentMessages", fields: [senderId], references: [id])
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
 
   receiverId String
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id])
 
   content String @db.Text
 
   // Moderation
-  isModerated Boolean @default(false)
+  isModerated     Boolean @default(false)
   moderationFlags Json? // {phone: true, email: false, etc}
 
   // Status
-  isRead Boolean @default(false)
-  readAt DateTime?
-  isEdited Boolean @default(false)
+  isRead   Boolean   @default(false)
+  readAt   DateTime?
+  isEdited Boolean   @default(false)
   editedAt DateTime?
 
   // Order context
   orderId String
-  order Order @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -347,20 +348,20 @@ model Review {
   id String @id @default(uuid())
 
   orderId String @unique
-  order Order @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id])
 
   authorId String
-  author User @relation("ReviewAuthor", fields: [authorId], references: [id])
+  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
 
   recipientId String
-  recipient User @relation("ReviewRecipient", fields: [recipientId], references: [id])
+  recipient   User   @relation("ReviewRecipient", fields: [recipientId], references: [id])
 
   // Ratings (1-5)
-  qualityRating Int? // Contractor only
+  qualityRating         Int? // Contractor only
   professionalismRating Int
-  communicationRating Int
-  valueRating Int? // Contractor only
-  paymentRating Int? // Client only
+  communicationRating   Int
+  valueRating           Int? // Contractor only
+  paymentRating         Int? // Client only
 
   // Overall rating (calculated)
   overallRating Decimal @db.Decimal(3, 2)
@@ -368,12 +369,12 @@ model Review {
   comment String? @db.Text
 
   // Moderation
-  isModerated Boolean @default(false)
-  isPublished Boolean @default(true)
+  isModerated     Boolean @default(false)
+  isPublished     Boolean @default(true)
   moderationNotes String?
 
   // Response
-  response String? @db.Text
+  response    String?   @db.Text
   respondedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -390,26 +391,26 @@ model Payment {
   id String @id @default(uuid())
 
   orderId String @unique
-  order Order @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id])
 
-  amount Decimal @db.Decimal(10, 2)
-  currency String @default("cad")
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("cad")
 
   status PaymentStatus @default(PENDING)
 
   // Stripe
   stripePaymentIntentId String? @unique
-  stripeCustomerId String?
+  stripeCustomerId      String?
   stripePaymentMethodId String?
 
   // Escrow
-  heldInEscrow Boolean @default(true)
-  releasedAt DateTime?
+  heldInEscrow Boolean   @default(true)
+  releasedAt   DateTime?
 
   // Refund
-  refundAmount Decimal? @db.Decimal(10, 2)
+  refundAmount Decimal?  @db.Decimal(10, 2)
   refundReason String?
-  refundedAt DateTime?
+  refundedAt   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -425,20 +426,20 @@ model Dispute {
   id String @id @default(uuid())
 
   orderId String @unique
-  order Order @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id])
 
   openedById String
-  reason String @db.Text
-  evidence String[] // Array of evidence URLs
+  reason     String   @db.Text
+  evidence   String[] // Array of evidence URLs
 
   status String @default("open") // open, in_review, resolved, closed
 
-  resolution String? @db.Text
+  resolution   String?   @db.Text
   resolvedById String? // Admin user ID
-  resolvedAt DateTime?
+  resolvedAt   DateTime?
 
   // Fund distribution
-  clientRefundAmount Decimal? @db.Decimal(10, 2)
+  clientRefundAmount      Decimal? @db.Decimal(10, 2)
   contractorPaymentAmount Decimal? @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
@@ -455,17 +456,17 @@ model Notification {
   id String @id @default(uuid())
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type String // ORDER_UPDATE, NEW_PROPOSAL, MESSAGE, PAYMENT, REVIEW, etc.
-  title String
+  type    String // ORDER_UPDATE, NEW_PROPOSAL, MESSAGE, PAYMENT, REVIEW, etc.
+  title   String
   message String @db.Text
 
   // Data
-  relatedEntityId String? // Order ID, Message ID, etc.
+  relatedEntityId   String? // Order ID, Message ID, etc.
   relatedEntityType String? // order, message, review, etc.
 
-  isRead Boolean @default(false)
+  isRead Boolean   @default(false)
   readAt DateTime?
 
   createdAt DateTime @default(now())
@@ -481,7 +482,7 @@ model Session {
   id String @id @default(uuid())
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   refreshToken String @unique
 
@@ -494,4 +495,41 @@ model Session {
   createdAt DateTime @default(now())
 
   @@map("sessions")
+}
+
+// ============================================================================
+// AUDIT LOG MODELS (PIPEDA Compliance)
+// ============================================================================
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  // User who performed the action (null for system actions)
+  userId String?
+  user   User?   @relation("AuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Action details
+  action   String // LOGIN, LOGOUT, REGISTER, PROFILE_UPDATE, DATA_EXPORT, ACCOUNT_DELETE, PASSWORD_RESET, etc.
+  entity   String? // User, Order, Payment, etc.
+  entityId String? // ID of the affected entity
+
+  // Request context
+  ipAddress String?
+  userAgent String?
+
+  // Data changes (before/after for updates)
+  changes  Json? // { before: {...}, after: {...} }
+  metadata Json? // Additional context data
+
+  // Result
+  success      Boolean @default(true)
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

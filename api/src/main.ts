@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
@@ -13,7 +14,11 @@ async function bootstrap() {
     logger: WinstonModule.createLogger(winstonConfig),
   });
 
-  // Security
+  // Request body size limit (protection against large payload attacks)
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+  // Security headers
   app.use(helmet());
 
   // CORS

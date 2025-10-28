@@ -47,9 +47,11 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { ttl: 60000, limit: 5 } }) // 5 requests per minute
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ status: 200, description: 'Successfully logged in' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto, @Req() req) {
     const userAgent = req.headers['user-agent'];
@@ -85,17 +87,21 @@ export class AuthController {
   }
 
   @Post('password-reset/request')
+  @Throttle({ default: { ttl: 60000, limit: 3 } }) // 3 requests per minute
   @ApiOperation({ summary: 'Request password reset' })
   @ApiResponse({ status: 200, description: 'Reset email sent if account exists' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
   async requestPasswordReset(@Body() dto: PasswordResetRequestDto) {
     return this.authService.requestPasswordReset(dto.email);
   }
 
   @Post('password-reset/confirm')
+  @Throttle({ default: { ttl: 60000, limit: 3 } }) // 3 requests per minute
   @ApiOperation({ summary: 'Confirm password reset' })
   @ApiResponse({ status: 200, description: 'Password successfully reset' })
   @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
   async confirmPasswordReset(@Body() dto: PasswordResetConfirmDto) {
     return this.authService.confirmPasswordReset(dto);

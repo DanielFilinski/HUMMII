@@ -11,6 +11,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { EmailService } from '../shared/email/email.service';
+import { AuditService } from '../shared/audit/audit.service';
+import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
@@ -22,6 +24,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly auditService: AuditService,
   ) {}
 
   /**
@@ -60,8 +63,29 @@ export class AuthService {
       },
     });
 
+    // Audit log: User registration
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.REGISTER,
+      entity: AuditEntity.USER,
+      entityId: user.id,
+      metadata: {
+        email: user.email,
+        name: user.name,
+        hasPhone: !!phone,
+      },
+    });
+
     // Send verification email
     await this.emailService.sendEmailVerification(email, verificationToken);
+
+    // Audit log: Verification email sent
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.EMAIL_VERIFICATION_SENT,
+      entity: AuditEntity.USER,
+      entityId: user.id,
+    });
 
     return this.excludePassword(user);
   }
@@ -90,6 +114,14 @@ export class AuthService {
         verificationToken: null,
         verificationTokenExpiry: null,
       },
+    });
+
+    // Audit log: Email verified
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.EMAIL_VERIFIED,
+      entity: AuditEntity.USER,
+      entityId: user.id,
     });
 
     // Send welcome email
@@ -147,6 +179,22 @@ export class AuthService {
         },
       });
 
+      // Audit log: Failed login attempt
+      await this.auditService.log({
+        userId: user.id,
+        action: lockAccount ? AuditAction.ACCOUNT_LOCKED : AuditAction.LOGIN_FAILED,
+        entity: AuditEntity.USER,
+        entityId: user.id,
+        ipAddress,
+        userAgent,
+        success: false,
+        errorMessage: 'Invalid credentials',
+        metadata: {
+          failedAttempts: newFailedAttempts,
+          locked: lockAccount,
+        },
+      });
+
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -173,6 +221,19 @@ export class AuthService {
       userAgent,
       ipAddress,
     );
+
+    // Audit log: Successful login
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.LOGIN,
+      entity: AuditEntity.USER,
+      entityId: user.id,
+      ipAddress,
+      userAgent,
+      metadata: {
+        email: user.email,
+      },
+    });
 
     return {
       user: this.excludePassword(user),
@@ -269,9 +330,26 @@ export class AuthService {
    * Logout current session by refresh token
    */
   async logout(refreshToken: string) {
+    // Get session info before deleting for audit log
+    const session = await this.prisma.session.findUnique({
+      where: { refreshToken },
+    });
+
     await this.prisma.session.deleteMany({
       where: { refreshToken },
     });
+
+    // Audit log: Logout
+    if (session) {
+      await this.auditService.log({
+        userId: session.userId,
+        action: AuditAction.LOGOUT,
+        entity: AuditEntity.SESSION,
+        entityId: session.id,
+        ipAddress: session.ipAddress || undefined,
+        userAgent: session.userAgent || undefined,
+      });
+    }
   }
 
   /**
@@ -280,6 +358,14 @@ export class AuthService {
   async logoutAll(userId: string) {
     await this.prisma.session.deleteMany({
       where: { userId },
+    });
+
+    // Audit log: Logout all sessions
+    await this.auditService.log({
+      userId,
+      action: AuditAction.LOGOUT_ALL,
+      entity: AuditEntity.USER,
+      entityId: userId,
     });
   }
 
@@ -360,6 +446,14 @@ export class AuthService {
     // Send password reset email
     await this.emailService.sendPasswordReset(email, resetToken);
 
+    // Audit log: Password reset requested
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.PASSWORD_RESET_REQUESTED,
+      entity: AuditEntity.USER,
+      entityId: user.id,
+    });
+
     return {
       message: 'If account exists, reset email has been sent',
     };
@@ -402,6 +496,17 @@ export class AuthService {
       where: { userId: user.id },
     });
 
+    // Audit log: Password reset completed
+    await this.auditService.log({
+      userId: user.id,
+      action: AuditAction.PASSWORD_RESET_COMPLETED,
+      entity: AuditEntity.USER,
+      entityId: user.id,
+      metadata: {
+        sessionsInvalidated: true,
+      },
+    });
+
     // Send confirmation email
     await this.emailService.sendPasswordResetConfirmation(user.email);
 
@@ -425,6 +530,8 @@ export class AuthService {
       where: { email },
     });
 
+    const isNewUser = !user;
+
     if (!user) {
       // Create new user from OAuth
       user = await this.prisma.user.create({
@@ -434,6 +541,21 @@ export class AuthService {
           avatar,
           password: '', // OAuth users don't have password
           isVerified: true, // OAuth emails are pre-verified
+        },
+      });
+
+      // Audit log: OAuth registration
+      await this.auditService.log({
+        userId: user.id,
+        action: AuditAction.OAUTH_REGISTER,
+        entity: AuditEntity.USER,
+        entityId: user.id,
+        ipAddress,
+        userAgent,
+        metadata: {
+          provider,
+          email: user.email,
+          name: user.name,
         },
       });
     }
@@ -455,6 +577,22 @@ export class AuthService {
       userAgent,
       ipAddress,
     );
+
+    // Audit log: OAuth login (for existing users)
+    if (!isNewUser) {
+      await this.auditService.log({
+        userId: user.id,
+        action: AuditAction.OAUTH_LOGIN,
+        entity: AuditEntity.USER,
+        entityId: user.id,
+        ipAddress,
+        userAgent,
+        metadata: {
+          provider,
+          email: user.email,
+        },
+      });
+    }
 
     return {
       user: this.excludePassword(user),
