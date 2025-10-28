@@ -28,6 +28,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Expose port
 EXPOSE 3000
 
@@ -40,6 +43,9 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma Client
+RUN npx prisma generate
 
 # Build the application
 RUN npm run build

@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
@@ -22,6 +23,13 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
 import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+
+interface RequestWithUser extends Request {
+  user: {
+    userId: string;
+    email: string;
+  };
+}
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -53,9 +61,9 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto, @Req() req) {
+  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
     const userAgent = req.headers['user-agent'];
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const ipAddress = req.ip || req.connection?.remoteAddress;
     return this.authService.login(loginDto, userAgent, ipAddress);
   }
 
@@ -82,7 +90,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout all sessions' })
   @ApiResponse({ status: 204, description: 'All sessions terminated' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logoutAll(@Req() req) {
+  async logoutAll(@Req() req: RequestWithUser) {
     await this.authService.logoutAll(req.user.userId);
   }
 
@@ -117,9 +125,9 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleAuthCallback(@Req() req) {
+  async googleAuthCallback(@Req() req: RequestWithUser) {
     const userAgent = req.headers['user-agent'];
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const ipAddress = req.ip || req.connection?.remoteAddress;
     return this.authService.oauthLogin(req.user, userAgent, ipAddress);
   }
 
@@ -128,7 +136,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all active sessions' })
   @ApiResponse({ status: 200, description: 'Active sessions retrieved' })
-  async getActiveSessions(@Req() req) {
+  async getActiveSessions(@Req() req: RequestWithUser) {
     return this.authService.getActiveSessions(req.user.userId);
   }
 
@@ -138,7 +146,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Delete specific session' })
   @ApiResponse({ status: 204, description: 'Session deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteSession(@Req() req, @Param('sessionId') sessionId: string) {
+  async deleteSession(@Req() req: RequestWithUser, @Param('sessionId') sessionId: string) {
     await this.authService.deleteSession(req.user.userId, sessionId);
   }
 }
