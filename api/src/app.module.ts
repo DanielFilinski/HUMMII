@@ -4,6 +4,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './shared/prisma/prisma.module';
+import { EmailModule } from './shared/email/email.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -21,10 +24,13 @@ import { PrismaModule } from './shared/prisma/prisma.module';
       },
     ]),
 
-    // Prisma
+    // Shared modules
     PrismaModule,
+    EmailModule,
 
-    // Feature modules will be added here
+    // Feature modules
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
