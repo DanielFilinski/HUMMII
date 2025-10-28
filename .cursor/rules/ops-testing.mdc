@@ -1,0 +1,397 @@
+---
+alwaysApply: false
+auto:
+  - "*.spec.ts"
+  - "*.test.ts"
+  - "*.spec.tsx"
+  - "*.test.tsx"
+  - "*.e2e-spec.ts"
+  - "jest.config.*"
+---
+
+# Testing Guide
+
+> **Unit, E2E, and integration testing strategies**
+> **Version:** 1.0 | **Updated:** October 27, 2025
+
+## Testing Strategy
+
+### Testing Pyramid
+
+```
+       /\
+      /  \      E2E Tests (5%)
+     /____\     - Critical user flows
+    /      \
+   /  Inte  \   Integration Tests (20%)
+  /__gration_\  - API endpoints
+ /            \
+/    Unit      \ Unit Tests (75%)
+/____Tests_____\ - Business logic, utilities, components
+```
+
+### Coverage Goals
+
+**Critical Paths (80%+ coverage):**
+
+**Backend:**
+- ✅ Authentication (auth module)
+- ✅ Payment processing (payments module)
+- ✅ Dispute resolution (disputes module)
+- ✅ Subscription management (subscriptions module)
+- ✅ Content moderation (moderation service)
+- ✅ PIPEDA endpoints (user data access/deletion)
+
+**Frontend:**
+- ✅ Authentication forms
+- ✅ Payment process
+- ✅ Form validation
+- ✅ Critical UI components
+
+## Backend Testing (Jest + Supertest)
+
+### Unit Tests for Services
+
+```typescript
+// api/src/users/users.service.spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { NotFoundException } from '@nestjs/common';
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let prisma: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: PrismaService,
+          useValue: {
+            user: {
+              findUnique: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+            },
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+    prisma = module.get<PrismaService>(PrismaService);
+  });
+
+  describe('findById', () => {
+    it('should return user if exists', async () => {
+      const userId = '123';
+      const expectedUser = {
+        id: userId,
+        email: 'test@example.com',
+        name: 'Test User',
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(expectedUser as any);
+
+      const result = await service.findById(userId);
+
+      expect(result).toEqual(expectedUser);
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      await expect(service.findById('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+});
+```
+
+### E2E Tests for API
+
+```typescript
+// api/test/auth.e2e-spec.ts
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '../src/app.module';
+import { PrismaService } from '../src/prisma/prisma.service';
+
+describe('AuthController (e2e)', () => {
+  let app: INestApplication;
+  let prisma: PrismaService;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+
+    await app.init();
+    prisma = app.get<PrismaService>(PrismaService);
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+    await app.close();
+  });
+
+  beforeEach(async () => {
+    await prisma.user.deleteMany();
+  });
+
+  describe('/auth/register (POST)', () => {
+    it('should register new user', () => {
+      return request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'newuser@example.com',
+          password: 'Password123!',
+          name: 'New User',
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('id');
+          expect(res.body.email).toBe('newuser@example.com');
+          expect(res.body).not.toHaveProperty('password');
+        });
+    });
+
+    it('should reject weak password', () => {
+      return request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'test@example.com',
+          password: '12345',
+          name: 'Test',
+        })
+        .expect(400);
+    });
+  });
+});
+```
+
+## Frontend Testing (React Testing Library)
+
+### Component Tests
+
+```typescript
+// frontend/components/login-form.test.tsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { LoginForm } from './login-form';
+
+describe('LoginForm', () => {
+  it('renders login form', () => {
+    render(<LoginForm />);
+
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+  });
+
+  it('shows validation error for invalid email', async () => {
+    render(<LoginForm />);
+
+    const emailInput = screen.getByLabelText(/email/i);
+    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    fireEvent.blur(emailInput);
+
+    expect(await screen.findByText(/invalid email/i)).toBeInTheDocument();
+  });
+
+  it('submits form with valid data', async () => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({ accessToken: 'token' }),
+      })
+    ) as jest.Mock;
+
+    render(<LoginForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'test@example.com' },
+    });
+
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'Password123!' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+  });
+});
+```
+
+## Mocking External Services
+
+### Stripe
+
+```typescript
+jest.mock('stripe', () => {
+  return jest.fn().mockImplementation(() => ({
+    paymentIntents: {
+      create: jest.fn().mockResolvedValue({
+        id: 'pi_test',
+        client_secret: 'secret_test',
+        status: 'succeeded',
+      }),
+    },
+    webhooks: {
+      constructEvent: jest.fn().mockReturnValue({
+        type: 'payment_intent.succeeded',
+        data: { object: { id: 'pi_test' } },
+      }),
+    },
+  }));
+});
+```
+
+### OneSignal
+
+```typescript
+jest.mock('@onesignal/node-onesignal', () => ({
+  createNotification: jest.fn().mockResolvedValue({
+    id: 'notification_id',
+    recipients: 1,
+  }),
+}));
+```
+
+### Socket.io
+
+```typescript
+jest.mock('socket.io-client', () => ({
+  io: jest.fn(() => ({
+    emit: jest.fn(),
+    on: jest.fn(),
+    off: jest.fn(),
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+  })),
+}));
+```
+
+### Google Maps API
+
+```typescript
+global.fetch = jest.fn((url) => {
+  if (url.includes('maps.googleapis.com')) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        results: [{
+          formatted_address: 'Toronto, ON, Canada',
+          geometry: {
+            location: { lat: 43.6532, lng: -79.3832 },
+          },
+        }],
+      }),
+    });
+  }
+  return Promise.reject(new Error('Unknown URL'));
+}) as jest.Mock;
+```
+
+## Running Tests
+
+### Commands
+
+```bash
+# Unit tests
+cd api
+pnpm run test
+
+cd frontend
+pnpm run test
+
+# E2E tests (API)
+cd api
+pnpm run test:e2e
+
+# Watch mode
+pnpm run test:watch
+
+# Coverage
+pnpm run test:cov
+
+# Specific test file
+pnpm run test users.service.spec.ts
+
+# Specific test pattern
+pnpm run test -- --testNamePattern="should create user"
+```
+
+### Useful Jest Flags
+
+```bash
+# Run only failed tests
+pnpm run test --onlyFailures
+
+# Verbose output
+pnpm run test --verbose
+
+# Run in band (sequentially, useful for debugging)
+pnpm run test --runInBand
+
+# Update snapshots
+pnpm run test -u
+
+# Show coverage in terminal
+pnpm run test --coverage --coverageReporters=text
+```
+
+## Test Organization
+
+### File Naming
+
+- Unit tests: `*.spec.ts` or `*.test.ts`
+- E2E tests: `*.e2e-spec.ts`
+- Same directory as source or in `__tests__` folder
+
+### Test Structure
+
+```typescript
+describe('Component/Service Name', () => {
+  describe('method name', () => {
+    it('should do something when condition', () => {
+      // Arrange
+      const input = 'test';
+      
+      // Act
+      const result = functionUnderTest(input);
+      
+      // Assert
+      expect(result).toBe('expected');
+    });
+  });
+});
+```
+
+### Coverage Targets
+
+- **Statements:** 75%+
+- **Branches:** 70%+
+- **Functions:** 75%+
+- **Lines:** 75%+
+
+**Critical paths:** 80%+ coverage required
+
+---
+
+**Last updated:** October 27, 2025

@@ -1,13 +1,38 @@
 ---
 alwaysApply: true
 ---
-Файлы документации данного проекта, планы и обяснения в файлах типа txt или md пиши на русском. 
-Всё в чате на русском.
-Но комментарии внутри кода или других файлах пиши на ангийском
 
-Перед каждой команде в чате описывай что будет делать эта команда и на что повлияет
+# Language & Communication Rules
 
-при поиске информации в интернете ищи акдуалыне данные на 2025 год 
+## Language Rules
+
+| Context | Language | Examples |
+|---------|----------|----------|
+| **Code** | English | Variables, functions, classes, code comments |
+| **Documentation** | Russian | `.md`, `.txt`, plans, specifications |
+| **Chat/Communication** | Russian | All messages with user, questions, answers |
+| **Internet Search** | 2025 data | Always search for fresh information |
+
+## Communication Rules
+
+### Before Every Command
+
+**MANDATORY:**
+- Describe what the command will do
+- Indicate what will be affected/changed
+- Warn about potential risks if any
+
+**Example:**
+```bash
+# ❌ BAD
+docker compose down -v
+
+# ✅ GOOD
+# Команда остановит все Docker контейнеры и УДАЛИТ все volumes (включая базу данных)
+# Затронуто: PostgreSQL, Redis, все данные будут потеряны
+# Используйте только если уверены!
+docker compose down -v
+```
 
 ## Code Quality & Security Standards
 
@@ -46,3 +71,9 @@ Always apply the following best practices when writing, reviewing, or suggesting
 - Ensure type safety (TypeScript strict mode)
 - Follow consistent code formatting and style guides
 - Write unit tests for critical functionality
+
+---
+
+**Note:** For detailed rules, see:
+- `core-critical.mdc` - Critical TypeScript and code quality rules
+- `core-security.mdc` - Security and PIPEDA compliance details

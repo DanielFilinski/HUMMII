@@ -1,5 +1,9 @@
 ---
-alwaysApply: false 
+alwaysApply: false
+auto:
+  - "api/**/*.ts"
+  - "api/**/*.js"
+  - "**/*.nestjs.ts"
 ---
 
 

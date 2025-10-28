@@ -1,0 +1,384 @@
+---
+alwaysApply: false
+auto:
+  - "*.md"
+  - "docker-compose*.yml"
+  - "Dockerfile"
+  - ".env*"
+  - "start.sh"
+  - "package.json"
+---
+
+# Development & Operations Guide
+
+> **Development, Docker, and project operations**
+> **Version:** 1.0 | **Updated:** October 27, 2025
+
+## Quick Start Commands
+
+### Docker Commands
+
+```bash
+# Start all services
+docker compose up -d
+
+# Stop all services
+docker compose down
+
+# Restart specific service
+docker compose restart api
+
+# View logs
+docker compose logs -f api
+docker compose logs --tail=100 api
+
+# Check status
+docker compose ps
+
+# Execute command in container
+docker compose exec api pnpm run migration:run
+docker compose exec postgres psql -U hummii -d hummii_dev
+
+# Rebuild containers
+docker compose up -d --build
+docker compose build api
+
+# Clean up (CAREFUL: removes all data)
+docker compose down -v
+```
+
+### Code Quality Commands
+
+```bash
+# Lint, format, type-check
+pnpm run lint          # ESLint
+pnpm run format        # Prettier
+pnpm run type-check    # TypeScript
+
+# Auto-fix
+pnpm run lint --fix
+pnpm run format --write
+
+# Testing
+pnpm run test          # Unit tests
+pnpm run test:watch    # Watch mode
+pnpm run test:cov      # Coverage
+pnpm run test:e2e      # E2E tests (backend)
+```
+
+### Database Commands (Backend)
+
+```bash
+cd api
+
+# Migrations
+pnpm run migration:generate -- -n MigrationName
+pnpm run migration:run
+pnpm run migration:revert
+
+# Prisma
+pnpm run prisma:generate     # Generate Prisma client
+pnpm run prisma:studio       # Open Prisma Studio GUI (http://localhost:5555)
+pnpm run prisma migrate reset # Reset DB (CAREFUL: deletes all data!)
+
+# Seed database
+pnpm run seed
+```
+
+## Environment Setup
+
+### Required Environment Variables
+
+Key variables from `.env.example` (251 lines):
+
+```bash
+# General
+NODE_ENV=development
+PORT=3000
+APP_URL=http://localhost:3001
+
+# Database
+DATABASE_URL="postgresql://hummii:password@localhost:5432/hummii_dev"
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# JWT Secrets (generate with: openssl rand -base64 64)
+JWT_ACCESS_SECRET=your-256-bit-secret
+JWT_REFRESH_SECRET=your-256-bit-secret
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Google Maps
+GOOGLE_MAPS_API_KEY=AIza...
+
+# OneSignal
+ONESIGNAL_APP_ID=...
+ONESIGNAL_API_KEY=...
+
+# Twilio
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
+TWILIO_PHONE_NUMBER=...
+```
+
+### Service URLs (After Docker Start)
+
+| Service | URL | Description |
+|--------|-----|-------------|
+| API | http://localhost:3000 | Backend NestJS |
+| Swagger | http://localhost:3000/api | API documentation |
+| Frontend | http://localhost:3001 | Next.js application |
+| Admin | http://localhost:3002 | Admin panel Refine |
+| PgAdmin | http://localhost:5050 | PostgreSQL GUI (optional) |
+| Redis Commander | http://localhost:8081 | Redis GUI (optional) |
+
+## Troubleshooting
+
+### Docker Issues
+
+**Problem: Containers not starting**
+
+```bash
+# Solution 1: Remove volumes and rebuild
+docker compose down -v
+docker compose up --build
+
+# Solution 2: Check logs
+docker compose logs api
+docker compose logs postgres
+
+# Solution 3: Check resources
+docker stats
+```
+
+**Problem: Port already in use**
+
+```bash
+# Find process on port 3000
+lsof -ti:3000
+
+# Kill process
+lsof -ti:3000 | xargs kill -9
+
+# Or change port in .env
+API_PORT=3001
+```
+
+**Problem: Database connection errors**
+
+```bash
+# Check PostgreSQL logs
+docker compose logs postgres
+
+# Restart PostgreSQL
+docker compose restart postgres
+
+# Check environment variables
+docker compose exec api env | grep DATABASE
+```
+
+### Database Issues
+
+**Problem: Migration not applying**
+
+```bash
+cd api
+
+# Revert last migration
+pnpm run migration:revert
+
+# Fix migration file
+# prisma/migrations/...
+
+# Apply again
+pnpm run migration:run
+```
+
+**Problem: Prisma schema not synced**
+
+```bash
+# Regenerate Prisma client
+pnpm run prisma:generate
+
+# Apply migrations
+pnpm run migration:run
+
+# If problem persists, reset DB
+pnpm run prisma migrate reset
+```
+
+### Next.js Issues
+
+**Problem: Build fails with type errors**
+
+```bash
+cd frontend
+
+# Clear Next.js cache
+rm -rf .next
+
+# Clear node_modules cache
+rm -rf node_modules/.cache
+
+# Check TypeScript errors
+pnpm run type-check
+
+# Rebuild
+pnpm run build
+```
+
+**Problem: Hydration errors**
+
+```typescript
+// Check for client-only code in server components
+// Add 'use client' directive when needed
+'use client';
+
+export default function Page() {
+  const user = useUser(); // ✅ Hook in Client Component
+  return <div>{user.name}</div>;
+}
+```
+
+### API Issues
+
+**Problem: CORS errors**
+
+```typescript
+// api/src/main.ts
+app.enableCors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+});
+```
+
+**Problem: JWT token invalid**
+
+```bash
+# Check secrets in .env
+echo $JWT_ACCESS_SECRET
+echo $JWT_REFRESH_SECRET
+
+# Generate new secrets
+openssl rand -base64 64
+
+# Update .env and restart API
+docker compose restart api
+```
+
+## Git Workflow
+
+### Commit Convention
+
+```bash
+# Format
+<type>(<scope>): <subject>
+
+# Types
+feat      # New feature
+fix       # Bug fix
+docs      # Documentation
+style     # Code formatting
+refactor  # Code refactoring
+test      # Tests
+chore     # Maintenance
+perf      # Performance
+security  # Security fixes
+ci        # CI/CD changes
+
+# Scopes
+api       # Backend API
+frontend  # Frontend
+admin     # Admin panel
+docker    # Docker
+docs      # Documentation
+deps      # Dependencies
+
+# Examples
+feat(api): add user authentication endpoint
+fix(frontend): resolve navigation bug on mobile
+docs: update installation instructions
+security(api): fix SQL injection vulnerability
+```
+
+### Pre-commit Checks
+
+Automatic checks before commit (Husky):
+- ESLint
+- Prettier
+- TypeScript type check
+- Unit tests for changed files
+
+## Useful Commands
+
+```bash
+# Check all environment variables
+cat .env | grep -v "^#" | grep -v "^$"
+
+# Test external services
+curl -X POST https://api.stripe.com/v1/customers \
+  -u $STRIPE_SECRET_KEY:
+
+# Check Docker resource usage
+docker stats
+
+# Check database size
+docker exec hummii-postgres psql -U hummii -d hummii_dev \
+  -c "SELECT pg_size_pretty(pg_database_size('hummii_dev'));"
+
+# Clear Docker logs
+docker system prune --volumes
+```
+
+## Adding New Features
+
+### New API Module
+
+```bash
+cd api
+
+# 1. Generate module, controller, service
+nest g module users
+nest g controller users
+nest g service users
+
+# 2. Create DTOs
+mkdir src/users/dto
+touch src/users/dto/create-user.dto.ts
+
+# 3. Update Prisma schema
+nano prisma/schema.prisma
+
+# 4. Generate and apply migration
+pnpm run migration:generate -- -n AddUserModel
+pnpm run migration:run
+
+# 5. Implement logic in service
+# 6. Add tests
+# 7. Update Swagger documentation
+```
+
+### New Next.js Page
+
+```bash
+cd frontend
+
+# 1. Create page file
+mkdir -p app/(public)/about
+touch app/(public)/about/page.tsx
+
+# 2. Add basic structure with metadata
+# 3. Add to navigation
+# 4. Test route
+```
+
+---
+
+**Last updated:** October 27, 2025
