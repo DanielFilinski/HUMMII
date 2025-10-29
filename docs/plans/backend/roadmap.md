@@ -5,7 +5,20 @@
 
 ---
 
-## 📋 Overview
+## � Навигация
+
+- **[INDEX.md](./INDEX.md)** - Главный индекс (начните здесь!)
+- **[README.md](./README.md)** - Краткий обзор всех фаз
+- **[security-checklist.md](./security-checklist.md)** - Security requirements
+- **[phase-0-foundation.md](./phase-0-foundation.md)** - ✅ Детальный план Phase 0
+- **[phase-1-authentication.md](./phase-1-authentication.md)** - ✅ Детальный план Phase 1
+- **[phase-12-background-jobs.md](./phase-12-background-jobs.md)** - ✅ Детальный план Phase 12
+- **[phase-15-production-deployment.md](./phase-15-production-deployment.md)** - ✅ Детальный план Phase 15
+- **[phases-2-15-quick-reference.md](./phases-2-15-quick-reference.md)** - 📝 Краткие планы Phase 2-14
+
+---
+
+## �📋 Overview
 
 This roadmap outlines the complete sequential plan for implementing the Hummii backend server using NestJS, following all security best practices and Canadian privacy legislation (PIPEDA).
 
@@ -30,6 +43,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 0: Foundation & Infrastructure (Week 1-2)
 **Status:** Must complete before any development
+**📖 Детальный план:** [phase-0-foundation.md](./phase-0-foundation.md)
 
 #### Infrastructure Setup
 - [ ] Docker Compose configuration
@@ -66,6 +80,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 1: Core Modules - Authentication & Authorization (Week 3-4)
 **Status:** 🔴 CRITICAL
+**📖 Детальный план:** [phase-1-authentication.md](./phase-1-authentication.md)
 
 #### Authentication Module
 - [ ] User registration with email verification
@@ -118,6 +133,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 2: User Management Module (Week 5-6)
 **Status:** 🔴 CRITICAL
+**📖 Детальный план:** [phase-2-user-management.md](./phase-2-user-management.md)
 
 #### User Profiles
 - [ ] User profile creation and management
@@ -233,6 +249,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 4: Chat Module (Week 9-10)
 **Status:** 🟡 HIGH
+**📖 Детальный план:** [phase-4-chat-module.md](./phase-4-chat-module.md)
 
 #### Real-time Communication
 - [ ] WebSocket gateway setup (Socket.io)
@@ -283,6 +300,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 5: Reviews & Ratings Module (Week 11-12)
 **Status:** 🔴 CRITICAL
+**📖 Детальный план:** [phase-5-reviews-ratings.md](./phase-5-reviews-ratings.md)
 
 #### Rating System
 - [ ] Two-way rating (client → contractor, contractor → client)
@@ -500,6 +518,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 10: Admin Panel API (Week 21-22)
 **Status:** 🟢 MEDIUM
+**📖 Детальный план:** [phase-10-admin-panel.md](./phase-10-admin-panel.md)
 
 #### Admin Endpoints
 - [ ] User management (search, filter, ban, verify)
@@ -575,44 +594,58 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 12: Background Jobs & Queues (Week 25-26)
 **Status:** 🟡 HIGH
+**📖 Детальный план:** [phase-12-background-jobs.md](./phase-12-background-jobs.md)
 
-#### Queue Setup
+#### Queue Infrastructure
 - [ ] Bull/BullMQ + Redis configuration
-- [ ] Queue processors
+- [ ] Queue processors with retry logic
 - [ ] Job priorities (high, medium, low)
-- [ ] Failed job retry logic
-- [ ] Job monitoring
+- [ ] Queue monitoring and metrics
+- [ ] Error handling and recovery
 
-#### Job Types
-- [ ] Email notification queue (priority: high)
-- [ ] Push notification queue (priority: medium)
-- [ ] Image processing queue (portfolio)
-- [ ] Data cleanup queue (weekly)
-- [ ] Webhook retries queue (Stripe)
-- [ ] Rating recalculation jobs
-- [ ] Chat cleanup jobs (30 days)
+#### Critical Job Types
+- [ ] Email notification queue (high priority - 50 emails/hour per user)
+- [ ] Push notification queue (medium priority - 20 push/hour per user)
+- [ ] Image processing queue (portfolio optimization, virus scanning)
+- [ ] Payment processing queue (Stripe webhook retries)
+- [ ] Data cleanup automation (PIPEDA compliance)
 
-#### Scheduled Tasks
-- [ ] Weekly database cleanup
-- [ ] Daily stats calculation
-- [ ] Email digest (low priority)
-- [ ] Subscription renewal reminders
-- [ ] Inactive account notifications
+#### Scheduled Tasks (Cron Jobs)
+- [ ] Daily: Statistics calculation, log cleanup, email digests
+- [ ] Weekly: Database maintenance, inactive account review
+- [ ] Monthly: Comprehensive cleanup, subscription renewal
+
+#### Security Requirements
+- [ ] Redis authentication and encryption
+- [ ] Job data protection (no PII in metadata)
+- [ ] Rate limiting for job creation
+- [ ] Audit logging for all operations
+- [ ] PIPEDA compliance automation
+
+**Performance Targets:**
+- Email Queue: 1000 emails/minute
+- Image Queue: 50 images/minute  
+- Job Success Rate: 99.5%
+- Processing Latency: <30 seconds (high priority)
 
 **Testing:**
-- Queue processing tests
-- Job retry tests
-- Scheduled task tests
+- Queue processing reliability tests
+- Job retry mechanism tests
+- Performance and load tests
+- Security and access control tests
+- PIPEDA compliance verification
 
 **Deliverables:**
-- Background job system
-- Queue management
-- Scheduled tasks
+- Production-ready background job system
+- Automated data cleanup (PIPEDA)
+- Performance monitoring dashboard
+- Queue management tools
 
 ---
 
 ### Phase 13: SEO & Analytics (Week 27)
-**Status:** 🟢 MEDIUM
+**Status:** 🟢 MEDIUM  
+**📖 Детальный план:** [phase-13-seo-analytics.md](./phase-13-seo-analytics.md)
 
 #### SEO Features
 - [ ] Profile slug generation (performer/{slug})
@@ -677,6 +710,7 @@ This roadmap outlines the complete sequential plan for implementing the Hummii b
 
 ### Phase 15: Production Deployment (Week 30-31)
 **Status:** 🔴 CRITICAL
+**📖 Детальный план:** [phase-15-production-deployment.md](./phase-15-production-deployment.md)
 
 #### Pre-Production
 - [ ] Security audit
