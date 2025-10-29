@@ -1,0 +1,4 @@
+# Admin panel - no indexing
+User-agent: *
+Disallow: /
+

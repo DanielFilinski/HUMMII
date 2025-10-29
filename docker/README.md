@@ -1,5 +1,24 @@
 # Hummii - Docker Setup Guide
 
+## Docker Structure
+
+### Dockerfile Locations
+
+All Dockerfiles are centralized in the `/docker` directory for better organization:
+
+- **`docker/api.Dockerfile`** - Backend API (NestJS)
+- **`docker/frontend.Dockerfile`** - Frontend (Next.js)
+- **`docker/admin.Dockerfile`** - Admin Panel (Next.js)
+
+Each Dockerfile has multi-stage builds:
+- `development` - Hot reload, volume mounts, dev dependencies
+- `production` - Optimized, minimal size, production-ready
+
+### Docker Compose Files
+
+- **`docker-compose.yml`** - Development environment
+- **`docker-compose.prod.yml`** - Production environment
+
 ## Quick Start
 
 ### Prerequisites

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # ====================================
   # PostgreSQL Database (Production)
@@ -71,7 +69,6 @@ services:
       args:
         NODE_VERSION: 20
     image: ${DOCKER_USERNAME}/hummii-api:${TAG:-latest}
-    container_name: hummii-api-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -124,7 +121,6 @@ services:
       args:
         NODE_VERSION: 20
     image: ${DOCKER_USERNAME}/hummii-frontend:${TAG:-latest}
-    container_name: hummii-frontend-prod
     restart: always
     environment:
       NODE_ENV: production
@@ -163,7 +159,6 @@ services:
       args:
         NODE_VERSION: 20
     image: ${DOCKER_USERNAME}/hummii-admin:${TAG:-latest}
-    container_name: hummii-admin-prod
     restart: always
     environment:
       NODE_ENV: production
