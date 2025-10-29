@@ -175,7 +175,7 @@ jobs:
             --enableExperimental
 
       - name: Upload OWASP report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: owasp-dependency-check-report
           path: reports/
