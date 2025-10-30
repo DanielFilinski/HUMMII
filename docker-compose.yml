@@ -3,7 +3,7 @@ services:
   # PostgreSQL Database
   # ====================================
   postgres:
-    image: postgres:${POSTGRES_VERSION:-15}-alpine
+    image: postgres:15-alpine
     container_name: hummii-postgres
     restart: unless-stopped
     environment:

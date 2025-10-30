@@ -10,7 +10,6 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [postgis]
 }
 
 // ============================================================================
@@ -117,8 +116,8 @@ model Contractor {
   experience Int? // Years of experience
   hourlyRate Decimal? @db.Decimal(10, 2)
 
-  // Location (PostGIS)
-  location      Unsupported("geography(Point, 4326)")?
+  // Location (temporarily disabled for testing)
+  location      String? // Will be replaced with PostGIS later
   address       String?
   city          String?
   province      String?
@@ -235,8 +234,8 @@ model Order {
   contractorId String?
   contractor   User?   @relation("ContractorOrders", fields: [contractorId], references: [id])
 
-  // Location
-  location   Unsupported("geography(Point, 4326)")?
+  // Location (temporarily disabled for testing)
+  location   String? // Will be replaced with PostGIS later
   address    String
   city       String
   province   String
