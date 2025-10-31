@@ -22,8 +22,8 @@ Complete Postman collection for testing Hummii API endpoints.
 
 If your API runs on a different port or host, update the `base_url` variable in the environment:
 
-- Default: `http://localhost:3000/api`
-- Production: `https://api.hummii.ca/api`
+- Default: `http://localhost:3000/api/v1`
+- Production: `https://api.hummii.ca/api/v1`
 
 ### 3. Start API Server
 
@@ -178,7 +178,7 @@ Each request includes test scripts that:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `base_url` | API base URL | `http://localhost:3000/api` |
+| `base_url` | API base URL | `http://localhost:3000/api/v1` |
 | `access_token` | JWT access token | (auto-filled after login) |
 | `refresh_token` | JWT refresh token | (auto-filled after login) |
 | `user_id` | Current user ID | (auto-filled after login) |

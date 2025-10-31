@@ -4,7 +4,7 @@ FROM node:${NODE_VERSION}-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl openssl-dev
 WORKDIR /app
 
 # Copy package files
@@ -22,6 +22,7 @@ RUN \
 
 # Development stage
 FROM base AS development
+RUN apk add --no-cache openssl openssl-dev
 WORKDIR /app
 
 # Copy node_modules from deps
@@ -39,6 +40,7 @@ CMD ["npm", "run", "start:dev"]
 
 # Build stage
 FROM base AS builder
+RUN apk add --no-cache openssl openssl-dev
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -52,6 +54,7 @@ RUN npm run build
 
 # Production stage
 FROM base AS production
+RUN apk add --no-cache openssl openssl-dev
 WORKDIR /app
 
 ENV NODE_ENV=production
