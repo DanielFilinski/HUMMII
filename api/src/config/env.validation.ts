@@ -53,6 +53,10 @@ class EnvironmentVariables {
   GOOGLE_CLIENT_SECRET?: string;
 
   @IsString()
+  @IsOptional()
+  GOOGLE_CALLBACK_URL?: string;
+
+  @IsString()
   FRONTEND_URL: string;
 
   @IsString()

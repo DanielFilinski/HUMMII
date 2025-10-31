@@ -31,7 +31,18 @@ import { PrismaService } from '../shared/prisma/prisma.service';
     JwtStrategy,
     JwtRefreshStrategy,
     LocalStrategy,
-    GoogleStrategy,
+    {
+      provide: GoogleStrategy,
+      inject: [ConfigService, AuthService],
+      useFactory: (configService: ConfigService, authService: AuthService) => {
+        const googleClientId = configService.get<string>('GOOGLE_CLIENT_ID');
+        // Only create GoogleStrategy if client ID is configured and not placeholder
+        if (googleClientId && !googleClientId.includes('your-google-client')) {
+          return new GoogleStrategy(configService, authService);
+        }
+        return null;
+      },
+    },
   ],
   exports: [AuthService, JwtModule],
 })

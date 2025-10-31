@@ -8,6 +8,7 @@ import { EmailModule } from './shared/email/email.module';
 import { AuditModule } from './shared/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { validate } from './config/env.validation';
 
 @Module({
   imports: [
@@ -15,6 +16,11 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate,
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: false,
+      },
     }),
 
     // Rate limiting
