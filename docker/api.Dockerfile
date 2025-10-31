@@ -1,10 +1,10 @@
 # Backend API Dockerfile (NestJS)
 ARG NODE_VERSION=20
 FROM node:${NODE_VERSION}-alpine AS base
+RUN apk add --no-cache libc6-compat openssl openssl-dev python3 make g++
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat openssl openssl-dev
 WORKDIR /app
 
 # Copy package files
@@ -22,12 +22,14 @@ RUN \
 
 # Development stage
 FROM base AS development
-RUN apk add --no-cache openssl openssl-dev
 WORKDIR /app
 
 # Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Rebuild bcrypt for current architecture
+RUN npm rebuild bcrypt
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -40,11 +42,13 @@ CMD ["npm", "run", "start:dev"]
 
 # Build stage
 FROM base AS builder
-RUN apk add --no-cache openssl openssl-dev
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Rebuild bcrypt for current architecture
+RUN npm rebuild bcrypt
 
 # Generate Prisma Client
 RUN npx prisma generate
