@@ -13,6 +13,12 @@ npm rebuild bcrypt || {
 if [ -f "prisma/schema.prisma" ]; then
   echo "Generating Prisma Client..."
   npx prisma generate || echo "Warning: Prisma generate failed"
+  
+  # Run migrations if DATABASE_URL is set
+  if [ -n "$DATABASE_URL" ]; then
+    echo "Running database migrations..."
+    npx prisma migrate deploy || echo "Warning: Migrations failed"
+  fi
 fi
 
 # Execute the main command
