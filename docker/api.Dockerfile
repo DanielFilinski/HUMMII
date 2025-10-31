@@ -26,6 +26,12 @@ WORKDIR /app
 
 # Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy entrypoint script first
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Copy application files
 COPY . .
 
 # Rebuild bcrypt for current architecture
@@ -36,6 +42,9 @@ RUN npx prisma generate
 
 # Expose port
 EXPOSE 3000
+
+# Use entrypoint script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Start development server
 CMD ["npm", "run", "start:dev"]
