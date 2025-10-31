@@ -10,7 +10,9 @@
 ## 📄 Документы
 
 ### Основной файл задач
-- **[phase-2-tasks.md](./phase-2-tasks.md)** - Полный список задач с примерами кода (10+ секций, 80+ задач)
+- **[phase-2-unified.md](./phase-2-unified.md)** - ✅ Unified comprehensive plan (RECOMMENDED)
+- [phase-2-tasks.md](./phase-2-tasks.md) - Legacy (объединен в unified)
+- [phase-2-user-management.md](./phase-2-user-management.md) - Legacy (объединен в unified)
 
 ---
 
@@ -32,6 +34,7 @@
 - Portfolio management (max 10 items)
 - Services & pricing setup
 - Category assignment (max 5 categories)
+- License upload and management
 
 ### 4. Geolocation & Privacy
 - PostGIS integration
@@ -68,15 +71,22 @@ api/src/users/
 ├── dto/
 │   ├── create-user.dto.ts
 │   ├── update-user.dto.ts
+│   ├── update-profile.dto.ts
 │   ├── update-contractor-profile.dto.ts
-│   ├── create-portfolio-item.dto.ts
-│   ├── create-service.dto.ts
+│   ├── create-contractor-profile.dto.ts
+│   ├── add-portfolio-item.dto.ts
+│   ├── add-service.dto.ts
+│   ├── add-license.dto.ts
 │   └── update-location.dto.ts
 ├── entities/
 │   ├── user.entity.ts
+│   ├── profile.entity.ts
 │   └── contractor.entity.ts
-└── decorators/
-    └── current-user.decorator.ts
+├── decorators/
+│   └── current-user.decorator.ts
+└── guards/
+    ├── profile-owner.guard.ts
+    └── contractor-verified.guard.ts
 
 api/src/shared/file-upload/
 ├── file-upload.module.ts
