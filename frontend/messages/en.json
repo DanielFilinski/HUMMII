@@ -8,6 +8,42 @@
     "notFound": "404 - Page Not Found",
     "notFoundDescription": "Could not find the requested resource",
     "returnHome": "Return Home"
+  },
+  "auth": {
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join Hummii to find trusted service providers",
+      "nameLabel": "Full Name",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "phoneLabel": "Phone Number",
+      "phoneOptional": "(Optional)",
+      "submit": "Sign Up",
+      "submitting": "Creating account...",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "terms": "By signing up, you agree to our Terms of Service and Privacy Policy"
+    },
+    "verifyEmailSent": {
+      "title": "Check your email",
+      "subtitle": "We've sent a verification link to:",
+      "instructions": "Click the link in the email to verify your account.",
+      "expiry": "The link will expire in 24 hours.",
+      "openEmail": "Open Email App",
+      "resend": "Didn't receive email? Resend",
+      "wrongEmail": "Wrong email? Go back"
+    },
+    "verifyEmail": {
+      "loading": "Verifying your email...",
+      "loadingMessage": "Please wait while we verify your email address.",
+      "success": "Email Verified!",
+      "successMessage": "Your account has been successfully verified. You can now sign in to your account.",
+      "redirecting": "Redirecting to login in 3 seconds...",
+      "error": "Invalid Verification Link",
+      "errorMessage": "This verification link is invalid or has expired. The link expires 24 hours after registration.",
+      "resend": "Resend Verification Email",
+      "backHome": "Back to Home"
+    }
   }
 }
 

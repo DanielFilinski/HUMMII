@@ -3,7 +3,7 @@
  * Handles authentication, error handling, and request/response interceptors
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 const API_V1_URL = `${API_BASE_URL}/api/v1`;
 
 interface RequestOptions extends RequestInit {

@@ -19,7 +19,9 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.stripe.com",
+      process.env.NODE_ENV === 'development'
+        ? "connect-src 'self' http://localhost:3000 https://api.stripe.com"
+        : "connect-src 'self' https://api.hummii.ca https://api.stripe.com wss://api.hummii.ca",
       "frame-src 'self' https://js.stripe.com",
       "object-src 'none'",
       "base-uri 'self'",
