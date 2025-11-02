@@ -103,12 +103,57 @@ These rules activate based on file patterns:
 
 ## Related Documentation
 
-For detailed guides, see `.claude/` directory:
-- `.claude/INDEX.md` - Navigation guide
-- `.claude/core/` - Core project rules
-- `.claude/backend/` - Backend-specific guides
-- `.claude/frontend/` - Frontend-specific guides
-- `.claude/ops/` - Operations guides
+### Core Documentation (`docs/`)
+
+**Project Planning:**
+- `docs/roadmap.md` - **NEW** - Complete roadmap with module dependencies and timeline
+- `docs/TS.md` - Technical specification (main reference)
+
+**Module Documentation:**
+- `docs/modules/payments.md` - **NEW** - Stripe integration (Escrow, Connect, webhooks)
+- `docs/modules/background-jobs.md` - **NEW** - Bull/BullMQ queues with retry policies
+- `docs/modules/chat.md` - **UPDATED** - WebSocket security & reconnection logic
+- `docs/modules/rating.md` - Reviews and rating system
+- `docs/modules/Partner Portal.md` - QR codes and partner discounts
+
+**API Documentation:**
+- `docs/api/geolocation.md` - **NEW** - PostGIS + privacy-preserving location
+
+**Security & Compliance:**
+- `docs/security/audit-logging.md` - **NEW** - PIPEDA-compliant audit trail
+- `docs/security.md` - General security guidelines
+
+### Quick Links to New Features
+
+**Backend developers should review:**
+1. `docs/roadmap.md` - Know what to build and when
+2. `docs/modules/payments.md` - Payment flows and escrow
+3. `docs/security/audit-logging.md` - What events to log
+4. `.cursor/rules/nest.mdc` - **UPDATED** with AI moderation, Guards examples, i18n
+
+**DevOps should review:**
+1. `.cursor/rules/ops-development.mdc` - **UPDATED** with Monitoring & Observability
+2. `docs/roadmap.md` - Infrastructure requirements per phase
+
+**All developers should know:**
+- Stripe Connect setup (payments.md)
+- PIPEDA audit logging requirements (audit-logging.md)
+- WebSocket security patterns (chat.md)
+- PostGIS privacy logic (geolocation.md)
+
+## Recent Updates (November 2, 2025)
+
+### Documentation Added
+- ✅ **roadmap.md** - 6 phases, module dependencies, timeline to MVP
+- ✅ **payments.md** - Escrow mechanism, Stripe Connect, webhook handlers
+- ✅ **audit-logging.md** - AuditAction enum, retention policies, PIPEDA compliance
+- ✅ **background-jobs.md** - 5 queue types, retry policies, concurrency limits
+- ✅ **geolocation.md** - PostGIS queries, fuzzy location (±500m), radius search
+
+### Rules Updated
+- ✅ **nest.mdc** - Added AI Moderation (AWS Rekognition), Guards examples, Backend i18n
+- ✅ **ops-development.mdc** - Added Monitoring & Observability (Sentry, Grafana, APM)
+- ✅ **chat.md** - Added WebSocket security, reconnection logic, offline messages
 
 ## Rule Updates
 
@@ -117,9 +162,34 @@ When updating rules:
 2. Update this README if structure changes
 3. Test rule activation with relevant file patterns
 4. Document breaking changes
+5. **NEW:** Reference detailed specs in `docs/` directory instead of duplicating in rules
+
+## Critical Reminders
+
+### For Backend Development
+- ❌ **NEVER** use `any` type (use `unknown` instead)
+- ✅ **ALWAYS** log audit events for PIPEDA compliance
+- ✅ **ALWAYS** use HTTP-only cookies for tokens
+- ✅ **ALWAYS** verify Stripe webhook signatures
+- ✅ **ALWAYS** implement rate limiting (see nest.mdc)
+- ✅ **ALWAYS** mask PII in logs (see audit-logging.md)
+
+### For Frontend Development
+- ❌ **NEVER** store tokens in localStorage (XSS vulnerability)
+- ✅ **ALWAYS** validate input on both client and server
+- ✅ **ALWAYS** implement proper error boundaries
+- ✅ **ALWAYS** use next/image for optimization
+- ✅ **ALWAYS** implement loading states
+
+### For Security
+- ✅ Review `docs/security/audit-logging.md` for events to log
+- ✅ Review `docs/modules/payments.md` for secure payment handling
+- ✅ Review `core-security.mdc` for PIPEDA requirements
+- ✅ Implement content moderation (see nest.mdc AI Moderation section)
 
 ---
 
 **Last updated:** November 2, 2025
 **Maintainer:** AI Assistant Configuration
+**Status:** Production-ready documentation
 

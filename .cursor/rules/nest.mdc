@@ -122,7 +122,8 @@ Generate code, corrections, and refactorings that comply with the basic principl
 
 - Use @nestjs/throttler for rate limiting
   - Global: 100 req/min per IP
-  - Auth endpoints: 5 req/min (login, register, password reset)
+  - Auth endpoints: 5 req/min (login, password reset)
+  - Registration endpoint: 3 req/hour (stricter to prevent spam/bot accounts)
   - Chat/messaging: 20 messages/min per user
 - Validate all inputs with DTOs
   - Set whitelist: true (strip unknown properties)
@@ -137,7 +138,14 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Use bcrypt or Argon2 for password hashing
   - Use cost factor 12+ for bcrypt
   - Never store passwords in plain text
-  - Implement password complexity requirements
+  - Implement password complexity requirements:
+    - Minimum 12 characters
+    - At least one uppercase letter (A-Z)
+    - At least one lowercase letter (a-z)
+    - At least one number (0-9)
+    - At least one special character (@$!%*?&)
+    - No common passwords or patterns
+    - Validate on both client (Zod) and server (class-validator)
 - JWT tokens
   - Use short-lived access tokens (15 minutes)
   - Use HTTP-only cookies for refresh tokens (7 days)
@@ -167,20 +175,25 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Mask email addresses (u***@example.com)
   - Mask phone numbers (***-***-1234)
   - Use correlation IDs instead of user IDs in logs
-- Implement user rights endpoints
-  - Right to Access - export all user data (JSON/PDF)
-  - Right to Rectification - allow profile editing
-  - Right to Erasure - full account deletion with data anonymization
-  - Right to Data Portability - machine-readable data export
+- Implement user rights endpoints (PIPEDA compliance)
+  - Right to Access - export all user data (GET /users/me/export, JSON/PDF format)
+  - Right to Rectification - allow profile editing (PATCH /users/me)
+  - Right to Erasure - full account deletion with data anonymization (DELETE /users/me)
+  - Right to Data Portability - machine-readable data export (GET /users/me/export)
+  - Right to Object - opt-out of marketing emails (PATCH /users/me/consent)
+  - Right to Withdraw Consent - clear consent management (PATCH /users/me/consent)
 - Use encryption
   - Encryption at rest for database (PostgreSQL TDE)
   - Encryption in transit (TLS 1.3, HTTPS only)
   - Field-level encryption for sensitive data (credit cards, SIN)
 - Implement data retention policies
   - Define retention periods for each data type
-  - Automatically delete expired data
-  - Keep audit logs for 90 days minimum
-  - Keep payment records for 7 years (Canadian tax law)
+  - Automatically delete expired data via scheduled cron jobs
+  - Keep audit logs for 1 year minimum (PIPEDA requirement for security/compliance)
+  - Keep chat messages for 90 days (then auto-delete)
+  - Keep payment records for 7 years (Canadian tax law - CRA requirement)
+  - Keep session data for 7 days (refresh token lifetime)
+  - Implement automated cleanup jobs using @nestjs/schedule (daily cleanup tasks)
 - Implement audit logging
   - Log all data access and modifications
   - Log authentication attempts (success and failures)
@@ -273,6 +286,10 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Document cron schedules clearly
   - Use timezone-aware scheduling
   - Implement idempotency for cron jobs
+  - Required PIPEDA compliance jobs:
+    - Daily cleanup: chat messages (>90 days), expired sessions, old notifications
+    - Weekly cleanup: audit logs (>1 year, but keep minimum 1 year)
+    - Never auto-delete payment records (7 years retention, manual only)
 - Handle job failures with retry logic
   - Set maximum retry attempts
   - Use exponential backoff
@@ -285,7 +302,11 @@ Generate code, corrections, and refactorings that comply with the basic principl
 - Common job types
   - Email notifications (async)
   - Push notifications (async)
-  - Data cleanup (scheduled)
+  - Data cleanup (scheduled) - PIPEDA compliance:
+    - Daily: cleanup old chat messages (>90 days)
+    - Daily: cleanup expired sessions
+    - Weekly: cleanup old audit logs (>1 year, keep minimum 1 year)
+    - Weekly: cleanup unread notifications (>90 days, keep read ones)
   - Report generation (scheduled)
   - Webhook retries (async with backoff)
 
@@ -316,6 +337,286 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Manual review queue for suspicious content
   - Automatic approval for verified users
   - Track moderation decisions for appeals
+
+### AI Content Moderation
+
+- Use AWS Rekognition for NSFW/inappropriate image detection
+  - Detect explicit nudity, suggestive content, violence
+  - Detect offensive symbols, drugs, alcohol
+  - Label confidence scoring (0-100%)
+- Implement moderation thresholds
+  - Confidence > 90% = auto-block, notify user
+  - Confidence 70-90% = hold for manual review
+  - Confidence < 70% = auto-approve
+- Create manual review queue
+  - Admin panel for reviewing flagged content
+  - Approve/reject with reason
+  - Track moderator decisions for quality assurance
+  - Appeal system for false positives
+- Implement progressive penalties
+  - 1st violation = warning
+  - 2nd violation = 7-day suspension
+  - 3rd violation = permanent ban
+- Store moderation decisions
+  - Keep audit trail for appeals
+  - Track false positive rate
+  - Improve AI model over time
+- Alternative: Google Cloud Vision API or Azure Content Moderator
+  - Same threshold logic applies
+  - Choose based on cost and accuracy
+
+### Guards & Decorators Examples
+
+**Subscription Guard:**
+```typescript
+// Protect endpoints based on subscription tier
+import { Injectable, CanActivate, ExecutionContext, PaymentRequiredException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { SubscriptionTier } from '@prisma/client';
+
+@Injectable()
+export class SubscriptionGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private subscriptionService: SubscriptionService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredTier = this.reflector.get<SubscriptionTier>(
+      'subscriptionTier',
+      context.getHandler(),
+    );
+
+    if (!requiredTier) {
+      return true; // No tier required
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    const subscription = await this.subscriptionService.getUserSubscription(user.id);
+
+    if (!subscription || !this.hasRequiredTier(subscription.tier, requiredTier)) {
+      throw new PaymentRequiredException('Upgrade your subscription to access this feature');
+    }
+
+    return true;
+  }
+
+  private hasRequiredTier(userTier: SubscriptionTier, requiredTier: SubscriptionTier): boolean {
+    const tierOrder = {
+      [SubscriptionTier.BASIC]: 0,
+      [SubscriptionTier.STANDARD]: 1,
+      [SubscriptionTier.PROFESSIONAL]: 2,
+      [SubscriptionTier.ADVANCED]: 3,
+    };
+
+    return tierOrder[userTier] >= tierOrder[requiredTier];
+  }
+}
+
+// Usage:
+@Post('categories')
+@UseGuards(JwtAuthGuard, SubscriptionGuard)
+@SubscriptionTier(SubscriptionTier.PROFESSIONAL)
+async addCategory(@User() user: UserEntity, @Body() dto: AddCategoryDto) {
+  // Only Professional and Advanced tiers can access
+}
+```
+
+**Verification Guard:**
+```typescript
+// Require verified users for certain actions
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+
+@Injectable()
+export class VerificationGuard implements CanActivate {
+  constructor(private verificationService: VerificationService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    const isVerified = await this.verificationService.isUserVerified(user.id);
+
+    if (!isVerified) {
+      throw new ForbiddenException(
+        'You must verify your identity to perform this action. Please complete verification in your profile settings.',
+      );
+    }
+
+    return true;
+  }
+}
+
+// Usage:
+@Post('orders/:id/accept')
+@UseGuards(JwtAuthGuard, VerificationGuard)
+async acceptOrder(@Param('id') orderId: string) {
+  // Only verified users can accept orders
+}
+```
+
+**Role Guard (RBAC):**
+```typescript
+// Protect admin-only endpoints
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { UserRole } from '@prisma/client';
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.get<UserRole[]>('roles', context.getHandler());
+
+    if (!requiredRoles) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    const hasRole = user.roles.some((role) => requiredRoles.includes(role));
+
+    if (!hasRole) {
+      throw new ForbiddenException('You do not have permission to access this resource');
+    }
+
+    return true;
+  }
+}
+
+// Decorator:
+export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
+
+// Usage:
+@Get('admin/users')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+async getAllUsers() {
+  // Only admins can access
+}
+```
+
+### Backend i18n (Internationalization)
+
+- Use nestjs-i18n for API error messages and notifications
+  - Install: `npm install nestjs-i18n`
+  - Configure for English (EN) and French (FR)
+- Store translations in `/api/src/i18n/[locale]/`
+  - `en/errors.json` - English error messages
+  - `fr/errors.json` - French error messages
+  - `en/notifications.json` - English notification templates
+  - `fr/notifications.json` - French notification templates
+- Pass Accept-Language header from frontend
+  - Frontend sets header based on user preference
+  - Default to English if locale not supported
+- Implement i18n in services and controllers
+
+**Configuration:**
+```typescript
+// app.module.ts
+import { I18nModule, AcceptLanguageResolver, QueryResolver, HeaderResolver } from 'nestjs-i18n';
+import * as path from 'path';
+
+@Module({
+  imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] }, // ?lang=fr
+        AcceptLanguageResolver, // Accept-Language header
+        new HeaderResolver(['x-custom-lang']), // Custom header
+      ],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+**Translation Files:**
+```json
+// src/i18n/en/errors.json
+{
+  "INVALID_EMAIL": "Invalid email address",
+  "INVALID_PASSWORD": "Password must be at least 12 characters with uppercase, lowercase, number, and special character",
+  "USER_NOT_FOUND": "User not found",
+  "ORDER_NOT_FOUND": "Order not found",
+  "PAYMENT_FAILED": "Payment failed. Please try again.",
+  "INSUFFICIENT_PERMISSIONS": "You do not have permission to perform this action"
+}
+
+// src/i18n/fr/errors.json
+{
+  "INVALID_EMAIL": "Adresse e-mail invalide",
+  "INVALID_PASSWORD": "Le mot de passe doit comporter au moins 12 caractères avec des majuscules, des minuscules, des chiffres et des caractères spéciaux",
+  "USER_NOT_FOUND": "Utilisateur introuvable",
+  "ORDER_NOT_FOUND": "Commande introuvable",
+  "PAYMENT_FAILED": "Le paiement a échoué. Veuillez réessayer.",
+  "INSUFFICIENT_PERMISSIONS": "Vous n'avez pas la permission d'effectuer cette action"
+}
+```
+
+**Usage in Services:**
+```typescript
+import { Injectable } from '@nestjs/common';
+import { I18nService } from 'nestjs-i18n';
+
+@Injectable()
+export class UsersService {
+  constructor(private readonly i18n: I18nService) {}
+
+  async findByEmail(email: string, lang: string = 'en') {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException(
+        this.i18n.t('errors.USER_NOT_FOUND', { lang }),
+      );
+    }
+
+    return user;
+  }
+}
+```
+
+**Usage in Controllers:**
+```typescript
+import { Controller, Get, BadRequestException } from '@nestjs/common';
+import { I18n, I18nContext } from 'nestjs-i18n';
+
+@Controller('users')
+export class UsersController {
+  @Get()
+  async getUsers(@I18n() i18n: I18nContext) {
+    // Automatically gets language from request
+    throw new BadRequestException(
+      i18n.t('errors.INVALID_EMAIL'),
+    );
+  }
+}
+```
+
+**Email Templates:**
+```typescript
+// Use i18n for email subject and body
+async sendWelcomeEmail(user: User, lang: string) {
+  const subject = this.i18n.t('emails.WELCOME_SUBJECT', { lang, args: { name: user.firstName } });
+  const body = this.i18n.t('emails.WELCOME_BODY', { lang, args: { name: user.firstName } });
+
+  await this.emailService.send({
+    to: user.email,
+    subject,
+    body,
+  });
+}
+```
 
 ### Payment Integration (Stripe)
 

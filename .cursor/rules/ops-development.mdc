@@ -381,4 +381,393 @@ touch app/(public)/about/page.tsx
 
 ---
 
-**Last updated:** October 27, 2025
+## Monitoring & Observability
+
+### Health Check Endpoints
+
+```bash
+# API health endpoints
+curl http://localhost:3000/api/health
+curl http://localhost:3000/api/health/db
+curl http://localhost:3000/api/health/redis
+curl http://localhost:3000/api/health/stripe
+```
+
+**Implementation:**
+
+```typescript
+// api/src/health/health.controller.ts
+import { Controller, Get } from '@nestjs/common';
+import { HealthCheck, HealthCheckService, PrismaHealthIndicator, HttpHealthIndicator } from '@nestjs/terminus';
+
+@Controller('health')
+export class HealthController {
+  constructor(
+    private health: HealthCheckService,
+    private db: PrismaHealthIndicator,
+    private http: HttpHealthIndicator,
+  ) {}
+
+  @Get()
+  @HealthCheck()
+  check() {
+    return this.health.check([
+      () => this.db.pingCheck('database'),
+      () => this.http.pingCheck('stripe', 'https://api.stripe.com/healthcheck'),
+    ]);
+  }
+
+  @Get('db')
+  @HealthCheck()
+  checkDatabase() {
+    return this.health.check([
+      () => this.db.pingCheck('database'),
+    ]);
+  }
+
+  @Get('redis')
+  @HealthCheck()
+  checkRedis() {
+    return this.health.check([
+      async () => {
+        await this.redis.ping();
+        return { redis: { status: 'up' } };
+      },
+    ]);
+  }
+}
+```
+
+### Metrics to Track
+
+**API Performance:**
+- Response times (p50, p95, p99)
+- Request rate (requests per second)
+- Error rate (4xx, 5xx)
+- Active connections
+
+**Database:**
+- Query execution time
+- Connection pool usage
+- Slow queries (>1s)
+- Deadlocks
+
+**Redis:**
+- Cache hit rate
+- Memory usage
+- Connected clients
+- Command latency
+
+**WebSocket:**
+- Active connections
+- Messages per second
+- Connection errors
+- Reconnection rate
+
+**Queue (Bull):**
+- Jobs waiting
+- Jobs active
+- Jobs completed/failed (per hour)
+- Job processing time
+
+**Business Metrics:**
+- User registrations (per day)
+- Orders created/completed (per day)
+- Payments processed (total amount)
+- Active users (DAU, MAU)
+- Stripe payment success rate
+
+### Logging Best Practices
+
+**Log Levels:**
+
+```typescript
+// Use appropriate log levels
+logger.error('Payment failed', { userId, orderId, error }); // Critical issues
+logger.warn('Rate limit approaching', { userId, count }); // Warnings
+logger.info('User registered', { userId }); // Important events
+logger.debug('Cache hit', { key }); // Debugging info
+```
+
+**Structured Logging:**
+
+```typescript
+// Winston structured logs
+logger.info('Payment processed', {
+  userId: payment.userId,
+  orderId: payment.orderId,
+  amount: payment.amount,
+  currency: 'CAD',
+  paymentIntentId: payment.paymentIntentId,
+  timestamp: new Date().toISOString(),
+  correlationId: req.correlationId,
+});
+```
+
+**Don't Log Sensitive Data:**
+
+```typescript
+// ❌ BAD
+logger.info('User login', { email: user.email, password: user.password });
+
+// ✅ GOOD
+logger.info('User login', {
+  userId: user.id,
+  email: maskEmail(user.email),
+  correlationId: req.correlationId,
+});
+```
+
+### Error Tracking (Sentry)
+
+**Setup:**
+
+```bash
+# Install Sentry
+cd api
+pnpm add @sentry/node @sentry/tracing
+```
+
+**Configuration:**
+
+```typescript
+// api/src/main.ts
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 0.1, // 10% of transactions
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Sentry.Integrations.Prisma({ client: prisma }),
+  ],
+  beforeSend(event, hint) {
+    // Don't send sensitive data
+    if (event.request) {
+      delete event.request.cookies;
+      delete event.request.headers?.authorization;
+    }
+    return event;
+  },
+});
+
+// Global error handler
+app.useGlobalFilters(new SentryExceptionFilter());
+```
+
+**Manual Error Capture:**
+
+```typescript
+try {
+  await processPayment(data);
+} catch (error) {
+  Sentry.captureException(error, {
+    tags: {
+      module: 'payments',
+      userId: user.id,
+    },
+    extra: {
+      orderId: data.orderId,
+      amount: data.amount,
+    },
+  });
+  throw error;
+}
+```
+
+### APM (Application Performance Monitoring)
+
+**Options:**
+1. **New Relic** - Full-featured APM
+2. **DataDog** - Infrastructure + APM
+3. **Elastic APM** - Open-source alternative
+
+**Recommended: New Relic**
+
+```bash
+# Install New Relic agent
+pnpm add newrelic
+```
+
+```typescript
+// api/newrelic.js
+exports.config = {
+  app_name: ['Hummii API'],
+  license_key: process.env.NEW_RELIC_LICENSE_KEY,
+  distributed_tracing: {
+    enabled: true,
+  },
+  logging: {
+    level: 'info',
+  },
+};
+
+// Import first in main.ts
+require('newrelic');
+```
+
+### Alerting Policies
+
+**Critical Alerts (immediate):**
+- API error rate > 5%
+- Database connection failures
+- Payment processing failures
+- WebSocket disconnections > 100/min
+- Queue backlog > 10,000 jobs
+
+**Warning Alerts (review within 1 hour):**
+- API response time p95 > 1s
+- Cache hit rate < 70%
+- Disk usage > 80%
+- Memory usage > 85%
+- Failed jobs rate > 10%
+
+**Info Alerts (daily digest):**
+- User growth
+- Daily revenue
+- Top errors (grouped)
+- Performance trends
+
+### Dashboard Setup (Grafana)
+
+**Install Grafana + Prometheus:**
+
+```yaml
+# docker-compose.monitoring.yml
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3500:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+volumes:
+  prometheus_data:
+  grafana_data:
+```
+
+**Prometheus Configuration:**
+
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'api'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: '/metrics'
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+```
+
+**Expose Metrics Endpoint:**
+
+```typescript
+// Install Prometheus client
+pnpm add prom-client
+
+// api/src/metrics/metrics.controller.ts
+import { Controller, Get, Res } from '@nestjs/common';
+import { Response } from 'express';
+import { register } from 'prom-client';
+
+@Controller('metrics')
+export class MetricsController {
+  @Get()
+  async getMetrics(@Res() res: Response) {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  }
+}
+```
+
+**Custom Metrics:**
+
+```typescript
+import { Counter, Histogram } from 'prom-client';
+
+// Count API requests
+const httpRequestCounter = new Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code'],
+});
+
+// Track response times
+const httpRequestDuration = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method', 'route'],
+  buckets: [0.1, 0.5, 1, 2, 5],
+});
+
+// Usage
+httpRequestCounter.inc({ method: 'GET', route: '/api/orders', status_code: 200 });
+httpRequestDuration.observe({ method: 'GET', route: '/api/orders' }, 0.234);
+```
+
+### Performance Optimization Checklist
+
+- [ ] Database indexes on frequently queried columns
+- [ ] Redis caching for hot data
+- [ ] CDN for static assets
+- [ ] Gzip compression enabled
+- [ ] Image optimization (WebP, lazy loading)
+- [ ] Code splitting (Next.js automatic)
+- [ ] API response pagination
+- [ ] Database connection pooling
+- [ ] Async/background jobs for heavy tasks
+- [ ] Rate limiting to prevent abuse
+
+### Monitoring Commands
+
+```bash
+# Check system resources
+docker stats
+
+# Check logs
+docker compose logs -f api
+docker compose logs --tail=100 postgres
+
+# Check database size
+docker exec hummii-postgres psql -U hummii -d hummii_dev \
+  -c "SELECT pg_size_pretty(pg_database_size('hummii_dev'));"
+
+# Check Redis memory
+docker exec hummii-redis redis-cli INFO memory
+
+# Check active connections
+docker exec hummii-postgres psql -U hummii -d hummii_dev \
+  -c "SELECT count(*) FROM pg_stat_activity;"
+
+# Check slow queries (last hour)
+docker exec hummii-postgres psql -U hummii -d hummii_dev \
+  -c "SELECT query, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10;"
+```
+
+---
+
+**Last updated:** November 2, 2025

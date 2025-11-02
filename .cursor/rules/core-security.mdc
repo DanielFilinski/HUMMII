@@ -1,7 +1,6 @@
 ---
-alwaysApply: true
+alwaysApply: false
 ---
-
 # Security & PIPEDA Compliance - Hummii
 
 > **Security and PIPEDA compliance for Canadian market**
@@ -45,6 +44,27 @@ alwaysApply: true
 ```typescript
 // GET /api/v1/users/me/export
 // Export in machine-readable format (JSON)
+```
+
+#### 5. Right to Object
+```typescript
+// PATCH /api/v1/users/me/consent
+// Opt-out of marketing emails
+{
+  "marketingEmails": false,
+  "newsletters": false
+}
+```
+
+#### 6. Right to Withdraw Consent
+```typescript
+// PATCH /api/v1/users/me/consent
+// Withdraw all consent
+{
+  "marketingEmails": false,
+  "analytics": false,
+  "thirdPartySharing": false
+}
 ```
 
 ### Data Minimization
@@ -102,13 +122,14 @@ logger.info('User login', {
 
 ### Data Retention Policies
 
-| Data Type | Retention Period | Justification |
-|-----------|-----------------|---------------|
-| **Chat messages** | 90 days | Business requirement |
-| **Payment records** | 7 years | Canadian Tax Law (CRA requirement) |
-| **User accounts** | Until deleted by user | User choice |
-| **Audit logs** | 1 year minimum | Security & compliance |
-| **Session data** | 7 days (refresh token) | Security |
+| Data Type | Retention Period | Justification | Cleanup Schedule |
+|-----------|-----------------|---------------|-----------------|
+| **Chat messages** | 90 days | Business requirement | Daily cron job |
+| **Payment records** | 7 years | Canadian Tax Law (CRA requirement) | Manual (never auto-delete) |
+| **User accounts** | Until deleted by user | User choice | On user request |
+| **Audit logs** | 1 year minimum | PIPEDA requirement (security & compliance) | Weekly cron job (keep 1 year) |
+| **Session data** | 7 days (refresh token) | Security | Daily cron job |
+| **Notification history** | 90 days (unread kept) | Business requirement | Daily cron job |
 
 ## Authentication Security
 
@@ -151,27 +172,6 @@ async login(@Res({ passthrough: true }) res: Response) {
 // localStorage.setItem('token', accessToken); // Vulnerable to XSS!
 ```
 
-### Password Security
-
-```typescript
-import * as bcrypt from 'bcrypt';
-
-// ✅ Hashing with bcrypt (cost factor 12+)
-const BCRYPT_ROUNDS = 12; // Higher = more secure but slower
-
-async hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, BCRYPT_ROUNDS);
-}
-
-async verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-
-// Password policy (validation)
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-// Min 12 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
-```
-
 ### Rate Limiting
 
 ```typescript
@@ -185,6 +185,10 @@ ThrottlerModule.forRoot({
 @Throttle(5, 60) // 5 requests per minute
 @Post('login')
 async login() { /* ... */ }
+
+@Throttle({ default: { limit: 3, ttl: 3600000 } }) // 3 requests per hour (stricter)
+@Post('register')
+async register() { /* ... */ }
 
 @Throttle(3, 60) // 3 requests per minute (stricter)
 @Post('forgot-password')
@@ -255,9 +259,9 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  @MinLength(12)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, {
-    message: 'Password too weak',
+  @MinLength(12, { message: 'Password must be at least 12 characters' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/, {
+    message: 'Password must contain: uppercase, lowercase, number, and special character (@$!%*?&)',
   })
   password: string;
 }

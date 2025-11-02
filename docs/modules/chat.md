@@ -271,3 +271,527 @@ function moderateMessage(text: string): {
 - ✅ Легче модерировать
 
 Это правильный выбор! 🎯
+
+---
+
+## 🔐 **WebSocket Security**
+
+### Authentication
+
+**JWT Authentication for WebSocket Connections:**
+
+```typescript
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+
+@WebSocketGateway({
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  },
+  namespace: '/chat',
+})
+export class ChatGateway implements OnGatewayConnection {
+  @WebSocketServer()
+  server: Server;
+
+  constructor(
+    private jwtService: JwtService,
+    private usersService: UsersService,
+  ) {}
+
+  async handleConnection(client: Socket) {
+    try {
+      // Extract token from handshake
+      const token = client.handshake.auth.token || client.handshake.headers.authorization?.split(' ')[1];
+
+      if (!token) {
+        throw new UnauthorizedException('No token provided');
+      }
+
+      // Verify JWT
+      const payload = this.jwtService.verify(token);
+      const user = await this.usersService.findOne(payload.sub);
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      // Attach user to socket
+      client.data.user = user;
+
+      // Join user's personal room
+      client.join(`user:${user.id}`);
+
+      // Set online status
+      await this.setOnlineStatus(user.id, true);
+
+      this.logger.log(`Client connected: ${user.id}`);
+    } catch (error) {
+      this.logger.error('WebSocket auth failed:', error);
+      client.disconnect();
+    }
+  }
+
+  async handleDisconnect(client: Socket) {
+    const user = client.data.user;
+    if (user) {
+      await this.setOnlineStatus(user.id, false);
+      this.logger.log(`Client disconnected: ${user.id}`);
+    }
+  }
+}
+```
+
+### Rate Limiting
+
+**Prevent message spam:**
+
+```typescript
+import { RateLimiterMemory } from 'rate-limiter-flexible';
+
+@WebSocketGateway()
+export class ChatGateway {
+  private rateLimiter = new RateLimiterMemory({
+    points: 20, // 20 messages
+    duration: 60, // per 60 seconds
+  });
+
+  @SubscribeMessage('send_message')
+  async handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: SendMessageDto,
+  ) {
+    const user = client.data.user;
+
+    try {
+      // Check rate limit
+      await this.rateLimiter.consume(user.id);
+    } catch (error) {
+      throw new WsException('Rate limit exceeded. Please slow down.');
+    }
+
+    // Process message
+    return this.chatService.sendMessage({ ...data, senderId: user.id });
+  }
+}
+```
+
+### Authorization (Order Access)
+
+**Ensure user can only access chats for their orders:**
+
+```typescript
+@SubscribeMessage('join_order_chat')
+async handleJoinChat(
+  @ConnectedSocket() client: Socket,
+  @MessageBody() data: { orderId: string },
+) {
+  const user = client.data.user;
+  
+  // Check if user is part of this order
+  const order = await this.ordersService.findOne(data.orderId);
+  
+  if (order.clientId !== user.id && order.contractorId !== user.id) {
+    throw new WsException('You do not have access to this chat');
+  }
+  
+  // Join order-specific room
+  client.join(`order:${data.orderId}`);
+  
+  return { success: true };
+}
+```
+
+---
+
+## 🔄 **Reconnection Logic**
+
+### Client-Side Reconnection
+
+```typescript
+// Frontend: Socket.io client with automatic reconnection
+import { io, Socket } from 'socket.io-client';
+
+class ChatService {
+  private socket: Socket;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 10;
+
+  connect(accessToken: string) {
+    this.socket = io(process.env.NEXT_PUBLIC_WS_URL + '/chat', {
+      auth: {
+        token: accessToken,
+      },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: this.maxReconnectAttempts,
+    });
+
+    // Handle connection
+    this.socket.on('connect', () => {
+      console.log('Connected to chat server');
+      this.reconnectAttempts = 0;
+      this.onReconnect();
+    });
+
+    // Handle disconnection
+    this.socket.on('disconnect', (reason) => {
+      console.log('Disconnected:', reason);
+      
+      if (reason === 'io server disconnect') {
+        // Server disconnected us, need to reconnect manually
+        this.socket.connect();
+      }
+    });
+
+    // Handle reconnection attempts
+    this.socket.on('reconnect_attempt', (attempt) => {
+      console.log(`Reconnection attempt ${attempt}`);
+      this.reconnectAttempts = attempt;
+    });
+
+    // Handle reconnection error
+    this.socket.on('reconnect_error', (error) => {
+      console.error('Reconnection error:', error);
+    });
+
+    // Handle reconnection failed
+    this.socket.on('reconnect_failed', () => {
+      console.error('Reconnection failed');
+      this.showReconnectionError();
+    });
+  }
+
+  private async onReconnect() {
+    // Re-join active chats
+    const activeOrderIds = this.getActiveOrderIds();
+    
+    for (const orderId of activeOrderIds) {
+      this.socket.emit('join_order_chat', { orderId });
+    }
+    
+    // Sync missed messages
+    await this.syncMissedMessages();
+  }
+
+  private async syncMissedMessages() {
+    // Fetch messages missed during offline period
+    const lastMessageTimestamp = this.getLastMessageTimestamp();
+    
+    for (const orderId of this.getActiveOrderIds()) {
+      const missedMessages = await api.get(`/chat/${orderId}/messages`, {
+        params: { since: lastMessageTimestamp },
+      });
+      
+      if (missedMessages.data.length > 0) {
+        this.addMissedMessages(orderId, missedMessages.data);
+        this.showNewMessagesNotification(missedMessages.data.length);
+      }
+    }
+  }
+}
+```
+
+### Server-Side Session Management
+
+**Store connection state in Redis:**
+
+```typescript
+@Injectable()
+export class ChatSessionService {
+  constructor(@InjectRedis() private redis: Redis) {}
+
+  /**
+   * Track user's active socket connections
+   */
+  async addConnection(userId: string, socketId: string): Promise<void> {
+    await this.redis.sadd(`user:${userId}:sockets`, socketId);
+    await this.redis.expire(`user:${userId}:sockets`, 86400); // 24 hours
+  }
+
+  async removeConnection(userId: string, socketId: string): Promise<void> {
+    await this.redis.srem(`user:${userId}:sockets`, socketId);
+  }
+
+  async getUserConnections(userId: string): Promise<string[]> {
+    return this.redis.smembers(`user:${userId}:sockets`);
+  }
+
+  async isUserOnline(userId: string): Promise<boolean> {
+    const connections = await this.getUserConnections(userId);
+    return connections.length > 0;
+  }
+
+  /**
+   * Store last seen timestamp
+   */
+  async updateLastSeen(userId: string): Promise<void> {
+    await this.redis.set(
+      `user:${userId}:last_seen`,
+      Date.now().toString(),
+      'EX',
+      86400,
+    );
+  }
+
+  async getLastSeen(userId: string): Promise<number | null> {
+    const lastSeen = await this.redis.get(`user:${userId}:last_seen`);
+    return lastSeen ? parseInt(lastSeen) : null;
+  }
+}
+```
+
+### Message Queue for Offline Users
+
+**Store messages for offline users:**
+
+```typescript
+@Injectable()
+export class ChatService {
+  async sendMessage(data: SendMessageDto): Promise<ChatMessage> {
+    // Moderate message
+    const moderated = this.moderationService.moderateMessage(data.content);
+    
+    // Save to database
+    const message = await this.prisma.chatMessage.create({
+      data: {
+        orderId: data.orderId,
+        senderId: data.senderId,
+        recipientId: data.recipientId,
+        content: moderated.content,
+        originalContent: data.content,
+        isModerated: moderated.isModerated,
+        moderationFlags: moderated.flags,
+      },
+    });
+    
+    // Check if recipient is online
+    const isOnline = await this.chatSessionService.isUserOnline(data.recipientId);
+    
+    if (isOnline) {
+      // Send via WebSocket
+      this.chatGateway.sendMessageToUser(data.recipientId, message);
+    } else {
+      // Queue for delivery when user comes online
+      await this.queueOfflineMessage(data.recipientId, message);
+      
+      // Send push notification
+      await this.notificationsQueue.add('send-push', {
+        userId: data.recipientId,
+        title: 'New message',
+        message: `${message.senderName}: ${moderated.content.slice(0, 50)}...`,
+      });
+    }
+    
+    return message;
+  }
+
+  private async queueOfflineMessage(userId: string, message: ChatMessage): Promise<void> {
+    await this.redis.lpush(`user:${userId}:offline_messages`, JSON.stringify(message));
+    await this.redis.expire(`user:${userId}:offline_messages`, 86400 * 7); // 7 days
+  }
+
+  async getOfflineMessages(userId: string): Promise<ChatMessage[]> {
+    const messages = await this.redis.lrange(`user:${userId}:offline_messages`, 0, -1);
+    await this.redis.del(`user:${userId}:offline_messages`);
+    
+    return messages.map((m) => JSON.parse(m));
+  }
+}
+```
+
+### Handling Multiple Device Connections
+
+**Support user connected from multiple devices:**
+
+```typescript
+@WebSocketGateway()
+export class ChatGateway {
+  @SubscribeMessage('send_message')
+  async handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: SendMessageDto,
+  ) {
+    const message = await this.chatService.sendMessage({
+      ...data,
+      senderId: client.data.user.id,
+    });
+
+    // Emit to sender's OTHER devices (sync across devices)
+    const senderConnections = await this.chatSessionService.getUserConnections(client.data.user.id);
+    
+    for (const socketId of senderConnections) {
+      if (socketId !== client.id) {
+        this.server.to(socketId).emit('message_sent', message);
+      }
+    }
+
+    // Emit to recipient's ALL devices
+    const recipientConnections = await this.chatSessionService.getUserConnections(data.recipientId);
+    
+    for (const socketId of recipientConnections) {
+      this.server.to(socketId).emit('new_message', message);
+    }
+
+    return message;
+  }
+}
+```
+
+---
+
+## 📱 **Handling Network Changes (Mobile)**
+
+### Detect Network Status
+
+```typescript
+// Frontend: Detect network status changes
+class ChatService {
+  private isOnline = true;
+
+  constructor() {
+    // Listen to network status
+    window.addEventListener('online', () => this.handleOnline());
+    window.addEventListener('offline', () => this.handleOffline());
+  }
+
+  private handleOnline() {
+    console.log('Network back online');
+    this.isOnline = true;
+    
+    // Reconnect socket
+    if (!this.socket.connected) {
+      this.socket.connect();
+    }
+    
+    // Sync pending messages
+    this.syncPendingMessages();
+  }
+
+  private handleOffline() {
+    console.log('Network offline');
+    this.isOnline = false;
+    
+    // Show offline indicator
+    this.showOfflineIndicator();
+  }
+
+  private async syncPendingMessages() {
+    // Send messages that were queued while offline
+    const pendingMessages = this.getPendingMessages();
+    
+    for (const message of pendingMessages) {
+      try {
+        await this.sendMessage(message);
+        this.removePendingMessage(message.id);
+      } catch (error) {
+        console.error('Failed to send pending message:', error);
+      }
+    }
+  }
+}
+```
+
+### Optimistic UI Updates
+
+```typescript
+// Show message immediately, then confirm
+async sendMessage(content: string, orderId: string) {
+  const tempMessage = {
+    id: `temp-${Date.now()}`,
+    content,
+    orderId,
+    senderId: currentUserId,
+    createdAt: new Date(),
+    status: 'sending',
+  };
+  
+  // Add to UI immediately
+  this.addMessageToUI(tempMessage);
+  
+  try {
+    // Send to server
+    const confirmedMessage = await this.chatService.sendMessage({ content, orderId });
+    
+    // Replace temp message with confirmed
+    this.replaceMessage(tempMessage.id, confirmedMessage);
+  } catch (error) {
+    // Mark as failed
+    this.markMessageAsFailed(tempMessage.id);
+    
+    // Allow retry
+    this.showRetryButton(tempMessage.id);
+  }
+}
+```
+
+---
+
+## 🔔 **Unread Message Count**
+
+### Track Unread Messages
+
+```typescript
+@Injectable()
+export class ChatService {
+  async incrementUnreadCount(orderId: string, userId: string): Promise<void> {
+    await this.prisma.chat.update({
+      where: { orderId },
+      data: {
+        unreadCount: {
+          increment: { [userId]: 1 },
+        },
+      },
+    });
+    
+    // Update user's total unread count in Redis
+    await this.redis.incr(`user:${userId}:unread_total`);
+    
+    // Emit unread count update
+    this.chatGateway.emitUnreadCountUpdate(userId);
+  }
+
+  async markAsRead(orderId: string, userId: string): Promise<void> {
+    const chat = await this.prisma.chat.findUnique({ where: { orderId } });
+    const currentUnread = chat.unreadCount[userId] || 0;
+    
+    await this.prisma.chat.update({
+      where: { orderId },
+      data: {
+        unreadCount: {
+          set: { ...chat.unreadCount, [userId]: 0 },
+        },
+      },
+    });
+    
+    // Update Redis
+    await this.redis.decrby(`user:${userId}:unread_total`, currentUnread);
+    
+    // Mark messages as read
+    await this.prisma.chatMessage.updateMany({
+      where: {
+        orderId,
+        recipientId: userId,
+        status: { in: ['sent', 'delivered'] },
+      },
+      data: {
+        status: 'read',
+        readAt: new Date(),
+      },
+    });
+    
+    // Emit read receipt
+    this.chatGateway.emitReadReceipt(orderId, userId);
+  }
+}
+```
+
+---
+
+**Last updated:** November 2, 2025  
+**Status:** Complete with WebSocket security and reconnection logic  
+**Priority:** HIGH
