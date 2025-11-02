@@ -30,12 +30,16 @@ export interface PaginatedResponse<T> {
   };
 }
 
+// User roles enum for type safety
+export type UserRole = 'CLIENT' | 'CONTRACTOR' | 'ADMIN';
+
 // User types
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'CLIENT' | 'CONTRACTOR' | 'ADMIN' | 'PARTNER';
+  role: UserRole;
+  isVerified?: boolean;
   createdAt: string;
   updatedAt: string;
 }

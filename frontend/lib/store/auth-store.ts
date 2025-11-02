@@ -1,15 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type UserRole = 'CLIENT' | 'CONTRACTOR' | 'ADMIN';
+
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  avatar?: string;
+  isVerified?: boolean;
+}
+
 interface AuthState {
   isAuthenticated: boolean;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  } | null;
-  setUser: (user: AuthState['user']) => void;
+  user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
   logout: () => void;
 }
 

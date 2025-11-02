@@ -24,7 +24,7 @@ class ApiClient {
   }
 
   private async getAuthHeaders(): Promise<HeadersInit> {
-    // TODO: Get token from secure storage (httpOnly cookies handled by Next.js API routes)
+    // Auth tokens are in HTTP-only cookies, automatically included with credentials: 'include'
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -45,7 +45,63 @@ class ApiClient {
         };
       }
 
+      // Handle 401 Unauthorized - redirect to login
+      if (response.status === 401) {
+        // Clear auth state
+        if (typeof window !== 'undefined') {
+          // Dynamic import to avoid circular dependency
+          import('@/lib/store/auth-store').then(({ useAuthStore }) => {
+            useAuthStore.getState().logout();
+          });
+
+          // Show error message
+          this.showErrorToast('Your session has expired. Please login again.');
+
+          // Redirect to login
+          window.location.href = '/login';
+        }
+
+        throw new Error(error.message || 'Unauthorized');
+      }
+
+      // Handle 403 Forbidden - insufficient permissions
+      if (response.status === 403) {
+        this.showErrorToast(
+          'Access denied. You do not have permission to perform this action.'
+        );
+
+        throw new Error(error.message || 'Access denied');
+      }
+
+      // Handle 404 Not Found
+      if (response.status === 404) {
+        throw new Error(error.message || 'Resource not found');
+      }
+
+      // Handle 429 Too Many Requests
+      if (response.status === 429) {
+        this.showErrorToast(
+          'Too many requests. Please slow down and try again later.'
+        );
+
+        throw new Error(error.message || 'Rate limit exceeded');
+      }
+
+      // Handle 500 Internal Server Error
+      if (response.status >= 500) {
+        this.showErrorToast(
+          'Server error. Please try again later or contact support.'
+        );
+
+        throw new Error(error.message || 'Server error');
+      }
+
       throw new Error(error.message || 'API request failed');
+    }
+
+    // Handle empty responses (204 No Content)
+    if (response.status === 204) {
+      return {} as T;
     }
 
     // Handle empty responses
@@ -55,6 +111,19 @@ class ApiClient {
     }
 
     return response.json();
+  }
+
+  private showErrorToast(message: string): void {
+    // Show toast notification if available
+    if (typeof window !== 'undefined') {
+      // Try to use sonner if available
+      import('sonner').then(({ toast }) => {
+        toast.error(message);
+      }).catch(() => {
+        // Fallback to console if sonner not available
+        console.error(message);
+      });
+    }
   }
 
   async request<T>(
@@ -76,7 +145,7 @@ class ApiClient {
           ...headers,
           ...fetchOptions.headers,
         },
-        credentials: 'include', // Include cookies for authentication
+        credentials: 'include', // Include HTTP-only cookies for authentication
       });
 
       return this.handleResponse<T>(response);

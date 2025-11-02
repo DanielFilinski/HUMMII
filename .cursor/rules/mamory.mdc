@@ -42,7 +42,43 @@ alwaysApply: true
 - **Storage:** AWS S3
 - **Cache:** Redis
 
+### Task Completion Requirements
+
+**At the end of every task implementation, ALWAYS provide:**
+
+1. **Commit message** in English following conventional commits format:
+   ```
+   type(scope): brief description
+   
+   - Detailed change 1
+   - Detailed change 2
+   - Detailed change 3
+   ```
+
+2. **Commit types:**
+   - `feat` - New feature
+   - `fix` - Bug fix
+   - `refactor` - Code refactoring
+   - `docs` - Documentation changes
+   - `style` - Code style changes (formatting, no logic changes)
+   - `test` - Adding or updating tests
+   - `chore` - Maintenance tasks (dependencies, configs)
+   - `perf` - Performance improvements
+   - `security` - Security improvements
+
+3. **Example:**
+   ```
+   feat(auth): implement JWT token refresh mechanism
+   
+   - Add refresh token endpoint in AuthController
+   - Implement token rotation strategy
+   - Add HTTP-only cookie handling for refresh tokens
+   - Add rate limiting (3 requests/min) to refresh endpoint
+   - Update AuthGuard to handle token expiration
+   ```
+
 ---
 
 **For detailed security requirements, see:** `core-security.mdc`
 **For project structure, see:** `.claude/core/project-context.md`
+
