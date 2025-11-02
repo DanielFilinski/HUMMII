@@ -10,6 +10,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { RolesGuard } from './guards/roles.guard';
 import { ResourceOwnerGuard } from './guards/resource-owner.guard';
+import { FailedLoginService } from './services/failed-login.service';
 import { PrismaService } from '../shared/prisma/prisma.service';
 
 @Module({
@@ -30,6 +31,7 @@ import { PrismaService } from '../shared/prisma/prisma.service';
   providers: [
     AuthService,
     PrismaService,
+    FailedLoginService, // Failed login tracking
     JwtStrategy,
     JwtRefreshStrategy,
     LocalStrategy,
@@ -48,6 +50,6 @@ import { PrismaService } from '../shared/prisma/prisma.service';
       },
     },
   ],
-  exports: [AuthService, JwtModule, RolesGuard, ResourceOwnerGuard],
+  exports: [AuthService, JwtModule, RolesGuard, ResourceOwnerGuard, FailedLoginService],
 })
 export class AuthModule {}

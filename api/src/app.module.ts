@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,6 +24,21 @@ import { validate } from './config/env.validation';
         allowUnknown: true,
         abortEarly: false,
       },
+    }),
+
+    // Redis (global for sessions and caching)
+    RedisModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'single',
+        options: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+          password: configService.get('REDIS_PASSWORD'),
+          db: 0,
+          keyPrefix: 'hummii:',
+        },
+      }),
     }),
 
     // Rate limiting

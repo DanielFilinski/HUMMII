@@ -460,8 +460,8 @@ export class SessionService {
 ### Authentication & Authorization
 - [x] HTTP-only cookies для JWT токенов (КРИТИЧНО) ✅ РЕАЛИЗОВАНО
 - [ ] Token rotation при refresh
-- [ ] Failed login tracking (max 5 attempts)
-- [ ] Account lockout (15 minutes after 5 failed attempts)
+- [x] Failed login tracking (max 5 attempts) ✅ РЕАЛИЗОВАНО
+- [x] Account lockout (15 minutes after 5 failed attempts) ✅ РЕАЛИЗОВАНО
 - [ ] Password complexity validation (12+ chars, upper+lower+digit+special)
 
 ### API Security
@@ -475,15 +475,15 @@ export class SessionService {
 - [x] PostgreSQL SSL connection ✅ РЕАЛИЗОВАНО
 - [x] Redis AUTH password ✅ РЕАЛИЗОВАНО
 - [x] Environment variables validation при старте ✅ РЕАЛИЗОВАНО (улучшено)
-- [ ] PII masking в логах (email, phone)
-- [ ] Никогда не логировать: passwords, tokens, credit cards
+- [x] PII masking в логах (email, phone) ✅ РЕАЛИЗОВАНО
+- [x] Никогда не логировать: passwords, tokens, credit cards ✅ РЕАЛИЗОВАНО
 
 ### File Upload Security
-- [ ] MIME type validation (whitelist)
-- [ ] File size limits (5MB per image)
-- [ ] File signature validation (magic numbers)
-- [ ] EXIF metadata stripping
-- [ ] Image optimization (Sharp)
+- [x] MIME type validation (whitelist) ✅ РЕАЛИЗОВАНО
+- [x] File size limits (5MB per image) ✅ РЕАЛИЗОВАНО
+- [x] File signature validation (magic numbers) ✅ РЕАЛИЗОВАНО
+- [x] EXIF metadata stripping ✅ РЕАЛИЗОВАНО
+- [ ] Image optimization (Sharp) ✅ УЖЕ НАСТРОЕНО
 
 ### Infrastructure
 - [ ] Nginx SSL/TLS 1.3 only
@@ -703,6 +703,119 @@ export class SessionService {
 
 **Файлы созданы:**
 - `/docs/deployment/production-env-setup.md` (создан)
+
+---
+
+### 9. PII Masking в логах ✅
+
+**Что сделано:**
+- ✅ Создан `pii-masking.util.ts` с функциями маскирования
+- ✅ Email masking: `john.doe@example.com` → `j*******@example.com`
+- ✅ Phone masking: `+1234567890` → `******7890`
+- ✅ Credit card masking: `4532015112830366` → `************0366`
+- ✅ Token removal: автоматическое удаление `password`, `accessToken`, `refreshToken`
+- ✅ IP address masking: `192.168.1.100` → `192.168.1.***`
+- ✅ JWT token masking: `eyJhbGciOi...` → `eyJ***`
+- ✅ SIN masking: `123-456-789` → `***-***-789`
+- ✅ Automatic pattern detection: автоматически находит и маскирует PII в строках
+
+**Winston Configuration:**
+- ✅ Custom format с PII masking для всех логов
+- ✅ Separate transports: console, error, combined, audit
+- ✅ Log rotation: 10MB max size, multiple files
+- ✅ Audit logs: 30 days retention для PIPEDA compliance
+- ✅ Stack traces: включены для errors
+- ✅ Structured JSON: для production
+
+**Безопасность:**
+- ✅ НИКОГДА не логирует passwords, tokens, credit cards
+- ✅ Автоматически маскирует email, phone перед записью в logs
+- ✅ Pattern-based sanitization: находит и маскирует даже в сообщениях
+- ✅ PIPEDA compliant: минимизация PII в логах
+
+**Файлы созданы:**
+- `/api/src/shared/logging/pii-masking.util.ts` (создан)
+- `/api/src/config/winston.config.ts` (обновлен)
+
+---
+
+### 10. File Upload Security ✅
+
+**Что сделано:**
+- ✅ Создан `UploadSecurityService` для безопасной загрузки файлов
+- ✅ MIME type validation: whitelist approach (только разрешенные типы)
+- ✅ File signature validation: проверка magic numbers (JPEG, PNG, WebP, GIF, PDF, DOCX)
+- ✅ File size limits: 5MB для images, 10MB для documents, 2MB для avatars
+- ✅ EXIF metadata stripping: удаление location, camera info через Sharp
+- ✅ Image optimization: resize, compress, format conversion
+- ✅ Content hash generation: SHA-256 для deduplication
+- ✅ Filename sanitization: защита от path traversal
+- ✅ Thumbnail generation: automatic thumbnails для images
+
+**Image Processing:**
+- ✅ Max dimensions: 4096x4096 validation
+- ✅ Avatar processing: 512x512 square, auto-crop
+- ✅ Thumbnail: 256x256 для previews
+- ✅ Format conversion: JPEG, PNG, WebP support
+- ✅ Quality optimization: 80% quality, mozjpeg compression
+- ✅ Metadata removal: removeMetadata() для EXIF stripping
+
+**Document Validation:**
+- ✅ PDF signature validation: `%PDF` magic number
+- ✅ DOCX signature validation: ZIP-based format detection
+- ✅ DOC (old) signature validation: OLE2 format detection
+- ✅ Hash generation: для integrity verification
+
+**Безопасность:**
+- ✅ File extension spoofing prevention: signature validation
+- ✅ Path traversal protection: filename sanitization
+- ✅ Location data removal: EXIF stripping (PIPEDA compliance)
+- ✅ Malicious file detection: magic number validation
+- ✅ Virus scanning ready: integration point для ClamAV
+
+**Файлы созданы:**
+- `/api/src/shared/upload/upload-security.service.ts` (создан)
+- `/api/src/shared/upload/upload.module.ts` (создан)
+
+---
+
+### 11. Failed Login Tracking ✅
+
+**Что сделано:**
+- ✅ Создан `FailedLoginService` с Redis-based tracking
+- ✅ User-level tracking: max 5 attempts, 15 min lockout
+- ✅ IP-level tracking: max 10 attempts, 30 min lockout (stricter)
+- ✅ Automatic unlock: после timeout
+- ✅ Attempt counter: с 1-hour rolling window
+- ✅ Manual unlock: admin endpoints для разблокировки
+- ✅ Lockout status: API для проверки статуса
+- ✅ Audit logging: все security events логируются
+
+**Brute-force Protection:**
+- ✅ User account lockout: 15 минут после 5 попыток
+- ✅ IP address lockout: 30 минут после 10 попыток (защита от IP rotation)
+- ✅ Attempt window: 1 час для подсчета попыток
+- ✅ Auto-expiration: счетчики автоматически истекают
+- ✅ Redis-based: fast, scalable, не нагружает PostgreSQL
+
+**Интеграция в AuthService:**
+- ✅ Pre-login checks: проверка lockout перед аутентификацией
+- ✅ Failed attempt recording: инкрементирует счетчики при неудаче
+- ✅ Successful login: очищает счетчики при успехе
+- ✅ User enumeration prevention: records attempt для несуществующих users
+- ✅ Audit integration: логирует все security events
+
+**Безопасность:**
+- ✅ OWASP compliant: следует best practices для login throttling
+- ✅ Prevents brute-force attacks: multi-level защита (user + IP)
+- ✅ User enumeration protection: одинаковый response для invalid users
+- ✅ Audit trail: полный лог для security monitoring
+- ✅ PIPEDA compliant: минимизация PII в Redis keys
+
+**Файлы созданы/изменены:**
+- `/api/src/auth/services/failed-login.service.ts` (создан)
+- `/api/src/auth/auth.service.ts` (обновлен - интеграция)
+- `/api/src/auth/auth.module.ts` (обновлен - добавлен provider)
 
 ---
 

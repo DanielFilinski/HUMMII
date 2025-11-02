@@ -13,6 +13,7 @@ import { UserRole } from '@prisma/client';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { EmailService } from '../shared/email/email.service';
 import { AuditService } from '../shared/audit/audit.service';
+import { FailedLoginService } from './services/failed-login.service';
 import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly auditService: AuditService,
+    private readonly failedLoginService: FailedLoginService,
   ) {}
 
   /**
@@ -134,7 +136,7 @@ export class AuthService {
   }
 
   /**
-   * Login user
+   * Login user with failed login tracking
    */
   async login(
     loginDto: LoginDto,
@@ -143,57 +145,46 @@ export class AuthService {
   ) {
     const { email, password } = loginDto;
 
+    // Check if user account is locked (Redis-based)
+    await this.failedLoginService.checkUserLockout(email);
+
+    // Check if IP address is locked (Redis-based)
+    if (ipAddress) {
+      await this.failedLoginService.checkIpLockout(ipAddress);
+    }
+
     // Find user
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
+      // Record failed attempt (even for non-existent users to prevent enumeration)
+      if (ipAddress) {
+        await this.failedLoginService.recordFailedAttempt(email, ipAddress, userAgent);
+      }
       throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Check if account locked
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      const minutesLeft = Math.ceil(
-        (user.lockedUntil.getTime() - Date.now()) / 1000 / 60,
-      );
-      throw new UnauthorizedException(
-        `Account locked. Try again in ${minutesLeft} minutes.`,
-      );
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      // Increment failed attempts
-      const newFailedAttempts = user.failedLoginAttempts + 1;
-      const lockAccount = newFailedAttempts >= 5;
-
-      await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          failedLoginAttempts: newFailedAttempts,
-          lockedUntil: lockAccount
-            ? new Date(Date.now() + 15 * 60 * 1000) // 15 min lockout
-            : null,
-        },
-      });
+      // Record failed login attempt
+      if (ipAddress) {
+        await this.failedLoginService.recordFailedAttempt(email, ipAddress, userAgent);
+      }
 
       // Audit log: Failed login attempt
       await this.auditService.log({
         userId: user.id,
-        action: lockAccount ? AuditAction.ACCOUNT_LOCKED : AuditAction.LOGIN_FAILED,
+        action: AuditAction.LOGIN_FAILED,
         entity: AuditEntity.USER,
         entityId: user.id,
         ipAddress,
         userAgent,
         success: false,
         errorMessage: 'Invalid credentials',
-        metadata: {
-          failedAttempts: newFailedAttempts,
-          locked: lockAccount,
-        },
       });
 
       throw new UnauthorizedException('Invalid credentials');
@@ -202,6 +193,11 @@ export class AuthService {
     // Check email verification
     if (!user.isVerified) {
       throw new UnauthorizedException('Email not verified');
+    }
+
+    // Record successful login (clears failed attempts in Redis)
+    if (ipAddress) {
+      await this.failedLoginService.recordSuccessfulLogin(email, ipAddress);
     }
 
     // Reset failed attempts and update login info
