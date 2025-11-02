@@ -7,6 +7,8 @@ Phase 0: Foundation & Infrastructure — 100%
 ✅ Error handling (filters, interceptors)
 ✅ Environment validation
 ✅ Swagger/OpenAPI
+✅ Helmet.js с CSP и security headers (HSTS, X-Frame-Options, etc.)
+✅ CORS whitelist для production и development окружений
 
 
 Phase 1: Authentication & Authorization — 100%

@@ -24,8 +24,13 @@ RUN \
 FROM base AS development
 WORKDIR /app
 
+# Copy package files first
+COPY package*.json ./
+
 # Copy node_modules from deps
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy application files
 COPY . .
 
 # Expose port

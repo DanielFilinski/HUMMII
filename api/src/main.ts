@@ -9,6 +9,8 @@ import { AllExceptionsFilter } from './core/filters/http-exception.filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/winston.config';
+import { getHelmetConfig } from './config/helmet.config';
+import { getCorsConfig } from './config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,27 +26,15 @@ async function bootstrap() {
   // MUST be before helmet
   app.use(cookieParser());
 
-  // Security headers (configured to allow cookies)
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-        },
-      },
-      crossOriginEmbedderPolicy: false, // Allow cookies
-      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow CORS
-    }),
-  );
+  // Security headers with Helmet.js
+  // Configured for PIPEDA compliance and maximum security
+  // See: /api/src/config/helmet.config.ts for detailed configuration
+  app.use(helmet(getHelmetConfig()));
 
-  // CORS
-  app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
-    credentials: true,
-  });
+  // CORS with whitelist approach (no wildcards)
+  // Only allows requests from trusted domains
+  // See: /api/src/config/cors.config.ts for whitelist configuration
+  app.enableCors(getCorsConfig());
 
   // API Versioning
   app.enableVersioning({

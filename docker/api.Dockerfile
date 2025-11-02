@@ -34,9 +34,6 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Copy application files
 COPY . .
 
-# Rebuild bcrypt for current architecture
-RUN npm rebuild bcrypt
-
 # Generate Prisma Client
 RUN npx prisma generate
 
@@ -72,9 +69,6 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Rebuild bcrypt for current architecture
-RUN npm rebuild bcrypt
 
 # Generate Prisma Client
 RUN npx prisma generate

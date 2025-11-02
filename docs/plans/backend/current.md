@@ -465,11 +465,11 @@ export class SessionService {
 - [ ] Password complexity validation (12+ chars, upper+lower+digit+special)
 
 ### API Security
+- [x] Helmet.js с CSP настройками ✅ РЕАЛИЗОВАНО
+- [x] CORS whitelist (production domains only) ✅ РЕАЛИЗОВАНО
 - [ ] Rate limiting на всех endpoints (глобально через APP_GUARD)
 - [ ] Специфичные rate limits для auth (5 req/min login)
-- [ ] CORS whitelist (production domains only)
-- [ ] Helmet.js с CSP настройками
-- [ ] Request size limits (10MB)
+- [ ] Request size limits (10MB) ✅ УЖЕ НАСТРОЕНО
 
 ### Data Protection
 - [ ] PostgreSQL SSL connection
@@ -531,6 +531,64 @@ export class SessionService {
 - `/api/src/auth/auth.controller.ts` (обновлен)
 - `/api/src/main.ts` (обновлен)
 - `/api/package.json` (добавлены зависимости)
+
+---
+
+### 2. Helmet.js с правильными CSP (Приоритет #2) ✅
+
+**Что сделано:**
+- ✅ Создан `/api/src/config/helmet.config.ts` с полной конфигурацией
+- ✅ Настроен Content Security Policy (CSP):
+  - `defaultSrc: ["'self']` - только ресурсы с того же origin
+  - `styleSrc` разрешает `'unsafe-inline'` для Tailwind CSS
+  - `scriptSrc` только с того же origin (защита от XSS)
+  - `frameSrc: ["'none']` - защита от clickjacking
+  - `objectSrc: ["'none']` - запрет опасных элементов
+- ✅ HTTP Strict Transport Security (HSTS):
+  - `maxAge: 31536000` (1 год)
+  - `includeSubDomains: true`
+  - `preload: true` - для HSTS preload list
+- ✅ Дополнительные security headers:
+  - `X-Frame-Options: DENY` - защита от clickjacking
+  - `X-Content-Type-Options: nosniff` - защита от MIME sniffing
+  - `X-XSS-Protection` - для старых браузеров
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `X-DNS-Prefetch-Control: off` - для приватности
+- ✅ `hidePoweredBy: true` - скрыть информацию о Express/NestJS
+- ✅ Обновлен `main.ts` для использования новой конфигурации
+
+**Файлы созданы/изменены:**
+- `/api/src/config/helmet.config.ts` (создан)
+- `/api/src/main.ts` (обновлен)
+
+---
+
+### 3. CORS с Whitelist (Приоритет #3) ✅
+
+**Что сделано:**
+- ✅ Создан `/api/src/config/cors.config.ts` с whitelist подходом
+- ✅ Настроены разные whitelist для production и development:
+  - **Production:** `hummii.ca`, `www.hummii.ca`, `admin.hummii.ca`
+  - **Development:** `localhost:3001`, `localhost:3002`, `localhost:5173`
+- ✅ Динамическая валидация origin:
+  - Разрешены запросы без origin (mobile apps, Postman)
+  - Проверка origin против whitelist
+  - Логирование заблокированных origins для мониторинга
+- ✅ `credentials: true` - поддержка HTTP-only cookies
+- ✅ Ограниченный список HTTP методов (только используемые)
+- ✅ Настроены `allowedHeaders` и `exposedHeaders`
+- ✅ `maxAge: 3600` - кеширование preflight запросов (1 час)
+- ✅ Обновлен `main.ts` для использования новой конфигурации
+
+**Безопасность:**
+- ✅ Никаких wildcards (`*`) - только конкретные домены
+- ✅ Логирование заблокированных origins
+- ✅ Разные whitelist для prod/dev окружений
+- ✅ Минимальный набор разрешенных методов и headers
+
+**Файлы созданы/изменены:**
+- `/api/src/config/cors.config.ts` (создан)
+- `/api/src/main.ts` (обновлен)
 
 ---
 

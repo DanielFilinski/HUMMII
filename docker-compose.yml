@@ -123,6 +123,7 @@ services:
     build:
       context: ./admin
       dockerfile: ../docker/admin.Dockerfile
+      target: development
       args:
         NODE_VERSION: ${NODE_VERSION:-20}
     container_name: hummii-admin
@@ -132,7 +133,7 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     volumes:
       - ./admin:/app
-      - /app/node_modules
+      - admin_node_modules:/app/node_modules
       - /app/.next
     ports:
       - "${ADMIN_PORT:-3002}:3000"
@@ -208,6 +209,8 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  admin_node_modules:
     driver: local
   # elasticsearch_data:
   #   driver: local
