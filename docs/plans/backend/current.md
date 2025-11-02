@@ -467,14 +467,14 @@ export class SessionService {
 ### API Security
 - [x] Helmet.js с CSP настройками ✅ РЕАЛИЗОВАНО
 - [x] CORS whitelist (production domains only) ✅ РЕАЛИЗОВАНО
-- [ ] Rate limiting на всех endpoints (глобально через APP_GUARD)
-- [ ] Специфичные rate limits для auth (5 req/min login)
-- [ ] Request size limits (10MB) ✅ УЖЕ НАСТРОЕНО
+- [x] Rate limiting на всех endpoints (глобально через APP_GUARD) ✅ УЖЕ НАСТРОЕНО
+- [x] Специфичные rate limits для auth (5 req/min login) ✅ УЖЕ НАСТРОЕНО
+- [x] Request size limits (10MB) ✅ УЖЕ НАСТРОЕНО
 
 ### Data Protection
-- [ ] PostgreSQL SSL connection
-- [ ] Redis AUTH password
-- [ ] Environment variables validation при старте
+- [x] PostgreSQL SSL connection ✅ РЕАЛИЗОВАНО
+- [x] Redis AUTH password ✅ РЕАЛИЗОВАНО
+- [x] Environment variables validation при старте ✅ РЕАЛИЗОВАНО (улучшено)
 - [ ] PII masking в логах (email, phone)
 - [ ] Никогда не логировать: passwords, tokens, credit cards
 
@@ -589,6 +589,120 @@ export class SessionService {
 **Файлы созданы/изменены:**
 - `/api/src/config/cors.config.ts` (создан)
 - `/api/src/main.ts` (обновлен)
+
+---
+
+### 4. Environment Variables Validation (улучшено) ✅
+
+**Что сделано:**
+- ✅ Расширена валидация environment переменных
+- ✅ JWT secrets: минимум 32 символа (256-bit) с проверкой
+- ✅ Redis password: минимум 16 символов (обязательно в production)
+- ✅ JWT expiration: валидация формата (15m, 1h, 7d)
+- ✅ Stripe keys: валидация формата (`sk_test_`, `sk_live_`, `whsec_`)
+- ✅ URLs: обязательно HTTPS в production
+- ✅ AWS credentials: валидация длины ключей
+- ✅ Conditional validation: разные требования для dev/prod
+- ✅ Helpful error messages: подсказки как исправить ошибки
+
+**Безопасность:**
+- ✅ Application не запустится с невалидными секретами
+- ✅ Validation errors с конкретными инструкциями по исправлению
+- ✅ Production-only validation для критичных переменных
+- ✅ Format validation для API keys (Stripe, AWS)
+
+**Файлы созданы/изменены:**
+- `/api/src/config/env.validation.ts` (расширен)
+- `/api/src/config/database.config.ts` (создан)
+- `/api/src/config/redis.config.ts` (создан)
+
+---
+
+### 5. PostgreSQL SSL Connection ✅
+
+**Что сделано:**
+- ✅ Создан `DatabaseConfig` класс для управления SSL подключениями
+- ✅ Production: автоматически добавляет `?sslmode=require` к DATABASE_URL
+- ✅ Development: разрешает non-SSL для локального docker
+- ✅ Connection pool configuration: оптимизировано для production
+- ✅ docker-compose.prod.yml: PostgreSQL с SSL сертификатами
+- ✅ SSL certificates mounting: volumes для server.crt и server.key
+- ✅ PostgreSQL SSL options: TLSv1.2+ только
+- ✅ Performance tuning: оптимизированная конфигурация для production
+
+**Файлы созданы/изменены:**
+- `/api/src/config/database.config.ts` (создан)
+- `/docker-compose.prod.yml` (создан)
+
+---
+
+### 6. Redis AUTH Password ✅
+
+**Что сделано:**
+- ✅ Создан `RedisConfig` класс для управления Redis подключениями
+- ✅ Password authentication: обязательно в production (min 16 chars)
+- ✅ Validation: Redis password проверяется через env.validation.ts
+- ✅ Separate databases: sessions (db 1) и cache (db 0)
+- ✅ Key prefixing: `hummii:session:` и `hummii:cache:`
+- ✅ Connection options: retry strategy, timeouts, TLS support
+- ✅ docker-compose.prod.yml: Redis с `--requirepass` командой
+- ✅ Production-ready: TLS для Redis (AWS ElastiCache, Redis Cloud)
+
+**Безопасность:**
+- ✅ Password required в production (validated at startup)
+- ✅ TLS support для encrypted connections
+- ✅ Separate databases для изоляции данных
+- ✅ Connection timeout и retry strategy
+
+**Файлы созданы/изменены:**
+- `/api/src/config/redis.config.ts` (создан)
+- `/docker-compose.prod.yml` (обновлен)
+
+---
+
+### 7. Production Docker Compose Configuration ✅
+
+**Что сделано:**
+- ✅ Создан `docker-compose.prod.yml` для production deployment
+- ✅ PostgreSQL: SSL enabled, performance tuning, no exposed ports
+- ✅ Redis: password auth, memory limits, no exposed ports
+- ✅ API: SSL certificates mounted, health checks, production build
+- ✅ Nginx: reverse proxy, SSL/TLS, security headers
+- ✅ Health checks: для всех сервисов (30s interval)
+- ✅ Logging: JSON logs с rotation (max-size, max-file)
+- ✅ Networks: isolated bridge network (172.20.0.0/16)
+- ✅ Volumes: persistent storage для PostgreSQL и Redis
+- ✅ Security: no port exposure для внутренних сервисов
+
+**Файлы созданы:**
+- `/docker-compose.prod.yml` (создан)
+- `/docs/deployment/production-env-setup.md` (создан)
+
+---
+
+### 8. Production Environment Setup Guide ✅
+
+**Что сделано:**
+- ✅ Создан comprehensive guide для production deployment
+- ✅ Security checklist: все критичные пункты безопасности
+- ✅ Secret generation: команды для генерации всех секретов
+- ✅ SSL setup guide: Let's Encrypt и custom certificates
+- ✅ Deployment steps: пошаговая инструкция
+- ✅ Verification steps: как проверить что всё работает
+- ✅ Secret rotation policy: когда и как ротировать секреты
+- ✅ Troubleshooting: common issues и решения
+
+**Документация включает:**
+- Complete `.env.production` example
+- Commands для генерации секретов
+- SSL certificate setup
+- Docker Compose deployment
+- Database migration steps
+- Health check verification
+- Secret rotation procedures
+
+**Файлы созданы:**
+- `/docs/deployment/production-env-setup.md` (создан)
 
 ---
 
