@@ -8,14 +8,16 @@ import {
   Query,
   Param,
   Req,
+  Res,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -24,6 +26,7 @@ import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
 import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { CookieConfig } from '../config/cookie.config';
 
 interface RequestWithUser extends Request {
   user: {
@@ -36,7 +39,10 @@ interface RequestWithUser extends Request {
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('register')
   @Throttle({ default: { ttl: 60000, limit: 5 } }) // 5 requests per minute
@@ -63,10 +69,30 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.connection?.remoteAddress;
-    return this.authService.login(loginDto, userAgent, ipAddress);
+    const result = await this.authService.login(loginDto, userAgent, ipAddress);
+
+    // Set HTTP-only cookies for tokens (XSS protection)
+    res.cookie(
+      CookieConfig.ACCESS_TOKEN_COOKIE,
+      result.accessToken,
+      CookieConfig.getAccessTokenOptions(this.configService),
+    );
+
+    res.cookie(
+      CookieConfig.REFRESH_TOKEN_COOKIE,
+      result.refreshToken,
+      CookieConfig.getRefreshTokenOptions(this.configService),
+    );
+
+    // Return user data without tokens (tokens in cookies only)
+    return { user: result.user };
   }
 
   @Post('refresh')
@@ -74,16 +100,64 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Token successfully refreshed' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   @HttpCode(HttpStatus.OK)
-  async refreshTokens(@Body() refreshDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(refreshDto.refreshToken);
+  async refreshTokens(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() refreshDto?: RefreshTokenDto,
+  ) {
+    // Try to get refresh token from cookie first, then from body (backward compatibility)
+    const refreshToken =
+      req.cookies?.[CookieConfig.REFRESH_TOKEN_COOKIE] || refreshDto?.refreshToken;
+
+    if (!refreshToken) {
+      throw new Error('Refresh token not provided');
+    }
+
+    const result = await this.authService.refreshTokens(refreshToken);
+
+    // Update access token cookie
+    res.cookie(
+      CookieConfig.ACCESS_TOKEN_COOKIE,
+      result.accessToken,
+      CookieConfig.getAccessTokenOptions(this.configService),
+    );
+
+    // Update refresh token cookie (token rotation)
+    res.cookie(
+      CookieConfig.REFRESH_TOKEN_COOKIE,
+      result.refreshToken,
+      CookieConfig.getRefreshTokenOptions(this.configService),
+    );
+
+    return { message: 'Token refreshed successfully' };
   }
 
   @Post('logout')
   @ApiOperation({ summary: 'Logout current session' })
   @ApiResponse({ status: 204, description: 'Successfully logged out' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Body() refreshDto: RefreshTokenDto) {
-    await this.authService.logout(refreshDto.refreshToken);
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @Body() refreshDto?: RefreshTokenDto,
+  ) {
+    // Try to get refresh token from cookie first, then from body
+    const refreshToken =
+      req.cookies?.[CookieConfig.REFRESH_TOKEN_COOKIE] || refreshDto?.refreshToken;
+
+    if (refreshToken) {
+      await this.authService.logout(refreshToken);
+    }
+
+    // Clear cookies
+    res.clearCookie(
+      CookieConfig.ACCESS_TOKEN_COOKIE,
+      CookieConfig.getClearCookieOptions(this.configService),
+    );
+    res.clearCookie(
+      CookieConfig.REFRESH_TOKEN_COOKIE,
+      CookieConfig.getClearCookieOptions(this.configService),
+    );
   }
 
   @Post('logout-all')
@@ -92,8 +166,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout all sessions (requires authentication)' })
   @ApiResponse({ status: 204, description: 'All sessions terminated' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logoutAll(@Req() req: RequestWithUser) {
+  async logoutAll(
+    @Req() req: RequestWithUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.logoutAll(req.user.userId);
+
+    // Clear cookies for current session
+    res.clearCookie(
+      CookieConfig.ACCESS_TOKEN_COOKIE,
+      CookieConfig.getClearCookieOptions(this.configService),
+    );
+    res.clearCookie(
+      CookieConfig.REFRESH_TOKEN_COOKIE,
+      CookieConfig.getClearCookieOptions(this.configService),
+    );
   }
 
   @Post('password-reset/request')
@@ -127,14 +214,32 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleAuthCallback(@Req() req: RequestWithUser) {
+  async googleAuthCallback(
+    @Req() req: RequestWithUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.connection?.remoteAddress;
-    return this.authService.oauthLogin(req.user, userAgent, ipAddress);
+    const result = await this.authService.oauthLogin(req.user, userAgent, ipAddress);
+
+    // Set HTTP-only cookies for OAuth tokens
+    res.cookie(
+      CookieConfig.ACCESS_TOKEN_COOKIE,
+      result.accessToken,
+      CookieConfig.getAccessTokenOptions(this.configService),
+    );
+
+    res.cookie(
+      CookieConfig.REFRESH_TOKEN_COOKIE,
+      result.refreshToken,
+      CookieConfig.getRefreshTokenOptions(this.configService),
+    );
+
+    return { user: result.user };
   }
 
   @Get('sessions')
-  @UseGuards(JwtAuthGuard, RolesGuard) // Add RolesGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all active sessions (requires authentication)' })
   @ApiResponse({ status: 200, description: 'Active sessions retrieved' })
@@ -143,7 +248,7 @@ export class AuthController {
   }
 
   @Delete('sessions/:sessionId')
-  @UseGuards(JwtAuthGuard, RolesGuard) // Add RolesGuard
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete specific session (requires authentication)' })
   @ApiResponse({ status: 204, description: 'Session deleted successfully' })
