@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -17,6 +17,17 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
+
+  // Check for redirect path from sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedRedirectPath = sessionStorage.getItem('redirect_after_auth');
+      if (savedRedirectPath) {
+        setRedirectPath(savedRedirectPath);
+      }
+    }
+  }, []);
 
   const {
     register: registerField,
@@ -48,8 +59,18 @@ export function LoginForm() {
         role: response.user.role,
       });
 
-      // Redirect to home page
-      router.push('/');
+      // Redirect to saved path or home page
+      if (typeof window !== 'undefined') {
+        const savedPath = sessionStorage.getItem('redirect_after_auth');
+        if (savedPath) {
+          sessionStorage.removeItem('redirect_after_auth');
+          router.push(savedPath);
+        } else {
+          router.push('/');
+        }
+      } else {
+        router.push('/');
+      }
     } catch (err) {
       if (err instanceof Error) {
         // Handle specific error messages from API
@@ -77,6 +98,13 @@ export function LoginForm() {
       <p className="text-center text-gray-600 mb-6">
         Welcome back to Hummii
       </p>
+
+      {redirectPath && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+          <p className="font-medium">Authentication Required</p>
+          <p className="text-xs mt-1">Sign in to continue to your requested page</p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">

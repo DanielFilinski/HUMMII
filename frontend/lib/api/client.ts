@@ -14,6 +14,9 @@ interface ApiError {
   message: string;
   statusCode?: number;
   error?: string;
+  code?: string;
+  requiredRoles?: string[];
+  userRole?: string;
 }
 
 class ApiClient {
@@ -45,20 +48,33 @@ class ApiClient {
         };
       }
 
-      // Handle 401 Unauthorized - redirect to login
+      // Handle 401 Unauthorized - redirect to login or dispatch event
       if (response.status === 401) {
-        // Clear auth state
-        if (typeof window !== 'undefined') {
-          // Dynamic import to avoid circular dependency
-          import('@/lib/store/auth-store').then(({ useAuthStore }) => {
-            useAuthStore.getState().logout();
-          });
+        // Check if it's AUTH_REQUIRED code (for showing registration modal)
+        if (error.code === 'AUTH_REQUIRED') {
+          // Dispatch custom event for protected actions
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('auth:required', {
+              detail: {
+                message: error.message,
+                requiredRoles: error.requiredRoles,
+              },
+            }));
+          }
+        } else {
+          // Clear auth state for expired sessions
+          if (typeof window !== 'undefined') {
+            // Dynamic import to avoid circular dependency
+            import('@/lib/store/auth-store').then(({ useAuthStore }) => {
+              useAuthStore.getState().logout();
+            });
 
-          // Show error message
-          this.showErrorToast('Your session has expired. Please login again.');
+            // Show error message
+            this.showErrorToast('Your session has expired. Please login again.');
 
-          // Redirect to login
-          window.location.href = '/login';
+            // Redirect to login
+            window.location.href = '/en/login';
+          }
         }
 
         throw new Error(error.message || 'Unauthorized');
@@ -66,9 +82,16 @@ class ApiClient {
 
       // Handle 403 Forbidden - insufficient permissions
       if (response.status === 403) {
-        this.showErrorToast(
-          'Access denied. You do not have permission to perform this action.'
-        );
+        // Check if it's INSUFFICIENT_ROLE code
+        if (error.code === 'INSUFFICIENT_ROLE') {
+          this.showErrorToast(
+            `Access denied. Required role: ${error.requiredRoles?.join(', ') || 'unknown'}. Your role: ${error.userRole || 'unknown'}.`
+          );
+        } else {
+          this.showErrorToast(
+            'Access denied. You do not have permission to perform this action.'
+          );
+        }
 
         throw new Error(error.message || 'Access denied');
       }

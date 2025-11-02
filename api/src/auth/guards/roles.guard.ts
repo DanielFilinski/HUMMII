@@ -29,18 +29,28 @@ export class RolesGuard implements CanActivate {
 
     // User must be authenticated
     if (!user) {
-      throw new UnauthorizedException(
-        'Authentication required to access this resource',
-      );
+      throw new UnauthorizedException({
+        statusCode: 401,
+        message: 'Authentication required to access this resource',
+        error: 'Unauthorized',
+        // Frontend can use this code to show registration modal
+        code: 'AUTH_REQUIRED',
+        requiredRoles,
+      });
     }
 
     // Check if user has required role
     const hasRole = requiredRoles.some((role) => user.role === role);
 
     if (!hasRole) {
-      throw new ForbiddenException(
-        `Access denied. Required role(s): ${requiredRoles.join(', ')}. Your role: ${user.role}`,
-      );
+      throw new ForbiddenException({
+        statusCode: 403,
+        message: `Access denied. Required role(s): ${requiredRoles.join(', ')}`,
+        error: 'Forbidden',
+        code: 'INSUFFICIENT_ROLE',
+        requiredRoles,
+        userRole: user.role,
+      });
     }
 
     return true;

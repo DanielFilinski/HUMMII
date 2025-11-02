@@ -90,6 +90,12 @@ These rules activate based on file patterns:
 - ✅ Rate limiting on all endpoints
 - ✅ PII masking in logs
 
+### Documentation Rules (from `config.mdc` and `core-critical.mdc`)
+- ❌ **NEVER** create separate documentation files for routine tasks
+- ✅ Update `docs/plans/backend/tasks/COMPLETED.md` with brief task entry
+- ✅ Only create new docs for major features or architecture changes
+- ✅ At task completion: Provide commit message + COMPLETED.md entry
+
 ### Before Every Command
 - Describe what command will do
 - Indicate what will be affected
@@ -114,6 +120,6 @@ When updating rules:
 
 ---
 
-**Last updated:** October 27, 2025
+**Last updated:** November 2, 2025
 **Maintainer:** AI Assistant Configuration
 

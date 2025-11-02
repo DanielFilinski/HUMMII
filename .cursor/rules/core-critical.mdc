@@ -245,6 +245,36 @@ async createUser(data: CreateUserDto): Promise<User> {
 const hashedPassword = await bcrypt.hash(password, 12);
 ```
 
+### Documentation Strategy
+
+**NEVER create separate documentation files for routine tasks.**
+
+Instead, update existing tracking files:
+
+#### For Backend Tasks:
+- **`docs/plans/backend/tasks/COMPLETED.md`** - Add completed task with brief description
+- **`docs/plans/backend/tasks/TASKS_ANALYSIS.md`** - Update progress percentage if needed
+
+#### Only Create New Documentation For:
+1. **Major architecture changes** (new microservices, significant refactoring)
+2. **New major features** (entirely new modules like Payment, Chat, etc.)
+3. **API documentation** (OpenAPI/Swagger specs)
+4. **Deployment guides** (new infrastructure setup)
+
+#### Task Completion Format:
+At the end of each task, provide:
+1. **Commit message** (conventional commits format in English)
+2. **Brief update entry for COMPLETED.md**
+
+**Example:**
+```markdown
+✅ File upload система (S3 интеграция для аватаров)
+  - Implemented multipart/form-data upload endpoint
+  - S3 bucket configuration with proper IAM permissions
+  - Image optimization (resize to max 1024x1024, compress)
+  - Added MIME type validation and virus scanning
+```
+
 ## Before Starting Work
 
 ### Checklist
@@ -268,10 +298,11 @@ const hashedPassword = await bcrypt.hash(password, 12);
 - [ ] No `any` types
 - [ ] No hardcoded secrets
 - [ ] Security checklist passed
-- [ ] Documentation updated (if needed)
+- [ ] **COMPLETED.md updated** with task entry (for feature work)
+- [ ] Commit message prepared (conventional commits format)
 
 ---
 
-**Last updated:** October 27, 2025
+**Last updated:** November 2, 2025
 **Priority:** CRITICAL
 **Status:** MANDATORY TO FOLLOW

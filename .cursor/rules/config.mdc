@@ -72,6 +72,55 @@ Always apply the following best practices when writing, reviewing, or suggesting
 - Follow consistent code formatting and style guides
 - Write unit tests for critical functionality
 
+## Documentation Rules
+
+**NEVER create separate documentation files for routine tasks.**
+
+Instead, update existing tracking files:
+
+### For Backend Tasks:
+- **`docs/plans/backend/tasks/COMPLETED.md`** - Add completed task with brief description
+- **`docs/plans/backend/tasks/TASKS_ANALYSIS.md`** - Update progress percentage and status
+
+### When to Write Separate Documentation:
+Only create new documentation files for:
+1. **Major architecture changes** (new microservices, significant refactoring)
+2. **New major features** (entirely new modules, payment systems, etc.)
+3. **API documentation** (OpenAPI/Swagger specs)
+4. **Deployment guides** (new infrastructure setup)
+
+### Task Completion Format:
+At the end of each task, provide:
+1. **Commit message** (conventional commits format)
+2. **Update to COMPLETED.md** (brief entry)
+
+**Commit message format (KEEP IT CONCISE):**
+```
+type(scope): brief description (max 72 chars)
+
+- Key change 1
+- Key change 2  
+- Key change 3 (max 5-7 bullets total)
+```
+
+**Rules:**
+- Subject line: Max 72 characters
+- Body: Max 5-7 bullet points (KEY changes only)
+- Total length: 10-15 lines MAX
+- Omit: File lists, dependency info, testing details
+
+**Example:**
+```markdown
+## Updated in COMPLETED.md
+
+Phase 2: User Management Module — 35%
+✅ File upload система (S3 интеграция для аватаров)
+  - Implemented multipart/form-data upload
+  - S3 bucket configuration with proper permissions
+  - Image optimization (resize, compress)
+  - Virus scanning integration
+```
+
 ---
 
 **Note:** For detailed rules, see:

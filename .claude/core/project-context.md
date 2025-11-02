@@ -498,6 +498,12 @@ PENDING → ACCEPTED → IN_PROGRESS → COMPLETED → PAID
 3. Проверяйте security requirements для задачи
 4. Следуйте coding standards из `.cursor/rules/`
 
+**Documentation Strategy:**
+- **NEVER create separate documentation files for routine tasks**
+- For backend tasks: Update `docs/plans/backend/tasks/COMPLETED.md` with brief task entry
+- Only create new docs for major features, architecture changes, or deployment guides
+- At task completion: Provide commit message + COMPLETED.md entry
+
 ### Для новых разработчиков
 
 **Quick start:**
@@ -508,6 +514,6 @@ PENDING → ACCEPTED → IN_PROGRESS → COMPLETED → PAID
 
 ---
 
-**Последнее обновление:** 27 октября 2025
+**Последнее обновление:** 2 ноября 2025
 **Статус проекта:** Planning & Configuration Phase
 **Следующая фаза:** MVP Phase 1 (Backend + Frontend initialization)
