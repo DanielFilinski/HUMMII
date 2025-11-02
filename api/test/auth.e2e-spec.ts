@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/shared/prisma/prisma.service';
 
@@ -135,7 +135,7 @@ describe('Authentication (e2e)', () => {
       const user = await prisma.user.findUnique({
         where: { email: testUser.email },
       });
-      verificationToken = user.verificationToken;
+      verificationToken = user?.verificationToken || '';
 
       // Verify email
       await request(app.getHttpServer())
@@ -219,7 +219,7 @@ describe('Authentication (e2e)', () => {
 
       // Verify email
       return request(app.getHttpServer())
-        .get(`/auth/verify-email?token=${user.verificationToken}`)
+        .get(`/auth/verify-email?token=${user?.verificationToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('message');
@@ -252,7 +252,7 @@ describe('Authentication (e2e)', () => {
       });
 
       await request(app.getHttpServer())
-        .get(`/auth/verify-email?token=${user.verificationToken}`);
+        .get(`/auth/verify-email?token=${user?.verificationToken}`);
 
       // Login to get refresh token
       const loginRes = await request(app.getHttpServer())
@@ -301,7 +301,7 @@ describe('Authentication (e2e)', () => {
       });
 
       await request(app.getHttpServer())
-        .get(`/auth/verify-email?token=${user.verificationToken}`);
+        .get(`/auth/verify-email?token=${user?.verificationToken}`);
     });
 
     it('should request password reset successfully', () => {
@@ -341,7 +341,7 @@ describe('Authentication (e2e)', () => {
       return request(app.getHttpServer())
         .post('/auth/password-reset/confirm')
         .send({
-          token: user.resetToken,
+          token: user?.resetToken || '',
           newPassword: 'NewPassword123',
         })
         .expect(200);
@@ -378,7 +378,7 @@ describe('Authentication (e2e)', () => {
       const user = users[0];
 
       await request(app.getHttpServer())
-        .get(`/auth/verify-email?token=${user.verificationToken}`);
+        .get(`/auth/verify-email?token=${user?.verificationToken}`);
 
       const loginRes = await request(app.getHttpServer())
         .post('/auth/login')
@@ -433,7 +433,7 @@ describe('Authentication (e2e)', () => {
       });
 
       await request(app.getHttpServer())
-        .get(`/auth/verify-email?token=${user.verificationToken}`);
+        .get(`/auth/verify-email?token=${user?.verificationToken}`);
 
       const loginRes = await request(app.getHttpServer())
         .post('/auth/login')

@@ -1,0 +1,55 @@
+services:
+  # ====================================
+  # PostgreSQL Test Database
+  # ====================================
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: hummii-postgres-test
+    environment:
+      POSTGRES_DB: hummii_test
+      POSTGRES_USER: hummii_test
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
+    tmpfs:
+      - /var/lib/postgresql/data  # In-memory for speed
+    ports:
+      - "5433:5432"
+    networks:
+      - hummii-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hummii_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ====================================
+  # API Test Container
+  # ====================================
+  api-test:
+    build:
+      context: ./api
+      dockerfile: ../docker/api.Dockerfile
+      target: test
+    platform: linux/amd64
+    container_name: hummii-api-test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://hummii_test:test_password@postgres-test:5432/hummii_test
+      JWT_ACCESS_SECRET: test_access_secret_key_for_testing_only
+      JWT_REFRESH_SECRET: test_refresh_secret_key_for_testing_only
+      JWT_ACCESS_EXPIRATION: 15m
+      JWT_REFRESH_EXPIRATION: 7d
+      FRONTEND_URL: http://localhost:3001
+      EMAIL_FROM: test@hummii.ca
+      APP_NAME: Hummii Test
+    networks:
+      - hummii-test-network
+    command: npm run test:all
+
+networks:
+  hummii-test-network:
+    driver: bridge
+

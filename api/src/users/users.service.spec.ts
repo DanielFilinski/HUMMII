@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { PrismaService } from '../shared/prisma/prisma.service';
+import { AuditService } from '../shared/audit/audit.service';
 
 describe('UsersService', () => {
   let service: UsersService;
   let prisma: PrismaService;
+  let auditService: AuditService;
 
   const mockPrismaService = {
     user: {
@@ -15,6 +17,10 @@ describe('UsersService', () => {
     session: {
       deleteMany: jest.fn(),
     },
+  };
+
+  const mockAuditService = {
+    log: jest.fn(),
   };
 
   const mockUser = {
@@ -68,11 +74,13 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: AuditService, useValue: mockAuditService },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     prisma = module.get<PrismaService>(PrismaService);
+    auditService = module.get<AuditService>(AuditService);
 
     jest.clearAllMocks();
   });
@@ -95,7 +103,7 @@ describe('UsersService', () => {
           name: true,
           phone: true,
           avatar: true,
-          role: true,
+          roles: true,
           isVerified: true,
           lastLoginAt: true,
           createdAt: true,
@@ -139,7 +147,7 @@ describe('UsersService', () => {
           name: true,
           phone: true,
           avatar: true,
-          role: true,
+          roles: true,
           isVerified: true,
           lastLoginAt: true,
           createdAt: true,

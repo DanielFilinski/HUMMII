@@ -49,6 +49,23 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 # Start development server
 CMD ["npm", "run", "start:dev"]
 
+# Test stage
+FROM development AS test
+WORKDIR /app
+
+# Copy everything
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Rebuild bcryptjs (no native modules)
+RUN npm install bcryptjs @types/bcryptjs
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Run tests
+CMD ["npm", "run", "test:all"]
+
 # Build stage
 FROM base AS builder
 WORKDIR /app
