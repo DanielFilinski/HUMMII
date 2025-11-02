@@ -44,7 +44,17 @@ export function AuthModal({ isOpen, onClose, reason, action }: AuthModalProps) {
     }
   }, [isAuthenticated, isOpen, onClose]);
 
-  if (!isOpen || isAuthenticated) return null;
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleRegister = () => {
     // Store current URL to redirect after registration
@@ -64,17 +74,7 @@ export function AuthModal({ isOpen, onClose, reason, action }: AuthModalProps) {
     onClose();
   };
 
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+  if (!isOpen || isAuthenticated) return null;
 
   return (
     <>
