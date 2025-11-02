@@ -35,7 +35,8 @@ export class ResourceOwnerGuard implements CanActivate {
     }
 
     // Admin always has access
-    if (user.role === UserRole.ADMIN) {
+    // Security: Check if user has ADMIN in their roles array
+    if (user.roles && user.roles.includes(UserRole.ADMIN)) {
       return true;
     }
 

@@ -35,6 +35,12 @@ export enum AuditAction {
   SESSION_DELETED = 'SESSION_DELETED',
   SESSION_EXPIRED = 'SESSION_EXPIRED',
 
+  // CRUD operations (for generic audit interceptor)
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+
   // System actions
   SYSTEM_ACTION = 'SYSTEM_ACTION',
   SECURITY_ALERT = 'SECURITY_ALERT',

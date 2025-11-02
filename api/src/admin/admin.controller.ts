@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -25,6 +26,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserRole } from '@prisma/client';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { AddUserRoleDto } from './dto/add-user-role.dto';
+import { RemoveUserRoleDto } from './dto/remove-user-role.dto';
 import { VerifyContractorDto } from './dto/verify-contractor.dto';
 
 @ApiTags('Admin')
@@ -67,9 +70,35 @@ export class AdminController {
     return this.adminService.getUserById(id);
   }
 
+  @Post('users/:id/roles')
+  @ApiOperation({ summary: 'Add role to user (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Role added successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  async addUserRole(
+    @Param('id') id: string,
+    @Body() dto: AddUserRoleDto,
+    @CurrentUser() admin: any,
+  ) {
+    return this.adminService.addUserRole(id, dto.role, admin.userId);
+  }
+
+  @Delete('users/:id/roles')
+  @ApiOperation({ summary: 'Remove role from user (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Role removed successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  async removeUserRole(
+    @Param('id') id: string,
+    @Body() dto: RemoveUserRoleDto,
+    @CurrentUser() admin: any,
+  ) {
+    return this.adminService.removeUserRole(id, dto.role, admin.userId);
+  }
+
   @Patch('users/:id/role')
-  @ApiOperation({ summary: 'Update user role (Admin only)' })
-  @ApiResponse({ status: 200, description: 'User role updated successfully' })
+  @ApiOperation({ summary: 'Update user roles (replace all) - DEPRECATED (Admin only)' })
+  @ApiResponse({ status: 200, description: 'User roles updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiParam({ name: 'id', description: 'User ID' })
   async updateUserRole(
@@ -77,7 +106,7 @@ export class AdminController {
     @Body() dto: UpdateUserRoleDto,
     @CurrentUser() admin: any,
   ) {
-    return this.adminService.updateUserRole(id, dto.role, admin.userId);
+    return this.adminService.updateUserRole(id, dto.roles, admin.userId);
   }
 
   @Patch('users/:id/lock')
@@ -123,12 +152,12 @@ export class AdminController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async getPendingContractors(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     return this.adminService.getPendingContractors({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page: parseInt(page || '1', 10),
+      limit: parseInt(limit || '20', 10),
     });
   }
 
@@ -175,15 +204,15 @@ export class AdminController {
   @ApiQuery({ name: 'action', required: false, type: String })
   @ApiQuery({ name: 'resourceType', required: false, type: String })
   async getAuditLogs(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '50',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('userId') userId?: string,
     @Query('action') action?: string,
     @Query('resourceType') resourceType?: string,
   ) {
     return this.adminService.getAuditLogs({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page: parseInt(page || '1', 10),
+      limit: parseInt(limit || '50', 10),
       userId,
       action,
       resourceType,
@@ -221,8 +250,8 @@ export class AdminController {
     description: 'User statistics retrieved successfully',
   })
   @ApiQuery({ name: 'period', required: false, enum: ['day', 'week', 'month', 'year'] })
-  async getUserStats(@Query('period') period: string = 'month') {
-    return this.adminService.getUserStats(period);
+  async getUserStats(@Query('period') period?: string) {
+    return this.adminService.getUserStats(period || 'month');
   }
 
   // ==================== PORTFOLIO MODERATION ====================
@@ -236,12 +265,12 @@ export class AdminController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async getPendingPortfolio(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     return this.adminService.getPendingPortfolio({
-      page: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      page: parseInt(page || '1', 10),
+      limit: parseInt(limit || '20', 10),
     });
   }
 

@@ -59,14 +59,14 @@ enum VerificationStatus {
 // ============================================================================
 
 model User {
-  id         String   @id @default(uuid())
-  email      String   @unique
+  id         String     @id @default(uuid())
+  email      String     @unique
   password   String
   name       String
   phone      String?
   avatar     String?
-  role       UserRole @default(CLIENT)
-  isVerified Boolean  @default(false)
+  roles      UserRole[] @default([CLIENT])
+  isVerified Boolean    @default(false)
 
   // Email verification
   verificationToken       String?
@@ -103,7 +103,6 @@ model User {
 
   @@index([email])
   @@index([phone])
-  @@index([role])
   @@map("users")
 }
 

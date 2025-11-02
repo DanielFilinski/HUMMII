@@ -8,6 +8,8 @@ export interface CreateAuditLogDto {
   action: AuditAction;
   entity?: AuditEntity;
   entityId?: string;
+  resourceType?: string; // NEW: For flexible resource type logging
+  resourceId?: string;   // NEW: Alternative to entityId
   ipAddress?: string;
   userAgent?: string;
   changes?: Record<string, any>;

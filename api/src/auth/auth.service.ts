@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { EmailService } from '../shared/email/email.service';
 import { AuditService } from '../shared/audit/audit.service';
@@ -217,7 +218,7 @@ export class AuthService {
     const tokens = await this.generateTokens(
       user.id,
       user.email,
-      user.role,
+      user.roles, // Pass roles array
       userAgent,
       ipAddress,
     );
@@ -243,15 +244,17 @@ export class AuthService {
 
   /**
    * Generate JWT access and refresh tokens
+   * Security: roles array is embedded in JWT payload for authorization
    */
   async generateTokens(
     userId: string,
     email: string,
-    role: string,
+    roles: UserRole[], // Array of roles
     userAgent?: string,
     ipAddress?: string,
   ) {
-    const payload = { sub: userId, email, role };
+    // Security: Include all roles in token payload
+    const payload = { sub: userId, email, roles };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
@@ -317,7 +320,7 @@ export class AuthService {
       const tokens = await this.generateTokens(
         session.user.id,
         session.user.email,
-        session.user.role,
+        session.user.roles, // Pass roles array
       );
 
       return tokens;
@@ -573,7 +576,7 @@ export class AuthService {
     const tokens = await this.generateTokens(
       user.id,
       user.email,
-      user.role,
+      user.roles, // Pass roles array
       userAgent,
       ipAddress,
     );

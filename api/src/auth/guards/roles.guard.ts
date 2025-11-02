@@ -9,6 +9,11 @@ import { Reflector } from '@nestjs/core';
 import { UserRole } from '@prisma/client';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
+/**
+ * Guard to check if user has required roles
+ * Updated to support multiple roles per user
+ * Security: Checks if user has ANY of the required roles
+ */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -39,8 +44,21 @@ export class RolesGuard implements CanActivate {
       });
     }
 
-    // Check if user has required role
-    const hasRole = requiredRoles.some((role) => user.role === role);
+    // Security: Validate that user.roles is an array
+    if (!Array.isArray(user.roles)) {
+      throw new UnauthorizedException({
+        statusCode: 401,
+        message: 'Invalid user roles data',
+        error: 'Unauthorized',
+        code: 'INVALID_ROLES',
+      });
+    }
+
+    // Check if user has ANY of the required roles
+    // Security: Using .some() ensures at least one role matches
+    const hasRole = requiredRoles.some((requiredRole) =>
+      user.roles.includes(requiredRole),
+    );
 
     if (!hasRole) {
       throw new ForbiddenException({
@@ -49,7 +67,7 @@ export class RolesGuard implements CanActivate {
         error: 'Forbidden',
         code: 'INSUFFICIENT_ROLE',
         requiredRoles,
-        userRole: user.role,
+        userRoles: user.roles, // Return array of user's roles
       });
     }
 

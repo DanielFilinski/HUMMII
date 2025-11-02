@@ -32,7 +32,9 @@ export class AdminService {
     };
 
     if (role) {
-      where.role = role;
+      where.roles = {
+        has: role, // Check if roles array contains this role
+      };
     }
 
     if (search) {
@@ -53,7 +55,7 @@ export class AdminService {
           email: true,
           name: true,
           phone: true,
-          role: true,
+          roles: true, // Return roles array
           isVerified: true,
           lockedUntil: true,
           lastLoginAt: true,
@@ -107,7 +109,7 @@ export class AdminService {
             },
           },
           orderBy: {
-            lastUsedAt: 'desc',
+            createdAt: 'desc', // Fixed: use createdAt instead of lastUsedAt
           },
           take: 10,
         },
@@ -130,45 +132,193 @@ export class AdminService {
     return safeUser;
   }
 
-  async updateUserRole(userId: string, newRole: UserRole, adminId: string) {
+  /**
+   * Add a role to user
+   * Security: ADMIN only, with audit logging
+   */
+  async addUserRole(userId: string, roleToAdd: UserRole, adminId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: { id: true, email: true, name: true, roles: true },
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
+    // Security: Don't allow modifying your own roles
     if (user.id === adminId) {
-      throw new BadRequestException('Cannot change your own role');
+      throw new BadRequestException('Cannot change your own roles');
     }
+
+    // Check if user already has this role
+    if (user.roles.includes(roleToAdd)) {
+      throw new BadRequestException(`User already has ${roleToAdd} role`);
+    }
+
+    // Add role to array
+    const updatedRoles = [...user.roles, roleToAdd];
 
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
-      data: { role: newRole },
+      data: { roles: updatedRoles },
       select: {
         id: true,
         email: true,
         name: true,
-        role: true,
+        roles: true,
       },
     });
 
-    // Audit log
+    // Audit log: Role added
     await this.auditService.log({
       userId: adminId,
       action: AuditAction.UPDATE,
       resourceType: 'user',
       resourceId: userId,
       metadata: {
-        field: 'role',
-        oldValue: user.role,
-        newValue: newRole,
+        operation: 'add_role',
+        roleAdded: roleToAdd,
+        previousRoles: user.roles,
+        newRoles: updatedRoles,
+        targetUser: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
       },
     });
 
     return {
-      message: 'User role updated successfully',
+      message: `Role ${roleToAdd} added successfully`,
+      user: updatedUser,
+    };
+  }
+
+  /**
+   * Remove a role from user
+   * Security: ADMIN only, ensures user has at least one role
+   */
+  async removeUserRole(userId: string, roleToRemove: UserRole, adminId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, roles: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Security: Don't allow modifying your own roles
+    if (user.id === adminId) {
+      throw new BadRequestException('Cannot change your own roles');
+    }
+
+    // Check if user has this role
+    if (!user.roles.includes(roleToRemove)) {
+      throw new BadRequestException(`User doesn't have ${roleToRemove} role`);
+    }
+
+    // Security: User must have at least one role
+    if (user.roles.length === 1) {
+      throw new BadRequestException('User must have at least one role');
+    }
+
+    // Remove role from array
+    const updatedRoles = user.roles.filter((r) => r !== roleToRemove);
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { roles: updatedRoles },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roles: true,
+      },
+    });
+
+    // Audit log: Role removed
+    await this.auditService.log({
+      userId: adminId,
+      action: AuditAction.UPDATE,
+      resourceType: 'user',
+      resourceId: userId,
+      metadata: {
+        operation: 'remove_role',
+        roleRemoved: roleToRemove,
+        previousRoles: user.roles,
+        newRoles: updatedRoles,
+        targetUser: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+      },
+    });
+
+    return {
+      message: `Role ${roleToRemove} removed successfully`,
+      user: updatedUser,
+    };
+  }
+
+  /**
+   * Set user roles (replace all)
+   * @deprecated Use addUserRole and removeUserRole instead
+   * Security: ADMIN only, with validation
+   */
+  async updateUserRole(userId: string, newRoles: UserRole[], adminId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, roles: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Security: Don't allow modifying your own roles
+    if (user.id === adminId) {
+      throw new BadRequestException('Cannot change your own roles');
+    }
+
+    // Security: Validate roles array
+    if (!newRoles || newRoles.length === 0) {
+      throw new BadRequestException('User must have at least one role');
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { roles: newRoles },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        roles: true,
+      },
+    });
+
+    // Audit log: Roles replaced
+    await this.auditService.log({
+      userId: adminId,
+      action: AuditAction.UPDATE,
+      resourceType: 'user',
+      resourceId: userId,
+      metadata: {
+        operation: 'replace_roles',
+        previousRoles: user.roles,
+        newRoles: newRoles,
+        targetUser: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
+      },
+    });
+
+    return {
+      message: 'User roles updated successfully',
       user: updatedUser,
     };
   }
@@ -186,7 +336,8 @@ export class AdminService {
       throw new BadRequestException('Cannot lock your own account');
     }
 
-    if (user.role === UserRole.ADMIN) {
+    // Security: Cannot lock admin accounts
+    if (user.roles.includes(UserRole.ADMIN)) {
       throw new BadRequestException('Cannot lock admin accounts');
     }
 
@@ -264,7 +415,7 @@ export class AdminService {
       throw new BadRequestException('Cannot delete your own account');
     }
 
-    if (user.role === UserRole.ADMIN) {
+    if (user.roles.includes(UserRole.ADMIN)) {
       throw new BadRequestException('Cannot delete admin accounts');
     }
 
@@ -469,7 +620,7 @@ export class AdminService {
               id: true,
               email: true,
               name: true,
-              role: true,
+              roles: true,
             },
           },
         },
@@ -498,7 +649,7 @@ export class AdminService {
             id: true,
             email: true,
             name: true,
-            role: true,
+            roles: true,
           },
         },
       },
@@ -525,13 +676,13 @@ export class AdminService {
     ] = await Promise.all([
       this.prisma.user.count({ where: { deletedAt: null } }),
       this.prisma.user.count({
-        where: { role: UserRole.CLIENT, deletedAt: null },
+        where: { roles: { has: UserRole.CLIENT }, deletedAt: null },
       }),
       this.prisma.user.count({
-        where: { role: UserRole.CONTRACTOR, deletedAt: null },
+        where: { roles: { has: UserRole.CONTRACTOR }, deletedAt: null },
       }),
       this.prisma.user.count({
-        where: { role: UserRole.ADMIN, deletedAt: null },
+        where: { roles: { has: UserRole.ADMIN }, deletedAt: null },
       }),
       this.prisma.contractor.count({
         where: { verificationStatus: VerificationStatus.VERIFIED },
