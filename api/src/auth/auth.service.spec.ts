@@ -10,7 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { EmailService } from '../shared/email/email.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 describe('AuthService', () => {
   let service: AuthService;

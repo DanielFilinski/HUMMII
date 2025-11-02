@@ -517,7 +517,6 @@ export class SessionService {
   - Google OAuth callback устанавливает токены в cookies
 - ✅ Установлен `cookie-parser` и добавлен в `main.ts`
 - ✅ Backward compatibility: API клиенты (Postman, mobile) могут использовать Authorization header
-- ✅ Сервер успешно запущен в Docker и работает корректно
 
 **Безопасность:**
 - ✅ `httpOnly: true` - защита от XSS атак
@@ -532,26 +531,6 @@ export class SessionService {
 - `/api/src/auth/auth.controller.ts` (обновлен)
 - `/api/src/main.ts` (обновлен)
 - `/api/package.json` (добавлены зависимости)
-- `/docs/security/HTTP_ONLY_COOKIES_IMPLEMENTATION.md` (документация)
-
-**Тестирование:**
-```bash
-# Сервер запущен успешно
-✅ Application is running on: http://localhost:3000
-✅ Swagger documentation: http://localhost:3000/api/docs
-
-# Для тестирования login с cookies:
-curl -X POST http://localhost:3000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password"}' \
-  -c cookies.txt -v
-
-# Проверить Set-Cookie заголовки:
-# Set-Cookie: accessToken=...; HttpOnly; Secure; SameSite=Strict
-# Set-Cookie: refreshToken=...; HttpOnly; Secure; SameSite=Strict
-```
-
-**Commit message:** Подготовлен в `/COMMIT_MESSAGE.txt`
 
 ---
 

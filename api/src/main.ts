@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './core/filters/http-exception.filter';
+import { AllExceptionsFilter } from './core/filters/http-exception.filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/winston.config';
@@ -15,15 +15,30 @@ async function bootstrap() {
     logger: WinstonModule.createLogger(winstonConfig),
   });
 
-  // Cookie parser (for HTTP-only cookies with JWT tokens)
-  app.use(cookieParser());
-
   // Request body size limit (protection against large payload attacks)
+  // MUST be before cookie parser
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 
-  // Security headers
-  app.use(helmet());
+  // Cookie parser (for HTTP-only cookies with JWT tokens)
+  // MUST be before helmet
+  app.use(cookieParser());
+
+  // Security headers (configured to allow cookies)
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Allow cookies
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow CORS
+    }),
+  );
 
   // CORS
   app.enableCors({
@@ -52,8 +67,8 @@ async function bootstrap() {
     }),
   );
 
-  // Global filters
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Global filters (catch ALL exceptions, not just HTTP)
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Global interceptors
   app.useGlobalInterceptors(new LoggingInterceptor());

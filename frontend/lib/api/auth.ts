@@ -39,8 +39,7 @@ export interface LoginResponse {
     roles: UserRole[];
     isVerified: boolean;
   };
-  accessToken: string;
-  refreshToken: string;
+  // Tokens are stored in HTTP-only cookies by backend, not in response body
 }
 
 /**

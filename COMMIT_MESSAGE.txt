@@ -1,7 +1,0 @@
-docs(rules): add documentation and commit message guidelines
-
-- Add documentation rules (never create separate docs for routine tasks)
-- Add concise commit message format (max 10-15 lines, 5-7 bullets)
-- Update COMPLETED.md as primary tracking file
-- Add rules to config.mdc, core-critical.mdc, mamory.mdc
-- Update project-context.md with documentation strategy
