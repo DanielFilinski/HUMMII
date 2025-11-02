@@ -1,9 +1,6 @@
 import { WinstonModuleOptions } from 'nest-winston';
 import * as winston from 'winston';
-import {
-  maskSensitiveData,
-  sanitizeLogMessage,
-} from '../shared/logging/pii-masking.util';
+import { maskSensitiveData, sanitizeLogMessage } from '../shared/logging/pii-masking.util';
 
 /**
  * Winston Logger Configuration with PII Masking

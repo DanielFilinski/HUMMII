@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuditService } from '../../shared/audit/audit.service';
@@ -11,11 +6,11 @@ import { AuditAction } from '../../shared/audit/enums/audit-action.enum';
 
 /**
  * AuditInterceptor - Automatically logs all operations for PIPEDA compliance
- * 
+ *
  * Usage:
  * - Can be applied globally or to specific controllers
  * - Logs all HTTP requests with user info, action, and metadata
- * 
+ *
  * Features:
  * - Automatically determines action type from HTTP method
  * - Extracts resource type and ID from URL
@@ -129,7 +124,7 @@ export class AuditInterceptor implements NestInterceptor {
   private extractResourceType(url: string): string {
     // Remove query parameters
     const cleanUrl = url.split('?')[0];
-    
+
     // Split by / and filter empty strings
     const segments = cleanUrl.split('/').filter(Boolean);
 
@@ -148,7 +143,7 @@ export class AuditInterceptor implements NestInterceptor {
     const filtered = segments.filter(
       (s) => !['api', 'v1', 'me'].includes(s) && !s.match(/^[0-9a-f-]{36}$/i),
     );
-    
+
     return filtered[0] || 'unknown';
   }
 
@@ -161,16 +156,15 @@ export class AuditInterceptor implements NestInterceptor {
   private extractResourceId(url: string): string | undefined {
     // Remove query parameters
     const cleanUrl = url.split('?')[0];
-    
+
     // Split by / and find UUID-like segments
     const segments = cleanUrl.split('/').filter(Boolean);
 
     // Look for UUID pattern (8-4-4-4-12 format)
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    
+
     const resourceId = segments.find((segment) => uuidPattern.test(segment));
 
     return resourceId;
   }
 }
-

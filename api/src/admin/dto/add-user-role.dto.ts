@@ -17,4 +17,3 @@ export class AddUserRoleDto {
   @IsNotEmpty()
   role: UserRole;
 }
-

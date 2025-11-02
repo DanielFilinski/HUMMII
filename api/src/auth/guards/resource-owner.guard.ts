@@ -10,12 +10,12 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
 
 /**
  * ResourceOwnerGuard - checks if user owns the resource they're trying to access
- * 
+ *
  * Usage:
  * @UseGuards(JwtAuthGuard, ResourceOwnerGuard)
  * @Patch(':id')
  * async updateResource(@Param('id') id: string) { ... }
- * 
+ *
  * Features:
  * - ADMIN always has access
  * - Resource owner has access
@@ -48,11 +48,7 @@ export class ResourceOwnerGuard implements CanActivate {
     const resourceType = this.getResourceType(request.path);
 
     // Check ownership based on resource type
-    const isOwner = await this.checkOwnership(
-      resourceType,
-      resourceId,
-      user.userId,
-    );
+    const isOwner = await this.checkOwnership(resourceType, resourceId, user.userId);
 
     if (!isOwner) {
       throw new ForbiddenException(
@@ -69,12 +65,12 @@ export class ResourceOwnerGuard implements CanActivate {
   private getResourceType(path: string): string {
     // Extract first segment after /api/v1/ or /
     const segments = path.split('/').filter(Boolean);
-    
+
     // Common patterns:
     // /api/v1/orders/:id -> 'orders'
     // /orders/:id -> 'orders'
     // /users/:id -> 'users'
-    
+
     if (segments.includes('orders')) return 'order';
     if (segments.includes('reviews')) return 'review';
     if (segments.includes('users')) return 'user';
@@ -87,11 +83,7 @@ export class ResourceOwnerGuard implements CanActivate {
   /**
    * Check if user owns the resource
    */
-  private async checkOwnership(
-    type: string,
-    resourceId: string,
-    userId: string,
-  ): Promise<boolean> {
+  private async checkOwnership(type: string, resourceId: string, userId: string): Promise<boolean> {
     try {
       switch (type) {
         case 'order':
@@ -161,4 +153,3 @@ export class ResourceOwnerGuard implements CanActivate {
     }
   }
 }
-

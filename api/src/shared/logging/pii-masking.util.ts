@@ -197,9 +197,8 @@ export function sanitizeLogMessage(message: string): string {
   let sanitized = message;
 
   // Mask email addresses
-  sanitized = sanitized.replace(
-    /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-    (email) => maskEmail(email),
+  sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, (email) =>
+    maskEmail(email),
   );
 
   // Mask phone numbers (various formats)
@@ -220,4 +219,3 @@ export function sanitizeLogMessage(message: string): string {
 
   return sanitized;
 }
-

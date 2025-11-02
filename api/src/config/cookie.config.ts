@@ -55,4 +55,3 @@ export class CookieConfig {
   static readonly ACCESS_TOKEN_COOKIE = 'accessToken';
   static readonly REFRESH_TOKEN_COOKIE = 'refreshToken';
 }
-

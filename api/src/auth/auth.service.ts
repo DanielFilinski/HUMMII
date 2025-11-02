@@ -138,11 +138,7 @@ export class AuthService {
   /**
    * Login user with failed login tracking
    */
-  async login(
-    loginDto: LoginDto,
-    userAgent?: string,
-    ipAddress?: string,
-  ) {
+  async login(loginDto: LoginDto, userAgent?: string, ipAddress?: string) {
     const { email, password } = loginDto;
 
     // Check if user account is locked (Redis-based)
@@ -517,11 +513,7 @@ export class AuthService {
   /**
    * OAuth login (Google, Apple, etc.)
    */
-  async oauthLogin(
-    oauthUser: any,
-    userAgent?: string,
-    ipAddress?: string,
-  ) {
+  async oauthLogin(oauthUser: any, userAgent?: string, ipAddress?: string) {
     const { email, name, avatar, provider, providerId } = oauthUser;
 
     // Find or create user

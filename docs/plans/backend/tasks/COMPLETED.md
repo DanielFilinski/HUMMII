@@ -9,6 +9,8 @@ Phase 0: Foundation & Infrastructure — 100%
 ✅ Swagger/OpenAPI
 ✅ Helmet.js с CSP и security headers (HSTS, X-Frame-Options, etc.)
 ✅ CORS whitelist для production и development окружений
+✅ Rate limiting endpoint-specific (auth 3-10 req/min, profile 2-5 req/hour)
+✅ E2E tests для rate limiting
 
 
 Phase 1: Authentication & Authorization — 100%

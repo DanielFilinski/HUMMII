@@ -1,7 +1,4 @@
-import {
-  RedisModuleOptions,
-  RedisSingleOptions,
-} from '@nestjs-modules/ioredis';
+import { RedisModuleOptions, RedisSingleOptions } from '@nestjs-modules/ioredis';
 import { RedisOptions } from 'ioredis';
 
 /**
@@ -24,9 +21,7 @@ export class RedisConfig {
 
     // In production, password is REQUIRED (validated by env.validation.ts)
     if (isProduction && !password) {
-      throw new Error(
-        'REDIS_PASSWORD is required in production environment for security',
-      );
+      throw new Error('REDIS_PASSWORD is required in production environment for security');
     }
 
     const options: RedisOptions = {
@@ -99,4 +94,3 @@ export class RedisConfig {
     };
   }
 }
-

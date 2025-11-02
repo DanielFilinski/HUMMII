@@ -1,10 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 @Catch(HttpException)
@@ -39,14 +33,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+      exception instanceof HttpException ? exception.getResponse() : 'Internal server error';
 
     // Log the error (Winston will handle this)
     console.error('Unhandled exception:', exception);

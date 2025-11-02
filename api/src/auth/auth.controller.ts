@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Get,
-  Patch,
   Delete,
   Body,
   Query,
@@ -45,7 +44,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: 3, ttl: 3600000 } }) // 3 registrations per hour
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 409, description: 'User already exists' })
@@ -96,9 +95,11 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 refreshes per minute
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiResponse({ status: 200, description: 'Token successfully refreshed' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
     @Req() req: Request,
@@ -166,10 +167,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout all sessions (requires authentication)' })
   @ApiResponse({ status: 204, description: 'All sessions terminated' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logoutAll(
-    @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logoutAll(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
     await this.authService.logoutAll(req.user.userId);
 
     // Clear cookies for current session
@@ -214,10 +212,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleAuthCallback(
-    @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async googleAuthCallback(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.connection?.remoteAddress;
     const result = await this.authService.oauthLogin(req.user, userAgent, ipAddress);

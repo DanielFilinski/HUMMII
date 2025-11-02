@@ -18,4 +18,3 @@ export class RemoveUserRoleDto {
   @IsNotEmpty()
   role: UserRole;
 }
-

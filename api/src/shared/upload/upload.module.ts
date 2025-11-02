@@ -15,4 +15,3 @@ import { UploadSecurityService } from './upload-security.service';
   exports: [UploadSecurityService],
 })
 export class UploadModule {}
-

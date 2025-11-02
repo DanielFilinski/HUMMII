@@ -467,8 +467,9 @@ export class SessionService {
 ### API Security
 - [x] Helmet.js с CSP настройками ✅ РЕАЛИЗОВАНО
 - [x] CORS whitelist (production domains only) ✅ РЕАЛИЗОВАНО
-- [x] Rate limiting на всех endpoints (глобально через APP_GUARD) ✅ УЖЕ НАСТРОЕНО
-- [x] Специфичные rate limits для auth (5 req/min login) ✅ УЖЕ НАСТРОЕНО
+- [x] Rate limiting на всех endpoints (глобально через APP_GUARD) ✅ РЕАЛИЗОВАНО
+- [x] Специфичные rate limits для auth (5 req/min login, 3/hour register) ✅ РЕАЛИЗОВАНО
+- [x] Специфичные rate limits для profile (5/hour updates, 2/day deletion) ✅ РЕАЛИЗОВАНО
 - [x] Request size limits (10MB) ✅ УЖЕ НАСТРОЕНО
 
 ### Data Protection
@@ -816,6 +817,51 @@ export class SessionService {
 - `/api/src/auth/services/failed-login.service.ts` (создан)
 - `/api/src/auth/auth.service.ts` (обновлен - интеграция)
 - `/api/src/auth/auth.module.ts` (обновлен - добавлен provider)
+
+---
+
+### 12. Rate Limiting на Endpoint-уровне (Приоритет #4) ✅
+
+**Что сделано:**
+- ✅ Глобальный `ThrottlerGuard` применен через `APP_GUARD` provider
+- ✅ Базовый лимит: 100 req/min per IP для всех endpoints
+- ✅ **Auth endpoints** - специфичные лимиты:
+  - `POST /auth/register` → 3 registrations per hour
+  - `POST /auth/login` → 5 attempts per minute
+  - `POST /auth/refresh` → 10 refreshes per minute
+  - `POST /auth/password-reset/request` → 3 requests per minute (already configured)
+  - `POST /auth/password-reset/confirm` → 3 attempts per minute (already configured)
+- ✅ **User profile endpoints** - специфичные лимиты:
+  - `PATCH /users/me` → 5 updates per hour
+  - `DELETE /users/me` → 2 deletions per day (prevent accidental)
+  - `GET /users/me/export` → 3 exports per hour
+- ✅ HTTP 429 responses с proper headers (`X-RateLimit-*`, `Retry-After`)
+- ✅ Comprehensive documentation: `/docs/security/rate-limiting.md`
+
+**Multi-Layer Protection:**
+```
+Layer 1: Nginx (200 req/sec)
+  ↓
+Layer 2: Global Throttle (100 req/min)
+  ↓
+Layer 3: Endpoint-Specific (3-10 req/min auth, 2-5 req/hour profile)
+  ↓
+Layer 4: Failed Login Tracking (5 attempts → 15 min lockout)
+```
+
+**Security Benefits:**
+- ✅ Brute-force attack prevention (login, password reset)
+- ✅ Account enumeration protection
+- ✅ API abuse prevention
+- ✅ DDoS mitigation
+- ✅ Spam registration prevention (3/hour limit)
+- ✅ Accidental deletion protection (2/day limit)
+
+**Файлы изменены:**
+- `/api/src/app.module.ts` (global guard already configured)
+- `/api/src/auth/auth.controller.ts` (updated throttle limits)
+- `/api/src/users/users.controller.ts` (added throttle decorators)
+- `/docs/security/rate-limiting.md` (created comprehensive guide)
 
 ---
 

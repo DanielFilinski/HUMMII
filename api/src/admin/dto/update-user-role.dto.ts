@@ -21,4 +21,3 @@ export class UpdateUserRoleDto {
   @IsEnum(UserRole, { each: true, message: 'Invalid role in array' })
   roles: UserRole[];
 }
-

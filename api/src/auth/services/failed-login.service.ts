@@ -79,11 +79,7 @@ export class FailedLoginService {
    * Record failed login attempt
    * Increments counter and locks account/IP if threshold exceeded
    */
-  async recordFailedAttempt(
-    email: string,
-    ipAddress: string,
-    userAgent?: string,
-  ): Promise<void> {
+  async recordFailedAttempt(email: string, ipAddress: string, userAgent?: string): Promise<void> {
     // Increment user attempt counter
     const userAttempts = await this.incrementUserAttempts(email);
 
@@ -105,9 +101,7 @@ export class FailedLoginService {
     // Lock user account if threshold exceeded
     if (userAttempts >= this.MAX_LOGIN_ATTEMPTS) {
       await this.lockUserAccount(email);
-      this.logger.error(
-        `Account locked due to ${userAttempts} failed login attempts: ${email}`,
-      );
+      this.logger.error(`Account locked due to ${userAttempts} failed login attempts: ${email}`);
     }
 
     // Lock IP address if threshold exceeded
@@ -185,10 +179,7 @@ export class FailedLoginService {
     const isLocked = (await this.redis.get(lockKey)) !== null;
     const attempts = await this.redis.get(attemptKey);
     const currentAttempts = attempts ? parseInt(attempts, 10) : 0;
-    const remainingAttempts = Math.max(
-      0,
-      this.MAX_LOGIN_ATTEMPTS - currentAttempts,
-    );
+    const remainingAttempts = Math.max(0, this.MAX_LOGIN_ATTEMPTS - currentAttempts);
 
     let lockoutExpiresIn: number | undefined;
     if (isLocked) {
@@ -261,4 +252,3 @@ export class FailedLoginService {
     return `hummii:auth:lockout:ip:${ipAddress}`;
   }
 }
-

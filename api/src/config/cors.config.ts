@@ -110,4 +110,3 @@ export const getCorsConfig = (): CorsOptions => {
     optionsSuccessStatus: 204,
   };
 };
-

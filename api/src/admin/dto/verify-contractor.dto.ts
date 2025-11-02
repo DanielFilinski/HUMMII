@@ -20,4 +20,3 @@ export class VerifyContractorDto {
   @IsOptional()
   notes?: string;
 }
-

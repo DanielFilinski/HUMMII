@@ -89,10 +89,7 @@ export class UploadSecurityService {
     const metadata = await sharpInstance.metadata();
 
     // Validate dimensions
-    if (
-      metadata.width! > this.MAX_IMAGE_WIDTH ||
-      metadata.height! > this.MAX_IMAGE_HEIGHT
-    ) {
+    if (metadata.width! > this.MAX_IMAGE_WIDTH || metadata.height! > this.MAX_IMAGE_HEIGHT) {
       throw new BadRequestException(
         `Image dimensions too large. Maximum: ${this.MAX_IMAGE_WIDTH}x${this.MAX_IMAGE_HEIGHT}`,
       );
@@ -197,15 +194,11 @@ export class UploadSecurityService {
    */
   private validateImageSignature(buffer: Buffer): void {
     // JPEG: FF D8 FF
-    const isJpeg =
-      buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+    const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
 
     // PNG: 89 50 4E 47 0D 0A 1A 0A
     const isPng =
-      buffer[0] === 0x89 &&
-      buffer[1] === 0x50 &&
-      buffer[2] === 0x4e &&
-      buffer[3] === 0x47;
+      buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47;
 
     // WebP: 52 49 46 46 (RIFF) + WebP header
     const isWebP =
@@ -220,10 +213,7 @@ export class UploadSecurityService {
 
     // GIF: 47 49 46 38 (GIF8)
     const isGif =
-      buffer[0] === 0x47 &&
-      buffer[1] === 0x49 &&
-      buffer[2] === 0x46 &&
-      buffer[3] === 0x38;
+      buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38;
 
     if (!isJpeg && !isPng && !isWebP && !isGif) {
       throw new BadRequestException(
@@ -274,32 +264,22 @@ export class UploadSecurityService {
   private validateDocumentSignature(buffer: Buffer, mimeType: string): void {
     // PDF: 25 50 44 46 (%PDF)
     const isPdf =
-      buffer[0] === 0x25 &&
-      buffer[1] === 0x50 &&
-      buffer[2] === 0x44 &&
-      buffer[3] === 0x46;
+      buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
 
     // ZIP-based formats (DOCX): 50 4B 03 04 (PK..)
     const isZipBased =
-      buffer[0] === 0x50 &&
-      buffer[1] === 0x4b &&
-      buffer[2] === 0x03 &&
-      buffer[3] === 0x04;
+      buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04;
 
     // DOC (old format): D0 CF 11 E0 A1 B1 1A E1
     const isDoc =
-      buffer[0] === 0xd0 &&
-      buffer[1] === 0xcf &&
-      buffer[2] === 0x11 &&
-      buffer[3] === 0xe0;
+      buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0;
 
     if (mimeType === 'application/pdf' && !isPdf) {
       throw new BadRequestException('Invalid PDF file signature');
     }
 
     if (
-      mimeType ===
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' &&
       !isZipBased
     ) {
       throw new BadRequestException('Invalid DOCX file signature');
@@ -333,10 +313,7 @@ export class UploadSecurityService {
     const maxLength = 255;
     if (sanitized.length > maxLength) {
       const ext = sanitized.split('.').pop();
-      const nameWithoutExt = sanitized.substring(
-        0,
-        sanitized.length - ext!.length - 1,
-      );
+      const nameWithoutExt = sanitized.substring(0, sanitized.length - ext!.length - 1);
       sanitized = `${nameWithoutExt.substring(0, maxLength - ext!.length - 1)}.${ext}`;
     }
 
@@ -357,4 +334,3 @@ export class UploadSecurityService {
     return `${timestamp}-${random}-${nameWithoutExt}.${ext}`;
   }
 }
-

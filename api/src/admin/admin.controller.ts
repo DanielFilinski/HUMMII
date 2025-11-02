@@ -151,10 +151,7 @@ export class AdminController {
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  async getPendingContractors(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  async getPendingContractors(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.adminService.getPendingContractors({
       page: parseInt(page || '1', 10),
       limit: parseInt(limit || '20', 10),
@@ -264,10 +261,7 @@ export class AdminController {
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  async getPendingPortfolio(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  async getPendingPortfolio(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.adminService.getPendingPortfolio({
       page: parseInt(page || '1', 10),
       limit: parseInt(limit || '20', 10),
@@ -302,4 +296,3 @@ export class AdminController {
     return this.adminService.rejectPortfolioItem(id, admin.userId, reason);
   }
 }
-

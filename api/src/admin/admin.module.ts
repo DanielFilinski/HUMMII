@@ -11,4 +11,3 @@ import { AuditModule } from '../shared/audit/audit.module';
   exports: [AdminService],
 })
 export class AdminModule {}
-

@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
 import { UserRole, VerificationStatus } from '@prisma/client';
@@ -18,12 +14,7 @@ export class AdminService {
 
   // ==================== USER MANAGEMENT ====================
 
-  async getAllUsers(filters: {
-    page: number;
-    limit: number;
-    role?: UserRole;
-    search?: string;
-  }) {
+  async getAllUsers(filters: { page: number; limit: number; role?: UserRole; search?: string }) {
     const { page, limit, role, search } = filters;
     const skip = (page - 1) * limit;
 
@@ -493,11 +484,7 @@ export class AdminService {
     };
   }
 
-  async verifyContractor(
-    contractorId: string,
-    dto: VerifyContractorDto,
-    adminId: string,
-  ) {
+  async verifyContractor(contractorId: string, dto: VerifyContractorDto, adminId: string) {
     const contractor = await this.prisma.contractor.findUnique({
       where: { id: contractorId },
       include: { user: true },
@@ -511,8 +498,7 @@ export class AdminService {
       where: { id: contractorId },
       data: {
         verificationStatus: dto.status,
-        verificationDate:
-          dto.status === VerificationStatus.VERIFIED ? new Date() : null,
+        verificationDate: dto.status === VerificationStatus.VERIFIED ? new Date() : null,
       },
       include: {
         user: {
@@ -544,11 +530,7 @@ export class AdminService {
     };
   }
 
-  async rejectContractor(
-    contractorId: string,
-    adminId: string,
-    reason?: string,
-  ) {
+  async rejectContractor(contractorId: string, adminId: string, reason?: string) {
     const contractor = await this.prisma.contractor.findUnique({
       where: { id: contractorId },
     });
@@ -722,7 +704,7 @@ export class AdminService {
   async getUserStats(period: string) {
     // Calculate date range based on period
     const now = new Date();
-    let startDate = new Date();
+    const startDate = new Date();
 
     switch (period) {
       case 'day':
@@ -855,11 +837,7 @@ export class AdminService {
     };
   }
 
-  async rejectPortfolioItem(
-    itemId: string,
-    adminId: string,
-    reason?: string,
-  ) {
+  async rejectPortfolioItem(itemId: string, adminId: string, reason?: string) {
     const item = await this.prisma.portfolioItem.findUnique({
       where: { id: itemId },
     });
@@ -892,4 +870,3 @@ export class AdminService {
     };
   }
 }
-
