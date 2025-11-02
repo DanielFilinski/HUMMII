@@ -76,8 +76,8 @@ export function useProtectedAction({
    */
   const hasRequiredRole = useCallback(() => {
     if (!requiredRoles || requiredRoles.length === 0) return true;
-    if (!user) return false;
-    return requiredRoles.includes(user.role as UserRole);
+    if (!user || !user.roles) return false;
+    return requiredRoles.some(role => user.roles.includes(role));
   }, [requiredRoles, user]);
 
   /**
@@ -96,7 +96,7 @@ export function useProtectedAction({
       if (requiredRoles && requiredRoles.length > 0 && !hasRequiredRole()) {
         // User is authenticated but lacks required role
         console.warn(
-          `User role ${user?.role} does not match required roles: ${requiredRoles.join(', ')}`
+          `User roles ${user?.roles?.join(', ')} do not match required roles: ${requiredRoles.join(', ')}`
         );
         onInsufficientRole?.();
         // You can show a different modal or toast here
@@ -115,7 +115,7 @@ export function useProtectedAction({
         onSuccess?.();
       }
     },
-    [isAuthenticated, hasRequiredRole, onSuccess, onInsufficientRole, requiredRoles, user?.role]
+    [isAuthenticated, hasRequiredRole, onSuccess, onInsufficientRole, requiredRoles, user?.roles]
   );
 
   /**

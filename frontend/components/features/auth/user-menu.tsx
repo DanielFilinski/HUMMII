@@ -4,13 +4,14 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { apiClient } from '@/lib/api/client';
+import { RoleSwitcher } from './role-switcher';
 
 /**
- * User menu component with logout functionality
- * Shows user info and logout button when authenticated
+ * User menu component with logout functionality and role switcher
+ * Shows user info, role switcher (if multiple roles), and logout button
  */
 export function UserMenu() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, activeRole, isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,10 +41,15 @@ export function UserMenu() {
 
   return (
     <div className="flex items-center gap-4">
+      {/* Role Switcher (only shows if user has multiple roles) */}
+      <RoleSwitcher />
+
       {/* User Info */}
       <div className="hidden sm:block text-right">
         <p className="text-sm font-medium text-gray-900">{user.name}</p>
-        <p className="text-xs text-gray-500">{user.role}</p>
+        <p className="text-xs text-gray-500">
+          {activeRole || user.roles[0]}
+        </p>
       </div>
 
       {/* Avatar */}

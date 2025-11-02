@@ -69,9 +69,9 @@ export function OnlyFor({
   role: UserRole; 
   children: ReactNode;
 }) {
-  const { role: userRole } = useRole();
+  const { activeRole } = useRole();
 
-  if (userRole !== role) {
+  if (activeRole !== role) {
     return null;
   }
 
@@ -95,9 +95,9 @@ export function HideFor({
   role: UserRole; 
   children: ReactNode;
 }) {
-  const { role: userRole } = useRole();
+  const { activeRole } = useRole();
 
-  if (userRole === role) {
+  if (activeRole === role) {
     return null;
   }
 

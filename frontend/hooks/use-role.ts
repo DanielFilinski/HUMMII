@@ -6,49 +6,74 @@ import { useAuthStore } from '@/lib/store/auth-store';
 export type UserRole = 'CLIENT' | 'CONTRACTOR' | 'ADMIN';
 
 /**
- * Custom hook for role-based access control
+ * Custom hook for role-based access control with multi-role support
+ * 
+ * Security: Uses activeRole for UI decisions, but checks full roles array
  * 
  * @example
  * ```tsx
- * const { hasRole, isAdmin, isContractor, isClient } = useRole();
+ * const { hasRole, isAdmin, activeRole, roles } = useRole();
  * 
- * if (isAdmin()) {
- *   // Show admin content
+ * // Check if user HAS admin role (in their roles array)
+ * if (hasRole('ADMIN')) {
+ *   // User CAN be admin
  * }
  * 
+ * // Check if user IS CURRENTLY in admin mode
+ * if (activeRole === 'ADMIN') {
+ *   // User is actively using admin mode
+ * }
+ * 
+ * // Check if user has multiple roles
  * if (hasRole(['CLIENT', 'CONTRACTOR'])) {
- *   // Show content for clients and contractors
+ *   // User has at least one of these roles
  * }
  * ```
  */
 export function useRole() {
   const user = useAuthStore((state) => state.user);
+  const activeRole = useAuthStore((state) => state.activeRole);
   
   /**
-   * Check if user has one of the required roles
+   * Check if user has one of the required roles (in their roles array)
    * @param roles - Single role or array of roles
    * @returns true if user has any of the required roles
    */
   const hasRole = (roles: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
+    if (!user || !user.roles) return false;
     const rolesArray = Array.isArray(roles) ? roles : [roles];
-    return rolesArray.includes(user.role as UserRole);
+    return rolesArray.some(role => user.roles.includes(role));
   };
 
   /**
-   * Check if user is CLIENT
+   * Check if user HAS CLIENT role (not necessarily active)
    */
-  const isClient = (): boolean => user?.role === 'CLIENT';
+  const isClient = (): boolean => user?.roles?.includes('CLIENT') || false;
 
   /**
-   * Check if user is CONTRACTOR
+   * Check if user HAS CONTRACTOR role (not necessarily active)
    */
-  const isContractor = (): boolean => user?.role === 'CONTRACTOR';
+  const isContractor = (): boolean => user?.roles?.includes('CONTRACTOR') || false;
 
   /**
-   * Check if user is ADMIN
+   * Check if user HAS ADMIN role (not necessarily active)
    */
-  const isAdmin = (): boolean => user?.role === 'ADMIN';
+  const isAdmin = (): boolean => user?.roles?.includes('ADMIN') || false;
+
+  /**
+   * Check if user's ACTIVE role is CLIENT
+   */
+  const isActiveClient = (): boolean => activeRole === 'CLIENT';
+
+  /**
+   * Check if user's ACTIVE role is CONTRACTOR
+   */
+  const isActiveContractor = (): boolean => activeRole === 'CONTRACTOR';
+
+  /**
+   * Check if user's ACTIVE role is ADMIN
+   */
+  const isActiveAdmin = (): boolean => activeRole === 'ADMIN';
 
   /**
    * Check if user has any of multiple roles
@@ -56,48 +81,65 @@ export function useRole() {
    * @returns true if user has any of the roles
    */
   const hasAnyRole = (...roles: UserRole[]): boolean => {
-    if (!user) return false;
-    return roles.includes(user.role as UserRole);
+    if (!user || !user.roles) return false;
+    return roles.some(role => user.roles.includes(role));
   };
 
   /**
    * Check if user has all of the specified roles
-   * Note: In current implementation, a user can only have one role at a time
-   * This is for future-proofing if multiple roles are needed
    * @param roles - Array of roles to check
    * @returns true if user has all roles
    */
   const hasAllRoles = (...roles: UserRole[]): boolean => {
-    if (!user || roles.length === 0) return false;
-    // Currently user can only have one role, so only works for single role
-    return roles.length === 1 && roles[0] === user.role;
+    if (!user || !user.roles || roles.length === 0) return false;
+    return roles.every(role => user.roles.includes(role));
   };
 
   return {
     /**
-     * Current user role or undefined if not authenticated
+     * Current ACTIVE role (what mode user is in)
      */
-    role: user?.role as UserRole | undefined,
+    activeRole: activeRole as UserRole | null,
     
     /**
-     * Check if user has required role(s)
+     * All roles user has
+     */
+    roles: user?.roles || [],
+    
+    /**
+     * Check if user has required role(s) in their roles array
      */
     hasRole,
     
     /**
-     * Check if user is CLIENT
+     * Check if user HAS CLIENT role
      */
     isClient,
     
     /**
-     * Check if user is CONTRACTOR
+     * Check if user HAS CONTRACTOR role
      */
     isContractor,
     
     /**
-     * Check if user is ADMIN
+     * Check if user HAS ADMIN role
      */
     isAdmin,
+    
+    /**
+     * Check if user's ACTIVE role is CLIENT
+     */
+    isActiveClient,
+    
+    /**
+     * Check if user's ACTIVE role is CONTRACTOR
+     */
+    isActiveContractor,
+    
+    /**
+     * Check if user's ACTIVE role is ADMIN
+     */
+    isActiveAdmin,
     
     /**
      * Check if user has any of the specified roles

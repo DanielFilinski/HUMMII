@@ -44,7 +44,7 @@ export default function SimpleProtectedExample() {
                   ✅ Authenticated
                 </p>
                 <p className="text-sm text-gray-600">
-                  Role: <span className="font-medium">{user?.role}</span>
+                  Roles: <span className="font-medium">{user?.roles?.join(', ')}</span>
                 </p>
                 <p className="text-sm text-gray-600">
                   Name: <span className="font-medium">{user?.name}</span>

@@ -38,7 +38,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
+  roles: UserRole[]; // CHANGED: from role to roles array
   isVerified?: boolean;
   createdAt: string;
   updatedAt: string;

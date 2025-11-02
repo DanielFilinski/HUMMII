@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './client';
+import { UserRole } from '@/types';
 
 export interface RegisterRequest {
   name: string;
@@ -35,7 +36,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    role: string;
+    roles: UserRole[];
     isVerified: boolean;
   };
   accessToken: string;

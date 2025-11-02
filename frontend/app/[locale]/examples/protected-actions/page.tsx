@@ -37,7 +37,7 @@ export default function ProtectedActionsExamplePage() {
           <div className="mt-6 p-4 bg-white rounded-lg shadow inline-block">
             <p className="text-sm font-medium text-gray-700">
               Status: {isAuthenticated ? (
-                <span className="text-green-600">✅ Authenticated as {user?.role}</span>
+                <span className="text-green-600">✅ Authenticated as {user?.roles?.join(', ')}</span>
               ) : (
                 <span className="text-yellow-600">⚠️ Not Authenticated</span>
               )}

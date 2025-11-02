@@ -56,7 +56,7 @@ export function LoginForm() {
         id: response.user.id,
         email: response.user.email,
         name: response.user.name,
-        role: response.user.role,
+        roles: response.user.roles,
       });
 
       // Redirect to saved path or home page
