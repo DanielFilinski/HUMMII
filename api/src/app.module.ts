@@ -8,6 +8,7 @@ import { EmailModule } from './shared/email/email.module';
 import { AuditModule } from './shared/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { AdminModule } from './admin/admin.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -39,6 +40,7 @@ import { validate } from './config/env.validation';
     // Feature modules
     AuthModule,
     UsersModule,
+    AdminModule, // Admin panel API
   ],
   controllers: [AppController],
   providers: [AppService],

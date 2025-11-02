@@ -8,6 +8,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { RolesGuard } from './guards/roles.guard';
+import { ResourceOwnerGuard } from './guards/resource-owner.guard';
 import { PrismaService } from '../shared/prisma/prisma.service';
 
 @Module({
@@ -31,6 +33,8 @@ import { PrismaService } from '../shared/prisma/prisma.service';
     JwtStrategy,
     JwtRefreshStrategy,
     LocalStrategy,
+    RolesGuard, // Register RolesGuard
+    ResourceOwnerGuard, // Register ResourceOwnerGuard
     {
       provide: GoogleStrategy,
       inject: [ConfigService, AuthService],
@@ -44,6 +48,6 @@ import { PrismaService } from '../shared/prisma/prisma.service';
       },
     },
   ],
-  exports: [AuthService, JwtModule],
+  exports: [AuthService, JwtModule, RolesGuard, ResourceOwnerGuard],
 })
 export class AuthModule {}

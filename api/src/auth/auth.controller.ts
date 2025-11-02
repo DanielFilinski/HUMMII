@@ -23,11 +23,13 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { PasswordResetRequestDto } from './dto/password-reset-request.dto';
 import { PasswordResetConfirmDto } from './dto/password-reset-confirm.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
 interface RequestWithUser extends Request {
   user: {
     userId: string;
     email: string;
+    role: string;
   };
 }
 
@@ -85,9 +87,9 @@ export class AuthController {
   }
 
   @Post('logout-all')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard) // Add RolesGuard
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Logout all sessions' })
+  @ApiOperation({ summary: 'Logout all sessions (requires authentication)' })
   @ApiResponse({ status: 204, description: 'All sessions terminated' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async logoutAll(@Req() req: RequestWithUser) {
@@ -132,18 +134,18 @@ export class AuthController {
   }
 
   @Get('sessions')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard) // Add RolesGuard
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get all active sessions' })
+  @ApiOperation({ summary: 'Get all active sessions (requires authentication)' })
   @ApiResponse({ status: 200, description: 'Active sessions retrieved' })
   async getActiveSessions(@Req() req: RequestWithUser) {
     return this.authService.getActiveSessions(req.user.userId);
   }
 
   @Delete('sessions/:sessionId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard) // Add RolesGuard
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete specific session' })
+  @ApiOperation({ summary: 'Delete specific session (requires authentication)' })
   @ApiResponse({ status: 204, description: 'Session deleted successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSession(@Req() req: RequestWithUser, @Param('sessionId') sessionId: string) {
