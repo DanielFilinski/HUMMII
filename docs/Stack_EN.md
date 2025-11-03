@@ -49,7 +49,7 @@ frontend/
 - **Cache:** Redis 7+
 - **ORM:** Prisma
 - **Real-time:** Socket.io (WebSocket gateway)
-- **File Storage:** AWS S3 + CloudFront CDN
+- **File Storage:** Cloudflare R2 (S3-compatible)
 - **Task Queue:** Bull/BullMQ (background jobs)
 - **Scheduler:** @nestjs/schedule (cron jobs)
 - **API Documentation:** Swagger/OpenAPI (auto-generated)
@@ -169,9 +169,10 @@ api/
 - **Channels:** In-App (Socket.io), Email (when offline), Push (if enabled)
 
 ### 5. File Storage
-- **AWS S3** - file storage (avatars, portfolio images, documents)
-- **CloudFront CDN** - content delivery network
+- **Cloudflare R2** - S3-compatible object storage (avatars, portfolio images, documents)
+- **Cloudflare CDN** - built-in content delivery (automatic)
 - **Processing:** Image optimization, EXIF stripping, virus scanning
+- **Benefits:** No egress fees, S3-compatible API, automatic CDN distribution
 
 ### 6. AI & Support
 - **OpenAI API (GPT-4)** - AI-powered support chatbot
@@ -304,7 +305,7 @@ api/
   - Stripe (payments, identity verification)
   - Google Maps (geolocation)
   - OneSignal (notifications)
-  - AWS S3 (file storage)
+  - Cloudflare R2 (file storage)
   - OpenAI (AI support)
   - Sentry (error tracking)
 
@@ -453,7 +454,7 @@ docker-compose up -d
   - `GET /health` - basic health check
   - `GET /health/db` - database connectivity
   - `GET /health/redis` - Redis connectivity
-  - `GET /health/storage` - S3 connectivity
+  - `GET /health/storage` - R2 connectivity
 
 ---
 
@@ -464,7 +465,7 @@ docker-compose up -d
 - **Frontend:** Static deployment (Vercel Edge Network)
 - **Database:** Read replicas for heavy read operations
 - **Redis:** Redis Cluster for distributed caching
-- **File Storage:** CDN distribution (CloudFront)
+- **File Storage:** CDN distribution (Cloudflare R2 built-in)
 
 ### Load Balancing
 - **Production Options:**
@@ -482,7 +483,7 @@ docker-compose up -d
 - **Server:** $50-100/month (DigitalOcean/AWS)
 - **Database:** $30-50/month (Managed PostgreSQL)
 - **Redis:** $15-30/month (Managed Redis)
-- **CDN:** $10-50/month (CloudFront/Cloudflare)
+- **Storage (R2):** $0.015/GB (no egress fees) + Cloudflare CDN (included)
 
 **External Services:**
 - **Stripe:** 2.9% + $0.30 per transaction

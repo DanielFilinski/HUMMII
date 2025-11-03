@@ -546,10 +546,12 @@ async updateProfile(
 
 **Задача 2.3.1:** Install dependencies
 ```bash
-pnpm add @nestjs/platform-express multer @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
+pnpm add @aws-sdk/client-s3 @aws-sdk/s3-request-presigner
 pnpm add sharp file-type
 pnpm add @types/multer -D
 ```
+
+**Note:** Cloudflare R2 is S3-compatible, so we use the AWS SDK.
 
 **Задача 2.3.2:** Create FileUploadModule
 ```
@@ -594,7 +596,7 @@ export class FileValidationInterceptor implements NestInterceptor {
 }
 ```
 
-**Задача 2.3.4:** S3 upload service
+**Задача 2.3.4:** R2 upload service (S3-compatible)
 ```typescript
 // api/src/shared/file-upload/file-upload.service.ts
 @Injectable()
@@ -603,10 +605,11 @@ export class FileUploadService {
 
   constructor(private configService: ConfigService) {
     this.s3Client = new S3Client({
-      region: this.configService.get('AWS_REGION'),
+      region: 'auto', // Cloudflare R2 uses 'auto'
+      endpoint: this.configService.get('R2_ENDPOINT'), // https://<account_id>.r2.cloudflarestorage.com
       credentials: {
-        accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
+        accessKeyId: this.configService.get('R2_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get('R2_SECRET_ACCESS_KEY'),
       },
     });
   }
@@ -632,25 +635,25 @@ export class FileUploadService {
     // Generate unique filename
     const filename = `${folder}/${userId}/${Date.now()}-${crypto.randomBytes(8).toString('hex')}.jpg`;
 
-    // Upload to S3
+    // Upload to R2
     await this.s3Client.send(
       new PutObjectCommand({
-        Bucket: this.configService.get('AWS_S3_BUCKET'),
+        Bucket: this.configService.get('R2_BUCKET_NAME'),
         Key: filename,
         Body: processedBuffer,
         ContentType: 'image/jpeg',
-        ServerSideEncryption: 'AES256',
+        // Note: R2 automatically encrypts all data at rest
       }),
     );
 
-    // Return CloudFront URL
-    return `https://${this.configService.get('AWS_CLOUDFRONT_DOMAIN')}/${filename}`;
+    // Return R2 public URL (or custom domain)
+    return `${this.configService.get('R2_PUBLIC_URL')}/${filename}`;
   }
 
   async deleteImage(key: string): Promise<void> {
     await this.s3Client.send(
       new DeleteObjectCommand({
-        Bucket: this.configService.get('AWS_S3_BUCKET'),
+        Bucket: this.configService.get('R2_BUCKET_NAME'),
         Key: key,
       }),
     );
@@ -675,15 +678,15 @@ export class FileUploadService {
 
     await this.s3Client.send(
       new PutObjectCommand({
-        Bucket: this.configService.get('AWS_S3_BUCKET'),
+        Bucket: this.configService.get('R2_BUCKET_NAME'),
         Key: filename,
         Body: file.buffer,
         ContentType: 'application/pdf',
-        ServerSideEncryption: 'AES256',
+        // R2 automatic encryption
       }),
     );
 
-    return `https://${this.configService.get('AWS_CLOUDFRONT_DOMAIN')}/${filename}`;
+    return `${this.configService.get('R2_PUBLIC_URL')}/${filename}`;
   }
 
   // Optional: Virus scanning (ClamAV or cloud service)
@@ -756,8 +759,8 @@ async uploadAvatar(
 - ✅ File signature validation (magic numbers)
 - ✅ EXIF metadata stripped
 - ✅ Images optimized and resized (800x800)
-- ✅ S3 upload successful with encryption
-- ✅ CloudFront URL returned
+- ✅ R2 upload successful with automatic encryption
+- ✅ R2 public URL or custom domain URL returned
 - ✅ Old avatar deleted on new upload
 - ✅ Rate limiting active (10 req/hour)
 - ✅ Audit logging works
@@ -1128,7 +1131,7 @@ async deletePortfolioItem(
     throw new NotFoundException('Portfolio item not found');
   }
 
-  // Delete image from S3
+  // Delete image from R2
   const key = this.extractKeyFromUrl(item.imageUrl);
   await this.fileUploadService.deleteImage(key);
 
@@ -1178,7 +1181,7 @@ private async reorderPortfolio(contractorId: string): Promise<void> {
 - ✅ Portfolio CRUD operations work
 - ✅ Max 10 items enforced
 - ✅ Image upload validated
-- ✅ Images stored in S3
+- ✅ Images stored in R2
 - ✅ Old images deleted on update/delete
 - ✅ Only owner can modify their portfolio
 - ✅ Reordering works
@@ -1385,7 +1388,7 @@ private async validatePdfFile(file: Express.Multer.File): Promise<void> {
 **Acceptance Criteria:**
 - ✅ Contractor can upload licenses
 - ✅ PDF validation works (MIME, size)
-- ✅ Stored in S3 with encryption
+- ✅ Stored in R2 with automatic encryption
 - ✅ Requires admin verification
 - ✅ Audit log created
 - ✅ Can delete licenses
@@ -2153,13 +2156,13 @@ async exportUserData(userId: string) {
 
 **Задача 10.1.1:** File Upload Security
 - [ ] MIME type validation enforced ✓
-- [ ] File size limits enforced (5MB for images, 20MB for PDFs) ✓
-- [ ] File signature validation (magic numbers) ✓
-- [ ] EXIF metadata stripped ✓
-- [ ] Virus scanning implemented (optional)
-- [ ] Images optimized and resized ✓
-- [ ] S3 bucket ACLs configured (private) ✓
-- [ ] Server-side encryption enabled ✓
+- [ ] ✅ File size limits enforced (5MB for images, 20MB for PDFs) ✓
+- [ ] ✅ File signature validation (magic numbers) ✓
+- [ ] ✅ EXIF metadata stripped ✓
+- [ ] ✅ Virus scanning implemented (optional)
+- [ ] ✅ Images optimized and resized ✓
+- [ ] ✅ R2 bucket configured with proper permissions ✓
+- [ ] ✅ Automatic encryption enabled (R2 default) ✓
 
 **Задача 10.1.2:** PII Protection
 - [ ] Sensitive fields encrypted (AES-256) ✓
@@ -2211,9 +2214,9 @@ async exportUserData(userId: string) {
 - [ ] GET /users/me endpoint working
 - [ ] PATCH /users/me endpoint working
 
-**Day 2:** Profile Photo Upload
+**День 2:** Profile Photo Upload
 - [ ] FileUploadModule created
-- [ ] S3 integration working
+- [ ] R2 integration working
 - [ ] Avatar upload endpoint working
 - [ ] File validation enforced (MIME, size, magic numbers)
 - [ ] EXIF stripping working
@@ -2222,7 +2225,7 @@ async exportUserData(userId: string) {
 - [ ] Contractor profile create/update working
 - [ ] Portfolio CRUD operations working
 - [ ] Max 10 portfolio items enforced
-- [ ] Image upload to S3 working
+- [ ] Image upload to R2 working
 
 **Day 4:** Services, Licenses & Geolocation
 - [ ] Services CRUD operations working
@@ -2273,7 +2276,7 @@ async exportUserData(userId: string) {
 - Users table (from Phase 1)
 - Prisma models: Contractor, Portfolio, ContractorLicense, ContractorCategory, ContractorService, Profile, AuditLog
 - FileUploadModule
-- S3 bucket configured
+- R2 bucket configured with proper permissions
 - Stripe Identity configured
 - PostGIS enabled in PostgreSQL
 - AuditLogInterceptor implemented
@@ -2291,8 +2294,8 @@ Phase 2 считается завершенным когда:
 - [ ] ✅ Portfolio management (max 10 items) работает
 - [ ] ✅ Services CRUD operations работают
 - [ ] ✅ License upload работает
-- [ ] ✅ File upload (avatar, portfolio) работает
-- [ ] ✅ S3 integration работает
+- [ ] ✅ Файлы загрузки (avatar, portfolio) работает
+- [ ] ✅ R2 integration работает
 - [ ] ✅ Geolocation (PostGIS + fuzzy) работает
 - [ ] ✅ Radius search функционирует
 - [ ] ✅ Stripe Identity verification интегрирована

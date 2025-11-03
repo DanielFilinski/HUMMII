@@ -340,7 +340,7 @@ Generate code, corrections, and refactorings that comply with the basic principl
 
 ### AI Content Moderation
 
-- Use AWS Rekognition for NSFW/inappropriate image detection
+- Use Google Cloud Vision API or Azure Content Moderator for NSFW/inappropriate image detection
   - Detect explicit nudity, suggestive content, violence
   - Detect offensive symbols, drugs, alcohol
   - Label confidence scoring (0-100%)
@@ -361,7 +361,7 @@ Generate code, corrections, and refactorings that comply with the basic principl
   - Keep audit trail for appeals
   - Track false positive rate
   - Improve AI model over time
-- Alternative: Google Cloud Vision API or Azure Content Moderator
+- Alternative: AWS Rekognition or Azure Content Moderator
   - Same threshold logic applies
   - Choose based on cost and accuracy
 

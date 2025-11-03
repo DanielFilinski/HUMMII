@@ -277,7 +277,7 @@ res.cookie('accessToken', accessToken, {
 - `DELETE /users/me` - Delete account (PIPEDA)
 
 **Missing:**
-- ❌ `POST /users/me/avatar` - Upload avatar
+- ❌ `POST /users/me/avatar` - Upload avatar (to R2)
 - ❌ `PATCH /users/me/contractor` - Update contractor profile
 - ❌ `POST /users/me/portfolio` - Add portfolio item
 - ❌ `DELETE /users/me/portfolio/:id` - Delete portfolio item
@@ -289,7 +289,7 @@ res.cookie('accessToken', accessToken, {
 
 ### Not Implemented (70%)
 #### File Upload System ❌
-- S3 integration for avatars
+- R2 integration for avatars (S3-compatible)
 - Image optimization (resize, compress)
 - MIME type validation
 - EXIF stripping
@@ -330,7 +330,7 @@ res.cookie('accessToken', accessToken, {
 **Next:** Complete Phase 2 before Phase 3 (CRITICAL)
 
 **Priority Tasks:**
-1. File upload system (S3)
+1. File upload system (R2 - S3-compatible storage)
 2. Contractor profile & portfolio
 3. Geolocation & radius search
 4. Stripe Identity verification
@@ -780,7 +780,7 @@ draft → published → in_progress → pending_review → completed
 
 ### Immediate (Week 5-8)
 1. **Complete Phase 2** (User Management) - 2 weeks
-   - File upload system
+   - File upload system (Cloudflare R2 - S3-compatible)
    - Contractor profiles & portfolio
    - Geolocation & radius search
    - Stripe Identity verification
@@ -815,8 +815,8 @@ draft → published → in_progress → pending_review → completed
 
 ### Immediate (This Week)
 - [ ] Review Phase 2 documentation
-- [ ] Set up AWS S3 bucket for file uploads
-- [ ] Implement file upload system
+- [ ] Set up Cloudflare R2 bucket for file uploads
+- [ ] Implement file upload system (R2 integration)
 - [ ] Create contractor profile schema
 
 ### This Sprint (2 weeks)
