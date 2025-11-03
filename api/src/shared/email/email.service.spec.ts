@@ -1,10 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+import { getQueueToken } from '@nestjs/bullmq';
 import { EmailService } from './email.service';
+
+// Mock SendGrid
+jest.mock('@sendgrid/mail', () => ({
+  setApiKey: jest.fn(),
+  send: jest.fn().mockResolvedValue([{ statusCode: 202 }]),
+}));
 
 describe('EmailService', () => {
   let service: EmailService;
   let configService: ConfigService;
+  let mockQueue: any;
 
   const mockConfigService = {
     get: jest.fn((key: string, defaultValue?: string) => {
@@ -12,18 +20,27 @@ describe('EmailService', () => {
         EMAIL_FROM: 'test@hummii.ca',
         APP_NAME: 'Hummii Test',
         FRONTEND_URL: 'http://localhost:3001',
+        EMAIL_PROVIDER: 'console', // Use console mode for tests
       };
       return config[key] || defaultValue;
     }),
   };
 
   beforeEach(async () => {
+    mockQueue = {
+      add: jest.fn().mockResolvedValue({ id: '1' }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EmailService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: getQueueToken('email'),
+          useValue: mockQueue,
         },
       ],
     }).compile();
@@ -45,6 +62,9 @@ describe('EmailService', () => {
       await expect(
         service.sendEmailVerification(email, token),
       ).resolves.not.toThrow();
+
+      // In console mode, queue should not be called
+      expect(mockQueue.add).not.toHaveBeenCalled();
     });
 
     it('should include verification URL in email', async () => {
@@ -53,8 +73,7 @@ describe('EmailService', () => {
 
       await service.sendEmailVerification(email, token);
 
-      // In production, this would send an actual email
-      // For now, it just logs
+      // Should construct URL from config
       expect(configService.get).toHaveBeenCalledWith('FRONTEND_URL');
     });
   });
@@ -131,6 +150,56 @@ describe('EmailService', () => {
 
     it('should use correct app name', () => {
       expect(configService.get).toHaveBeenCalledWith('APP_NAME', 'Hummii');
+    });
+
+    it('should initialize in console mode for tests', () => {
+      expect(configService.get).toHaveBeenCalledWith('EMAIL_PROVIDER', 'console');
+    });
+  });
+
+  describe('queue integration', () => {
+    it('should not queue emails in console mode', async () => {
+      await service.sendEmailVerification('test@example.com', 'token');
+      expect(mockQueue.add).not.toHaveBeenCalled();
+    });
+
+    it('should queue emails in sendgrid mode', async () => {
+      // Override email provider for this test
+      mockConfigService.get = jest.fn((key: string, defaultValue?: string) => {
+        if (key === 'EMAIL_PROVIDER') return 'sendgrid';
+        if (key === 'SENDGRID_API_KEY') return 'SG.test_key';
+        if (key === 'EMAIL_FROM') return 'test@hummii.ca';
+        if (key === 'APP_NAME') return 'Hummii Test';
+        if (key === 'FRONTEND_URL') return 'http://localhost:3001';
+        return defaultValue;
+      });
+
+      // Recreate service with sendgrid mode
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          EmailService,
+          {
+            provide: ConfigService,
+            useValue: mockConfigService,
+          },
+          {
+            provide: getQueueToken('email'),
+            useValue: mockQueue,
+          },
+        ],
+      }).compile();
+
+      const sendgridService = module.get<EmailService>(EmailService);
+      await sendgridService.sendEmailVerification('test@example.com', 'token');
+
+      expect(mockQueue.add).toHaveBeenCalledWith(
+        'send-email',
+        expect.objectContaining({
+          to: 'test@example.com',
+          subject: expect.stringContaining('Verify'),
+        }),
+        expect.any(Object),
+      );
     });
   });
 });

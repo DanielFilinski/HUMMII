@@ -70,3 +70,52 @@ Frontend (frontend/.env.local):
 NEXT_PUBLIC_API_URL=http://localhost:3000
 3. Запустите и протестируйте:
 
+
+
+
+**SendGrid**
+📊 Что реализовано:
+1. SendGrid API Integration
+✅ Полная интеграция с @sendgrid/mail
+✅ Tracking открытий и кликов
+✅ Поддержка 2 режимов: console (dev) + sendgrid (production)
+2. BullMQ Queue System
+✅ Асинхронная отправка через Redis очередь
+✅ Retry logic: 5 попыток с exponential backoff
+✅ Concurrency: 5 параллельных воркеров
+✅ Автоматический мониторинг и обработка ошибок
+3. Webhook Support
+✅ Endpoint /webhooks/sendgrid/events для событий
+✅ Обработка: delivered, bounce, open, click, spam_report
+✅ Логирование failed deliveries
+4. Tests & Build
+✅ 14 unit тестов - все проходят
+✅ TypeScript build - успешно
+✅ No lint errors
+📁 Созданные файлы (6 новых):
+api/src/shared/queue/├── queue.module.ts                      # BullMQ конфигурация└── interfaces/email-job.interface.ts    # Типы для email jobsapi/src/shared/email/├── email.processor.ts                   # Queue worker├── email-webhook.controller.ts          # Webhook endpoint└── email-webhook.service.ts             # Обработка событийdocs/setup/└── sendgrid-setup.md                    # Инструкция для команды
+🔄 Обновленные файлы (5):
+email.service.ts - SendGrid интеграция + queue support
+email.module.ts - Импорт QueueModule
+app.module.ts - Регистрация QueueModule
+.env.example - Переменные SendGrid
+email.service.spec.ts - Обновленные тесты
+🚀 Использование:
+Development (текущая настройка):
+EMAIL_PROVIDER=console  # Логирует в консоль, не отправляет
+Production (когда настроите SendGrid):
+EMAIL_PROVIDER=sendgridSENDGRID_API_KEY=SG.your_actual_key_hereEMAIL_FROM=noreply@hummii.ca
+📝 Следующие шаги:
+Создать SendGrid аккаунт (бесплатно 100 email/день)
+Перейти на https://sendgrid.com/
+Зарегистрироваться
+Верифицировать sender email
+Settings → Sender Authentication
+Verify: noreply@hummii.ca
+Получить API Key
+Settings → API Keys → Create
+Скопировать и добавить в .env
+Протестировать на staging
+Установить EMAIL_PROVIDER=sendgrid
+Протестировать регистрацию
+Полная инструкция: docs/setup/sendgrid-setup.md

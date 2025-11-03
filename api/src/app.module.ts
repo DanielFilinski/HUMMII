@@ -6,6 +6,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './shared/prisma/prisma.module';
+import { QueueModule } from './shared/queue/queue.module';
 import { EmailModule } from './shared/email/email.module';
 import { AuditModule } from './shared/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
@@ -51,6 +52,7 @@ import { validate } from './config/env.validation';
 
     // Shared modules
     PrismaModule,
+    QueueModule, // Background jobs and email queue
     EmailModule,
     AuditModule, // Global audit logging for PIPEDA compliance
 
