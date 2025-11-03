@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 # Project Context - Hummii
 
@@ -41,63 +41,6 @@ alwaysApply: false
 - **Storage:** AWS S3
 - **Cache:** Redis
 
-### Task Completion Requirements
-
-**At the end of every task implementation, ALWAYS provide:**
-
-1. **Commit message** in English following conventional commits format (KEEP IT CONCISE):
-   ```
-   type(scope): brief description (max 72 chars)
-   
-   - Key change 1
-   - Key change 2
-   - Key change 3
-   - Key change 4 (max 5-7 bullets)
-   ```
-
-2. **Commit message rules:**
-   - **Subject line:** Max 72 characters
-   - **Body:** Max 5-7 bullet points highlighting KEY changes only
-   - **Focus:** What changed, not implementation details
-   - **Omit:** File lists, dependency info, testing details
-   - **Total length:** Aim for 10-15 lines MAX
-
-3. **Commit types:**
-   - `feat` - New feature
-   - `fix` - Bug fix
-   - `refactor` - Code refactoring
-   - `docs` - Documentation changes
-   - `style` - Code style changes (formatting, no logic changes)
-   - `test` - Adding or updating tests
-   - `chore` - Maintenance tasks (dependencies, configs)
-   - `perf` - Performance improvements
-   - `security` - Security improvements
-
-4. **Good Example (concise):**
-   ```
-   feat(auth): implement JWT token refresh mechanism
-   
-   - Add refresh token endpoint with rotation strategy
-   - Store tokens in HTTP-only cookies
-   - Add rate limiting (3 req/min) to refresh endpoint
-   - Update AuthGuard to handle token expiration
-   - Add audit logging for refresh events
-   ```
-
-5. **Bad Example (too verbose):**
-   ```
-   feat(auth): implement comprehensive JWT token refresh mechanism with security
-   
-   ## Summary
-   Implemented complete token refresh system...
-   
-   ## Files Created (15)
-   - api/src/auth/refresh.controller.ts
-   ...
-   
-   ## Testing
-   All components tested...
-   ```
 
 ---
 
