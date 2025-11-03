@@ -11,6 +11,11 @@ Phase 0: Foundation & Infrastructure — 100%
 ✅ CORS whitelist для production и development окружений
 ✅ Rate limiting endpoint-specific (auth 3-10 req/min, profile 2-5 req/hour)
 ✅ E2E tests для rate limiting
+✅ Nginx SSL/TLS improvements (TLS 1.2+1.3, modern ciphers, ssl_session_tickets off)
+✅ Nginx Enhanced Security Headers (Permissions-Policy, X-Frame-Options DENY, Referrer-Policy strict)
+✅ Nginx Hide server tokens (server_tokens off)
+✅ Nginx DDoS Protection (connection limits per IP: 5-20 concurrent connections)
+✅ Firewall Setup Documentation (UFW/iptables guide created)
 
 
 Phase 1: Authentication & Authorization — 100%
