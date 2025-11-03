@@ -8,6 +8,34 @@
     "notFound": "404 - Page non trouvée",
     "notFoundDescription": "Impossible de trouver la ressource demandée",
     "returnHome": "Retour à l'accueil"
+  },
+  "cookieConsent": {
+    "title": "Préférences des Cookies",
+    "description": "Nous utilisons des cookies pour améliorer votre expérience sur notre plateforme. Vous pouvez personnaliser vos préférences ci-dessous.",
+    "essential": {
+      "label": "Cookies Essentiels",
+      "description": "Requis pour le bon fonctionnement du site. Ces cookies ne peuvent pas être désactivés."
+    },
+    "functional": {
+      "label": "Cookies Fonctionnels",
+      "description": "Permettent des fonctionnalités améliorées et une personnalisation, comme la mémorisation de vos préférences."
+    },
+    "analytics": {
+      "label": "Cookies Analytiques",
+      "description": "Nous aident à comprendre comment les visiteurs interagissent avec notre site en collectant et en rapportant des informations de manière anonyme."
+    },
+    "marketing": {
+      "label": "Cookies Marketing",
+      "description": "Utilisés pour suivre les visiteurs sur les sites Web afin d'afficher des publicités pertinentes."
+    },
+    "acceptAll": "Tout Accepter",
+    "acceptSelected": "Accepter la Sélection",
+    "rejectAll": "Tout Rejeter",
+    "privacyPolicy": "Politique de Confidentialité",
+    "cookiePolicy": "Politique des Cookies",
+    "learnMore": "En savoir plus sur l'utilisation des cookies dans notre",
+    "saved": "Vos préférences de cookies ont été enregistrées.",
+    "error": "Échec de l'enregistrement des préférences de cookies. Veuillez réessayer."
   }
 }
 

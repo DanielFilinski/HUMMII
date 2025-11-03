@@ -44,6 +44,34 @@
       "resend": "Resend Verification Email",
       "backHome": "Back to Home"
     }
+  },
+  "cookieConsent": {
+    "title": "Cookie Preferences",
+    "description": "We use cookies to enhance your experience on our platform. You can customize your preferences below.",
+    "essential": {
+      "label": "Essential Cookies",
+      "description": "Required for the website to function properly. These cookies cannot be disabled."
+    },
+    "functional": {
+      "label": "Functional Cookies",
+      "description": "Enable enhanced functionality and personalization, such as remembering your preferences."
+    },
+    "analytics": {
+      "label": "Analytics Cookies",
+      "description": "Help us understand how visitors interact with our website by collecting and reporting information anonymously."
+    },
+    "marketing": {
+      "label": "Marketing Cookies",
+      "description": "Used to track visitors across websites to display relevant advertisements."
+    },
+    "acceptAll": "Accept All",
+    "acceptSelected": "Accept Selected",
+    "rejectAll": "Reject All",
+    "privacyPolicy": "Privacy Policy",
+    "cookiePolicy": "Cookie Policy",
+    "learnMore": "Learn more about how we use cookies in our",
+    "saved": "Your cookie preferences have been saved.",
+    "error": "Failed to save cookie preferences. Please try again."
   }
 }
 

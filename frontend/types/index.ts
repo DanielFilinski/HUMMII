@@ -49,3 +49,18 @@ export interface UserProfile extends User {
   avatar?: string;
 }
 
+// Cookie Preferences (PIPEDA Compliance)
+export interface CookiePreferences {
+  essential: boolean; // Always true (required)
+  functional: boolean; // User preference
+  analytics: boolean; // User preference
+  marketing: boolean; // User preference
+}
+
+export interface UpdateCookiePreferencesDto {
+  essential?: boolean;
+  functional?: boolean;
+  analytics?: boolean;
+  marketing?: boolean;
+}
+
