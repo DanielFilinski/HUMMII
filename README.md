@@ -88,6 +88,7 @@ Hummii/
 ├── api/                 # Backend (NestJS)
 │   ├── src/
 │   ├── test/
+│   ├── logs/            # Winston logs (in container)
 │   └── package.json
 │
 ├── frontend/            # User-facing app (Next.js)
@@ -265,6 +266,40 @@ pnpm run format
 pnpm run type-check
 pnpm run test
 ```
+
+### Viewing Logs
+
+Winston logger writes structured logs with automatic PII masking (PIPEDA compliant):
+
+```bash
+# Using helper script (recommended)
+./scripts/view-logs.sh stats           # Show statistics
+./scripts/view-logs.sh tail            # Tail all logs in real-time
+./scripts/view-logs.sh tail error      # Tail only errors
+./scripts/view-logs.sh errors          # Show recent errors
+./scripts/view-logs.sh search "text"   # Search logs
+./scripts/view-logs.sh help            # Show all commands
+
+# Direct file access
+tail -f logs/api/combined.log          # All logs
+tail -f logs/api/error.log             # Only errors
+tail -f logs/api/audit.log             # Audit logs (PIPEDA)
+
+# Inside Docker container
+docker exec hummii-api tail -f /app/logs/combined.log
+
+# Copy logs from container to host
+docker cp hummii-api:/app/logs/. ./logs/api/
+```
+
+**Log Files:**
+- `combined.log` - All logs (8211+ lines)
+- `error.log` - Only errors (38 lines)
+- `audit.log` - Audit trail for PIPEDA compliance (3023+ lines)
+- `exceptions.log` - Unhandled exceptions
+- `rejections.log` - Promise rejections
+
+All logs automatically mask PII: emails (`j***@example.com`), phones (`******7890`), passwords, tokens, credit cards.
 
 ### Git Workflow
 
