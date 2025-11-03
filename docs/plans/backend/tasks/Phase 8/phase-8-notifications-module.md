@@ -587,6 +587,139 @@ export class NotificationsGateway
 
 ---
 
+### Task 8.5.5: OneSignal Configuration & Initial Setup (День 5)
+
+**Описание:** Детальная настройка OneSignal для email и push уведомлений.
+
+**⚠️ ВАЖНО:** OneSignal требует регистрацию и настройку на [onesignal.com](https://onesignal.com) до начала интеграции.
+
+**Подзадачи:**
+
+- [ ] **8.5.5.1** Создать OneSignal аккаунт и приложение
+  - Зарегистрироваться на https://onesignal.com
+  - Создать приложение "Hummii Platform"
+  - Выбрать платформы: Web Push + Email
+
+- [ ] **8.5.5.2** Настроить Email channel в OneSignal dashboard
+  - Включить Email messaging
+  - Sender Email: `noreply@hummii.ca`
+  - Sender Name: `Hummii Platform`
+  - Reply-To: `support@hummii.ca`
+  - Verify domain ownership
+
+- [ ] **8.5.5.3** Настроить DNS records для email deliverability
+  ```dns
+  # SPF Record
+  hummii.ca. IN TXT "v=spf1 include:onesignal.com ~all"
+  
+  # DKIM Record (получить от OneSignal)
+  onesignal._domainkey.hummii.ca. IN TXT "v=DKIM1; k=rsa; p=<public-key>"
+  
+  # DMARC Record
+  _dmarc.hummii.ca. IN TXT "v=DMARC1; p=quarantine; rua=mailto:postmaster@hummii.ca"
+  ```
+
+- [ ] **8.5.5.4** Получить API credentials из OneSignal
+  - REST API Key (Settings → Keys & IDs)
+  - App ID (Settings → Keys & IDs)
+  - User Auth Key (optional, для расширенных операций)
+
+- [ ] **8.5.5.5** Добавить environment variables
+  ```env
+  # .env
+  ONESIGNAL_APP_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  ONESIGNAL_API_KEY=your-rest-api-key-here
+  ONESIGNAL_USER_AUTH_KEY=optional-user-auth-key
+  ONESIGNAL_EMAIL_ENABLED=true
+  ONESIGNAL_PUSH_ENABLED=true
+  ONESIGNAL_SENDER_EMAIL=noreply@hummii.ca
+  ONESIGNAL_SENDER_NAME=Hummii Platform
+  ```
+
+- [ ] **8.5.5.6** Установить OneSignal Node.js SDK
+  ```bash
+  pnpm add @onesignal/node-onesignal
+  ```
+
+- [ ] **8.5.5.7** Создать OneSignal configuration file
+  **Файл:** `api/src/notifications/integrations/onesignal.config.ts`
+  ```typescript
+  import { registerAs } from '@nestjs/config';
+  
+  export default registerAs('onesignal', () => ({
+    appId: process.env.ONESIGNAL_APP_ID,
+    apiKey: process.env.ONESIGNAL_API_KEY,
+    userAuthKey: process.env.ONESIGNAL_USER_AUTH_KEY,
+    emailEnabled: process.env.ONESIGNAL_EMAIL_ENABLED === 'true',
+    pushEnabled: process.env.ONESIGNAL_PUSH_ENABLED === 'true',
+    senderEmail: process.env.ONESIGNAL_SENDER_EMAIL || 'noreply@hummii.ca',
+    senderName: process.env.ONESIGNAL_SENDER_NAME || 'Hummii Platform',
+  }));
+  ```
+
+- [ ] **8.5.5.8** Добавить валидацию в env schema
+  **Файл:** `api/src/config/validation.schema.ts`
+  ```typescript
+  ONESIGNAL_APP_ID: Joi.string().required(),
+  ONESIGNAL_API_KEY: Joi.string().required(),
+  ONESIGNAL_EMAIL_ENABLED: Joi.boolean().default(true),
+  ONESIGNAL_PUSH_ENABLED: Joi.boolean().default(true),
+  ```
+
+- [ ] **8.5.5.9** Создать OneSignal Module
+  **Файл:** `api/src/notifications/integrations/onesignal.module.ts`
+  ```typescript
+  import { Module } from '@nestjs/common';
+  import { ConfigModule } from '@nestjs/config';
+  import { OneSignalService } from './onesignal.service';
+  import oneSignalConfig from './onesignal.config';
+  
+  @Module({
+    imports: [ConfigModule.forFeature(oneSignalConfig)],
+    providers: [OneSignalService],
+    exports: [OneSignalService],
+  })
+  export class OneSignalModule {}
+  ```
+
+- [ ] **8.5.5.10** Настроить User Segments в OneSignal
+  - All Users (все пользователи)
+  - Clients Only (только клиенты)
+  - Contractors Only (только подрядчики)
+  - Verified Contractors (верифицированные подрядчики)
+  - Premium Subscribers (платные подписки)
+
+**OneSignal Dashboard Settings:**
+- Delivery Settings: Smart Delivery enabled
+- Frequency Capping: Max 20 push per day per user
+- Quiet Hours: 22:00 - 08:00 (no notifications at night)
+- Default Icon: Upload Hummii logo (256x256 px)
+- Timezone: America/Toronto (Eastern Time)
+
+**Security Requirements:**
+- ✅ API keys only in environment variables (NEVER in code)
+- ✅ Use separate App IDs for dev/staging/prod
+- ✅ Rate limiting: 100 API calls per minute
+- ✅ User data encrypted in transit (HTTPS)
+
+**Testing:**
+- [ ] Send test email через OneSignal dashboard
+- [ ] Verify email delivery (check spam folder)
+- [ ] Check DNS records with `dig` or `nslookup`
+- [ ] Test unsubscribe link functionality
+- [ ] Email deliverability score (mail-tester.com)
+
+**Acceptance Criteria:**
+- ✅ OneSignal account created
+- ✅ Email channel configured
+- ✅ DNS records set up correctly
+- ✅ API credentials obtained
+- ✅ Environment variables configured
+- ✅ Test email sent successfully
+- ✅ OneSignalModule created
+
+---
+
 ### Task 8.6: OneSignal Integration - Email & Push (День 5-6)
 
 **Описание:** Интегрировать OneSignal для отправки email и push уведомлений.

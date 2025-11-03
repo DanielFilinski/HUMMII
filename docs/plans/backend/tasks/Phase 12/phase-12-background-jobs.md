@@ -252,33 +252,214 @@ Phase 12 focuses on implementing a robust background job processing system using
 **Estimated Time:** 12 hours
 
 **Subtasks:**
-- [ ] **12.6.1** Chat cleanup automation
-  - Auto-close chats (30 days after order completion)
-  - Archive old messages
-  - Clean temporary files
-  - Update chat status
+- [ ] **12.6.1** Chat message cleanup (PIPEDA requirement)
+  - Delete messages older than 90 days
+  - Keep unread messages regardless of age
+  - Archive important messages before deletion
+  - Update message count statistics
+  - Schedule: Daily at 02:00 UTC
   - **Files:** `src/queues/jobs/cleanup/chat-cleanup.job.ts`
 
-- [ ] **12.6.2** User data retention management
-  - Inactive account identification (2+ years)
-  - Data deletion notifications
-  - Automatic account deletion (after notification period)
-  - PIPEDA compliance automation
-  - **Files:** `src/queues/jobs/cleanup/user-retention.job.ts`
+- [ ] **12.6.2** Session data cleanup (Security requirement)
+  - Delete expired sessions (>7 days old)
+  - Remove invalid refresh tokens
+  - Clean Redis session cache
+  - Update active session statistics
+  - Schedule: Daily at 03:00 UTC
+  - **Files:** `src/queues/jobs/cleanup/session-cleanup.job.ts`
 
-- [ ] **12.6.3** Database maintenance jobs
+- [ ] **12.6.3** Audit logs cleanup (PIPEDA requirement)
+  - Keep audit logs for minimum 1 year
+  - Delete logs older than 1 year
+  - Archive critical logs before deletion
+  - Maintain compliance trail
+  - Schedule: Weekly on Sunday at 01:00 UTC
+  - **Files:** `src/queues/jobs/cleanup/audit-cleanup.job.ts`
+
+- [ ] **12.6.4** Notification history cleanup (PIPEDA requirement)
+  - Delete read notifications older than 90 days
+  - Keep unread notifications regardless of age
+  - Archive important notifications
+  - Update notification statistics
+  - Schedule: Daily at 04:00 UTC
+  - **Files:** `src/queues/jobs/cleanup/notification-cleanup.job.ts`
+
+- [ ] **12.6.5** Payment records retention (Legal requirement)
+  - NEVER auto-delete payment records (7 years retention by law)
+  - Archive old payment records (>2 years) to cold storage
+  - Verify backup integrity
+  - Canadian tax law (CRA) compliance
+  - Schedule: Manual only (no auto-deletion)
+  - **Files:** `src/queues/jobs/maintenance/payment-archive.job.ts`
+
+- [ ] **12.6.6** Inactive user account handling
+  - Identify inactive accounts (>2 years no activity)
+  - Send notification to users (30 days before deletion)
+  - Auto-delete after notification period
+  - Anonymize data in orders (preserve history)
+  - Schedule: Monthly on 1st at 00:00 UTC
+  - **Files:** `src/queues/jobs/cleanup/inactive-users.job.ts`
+
+- [ ] **12.6.7** Temporary files cleanup
+  - Delete temp upload files (>24 hours)
+  - Remove failed upload files
+  - Clean image processing cache
+  - S3 multipart upload cleanup
+  - Schedule: Daily at 05:00 UTC
+  - **Files:** `src/queues/jobs/cleanup/temp-files.job.ts`
+
+- [ ] **12.6.8** Database maintenance
   - Old session cleanup (Redis)
   - Expired token removal
-  - Log file rotation and cleanup
-  - Database statistics update
-  - **Files:** `src/queues/jobs/maintenance/`
+  - Vacuum and analyze PostgreSQL tables
+  - Update database statistics
+  - Schedule: Weekly on Sunday at 02:00 UTC
+  - **Files:** `src/queues/jobs/maintenance/db-maintenance.job.ts`
 
-- [ ] **12.6.4** File system cleanup
-  - Temporary file removal
-  - Orphaned file detection and cleanup
-  - S3 bucket maintenance
-  - CDN cache invalidation
-  - **Files:** `src/queues/jobs/cleanup/file-cleanup.job.ts`
+**Data Retention Policy Summary (PIPEDA Compliance):**
+
+| Data Type | Retention Period | Auto-Delete | Cleanup Schedule | Legal Basis |
+|-----------|------------------|-------------|------------------|-------------|
+| **Chat messages** | 90 days | ✅ Yes (keep unread) | Daily 02:00 UTC | Business requirement |
+| **Payment records** | 7 years | ❌ NO (manual only) | Archive after 2 years | Canadian Tax Law (CRA) |
+| **Audit logs** | 1 year minimum | ✅ Yes | Weekly (Sunday 01:00 UTC) | PIPEDA requirement |
+| **Session data** | 7 days | ✅ Yes | Daily 03:00 UTC | Security requirement |
+| **Notification history** | 90 days | ✅ Yes (keep unread) | Daily 04:00 UTC | Business requirement |
+| **Inactive accounts** | 2 years | ✅ Yes (with notice) | Monthly (1st 00:00 UTC) | PIPEDA + Business |
+| **Temp files** | 24 hours | ✅ Yes | Daily 05:00 UTC | Technical requirement |
+| **User accounts** | Until deleted | ❌ NO (user choice) | On user request | PIPEDA requirement |
+
+**Implementation Example:**
+
+```typescript
+// src/queues/jobs/cleanup/chat-cleanup.job.ts
+import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { PrismaService } from '@/shared/prisma/prisma.service';
+
+@Injectable()
+export class ChatCleanupJob {
+  constructor(private prisma: PrismaService) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  async cleanupOldMessages() {
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    // Delete read messages older than 90 days
+    const deleted = await this.prisma.message.deleteMany({
+      where: {
+        createdAt: { lt: ninetyDaysAgo },
+        isRead: true, // Only delete read messages
+      },
+    });
+
+    console.log(`Cleaned up ${deleted.count} chat messages (>90 days, read)`);
+  }
+}
+```
+
+```typescript
+// src/queues/jobs/cleanup/notification-cleanup.job.ts
+import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+
+@Injectable()
+export class NotificationCleanupJob {
+  constructor(private prisma: PrismaService) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async cleanupOldNotifications() {
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+    // Delete read notifications older than 90 days
+    const deleted = await this.prisma.notification.deleteMany({
+      where: {
+        createdAt: { lt: ninetyDaysAgo },
+        isRead: true, // Keep unread notifications
+      },
+    });
+
+    console.log(`Cleaned up ${deleted.count} notifications (>90 days, read)`);
+  }
+}
+```
+
+```typescript
+// src/queues/jobs/cleanup/audit-cleanup.job.ts
+import { Injectable } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+
+@Injectable()
+export class AuditCleanupJob {
+  constructor(
+    private prisma: PrismaService,
+    private auditService: AuditService,
+  ) {}
+
+  @Cron('0 1 * * 0') // Every Sunday at 01:00 UTC
+  async cleanupOldAuditLogs() {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    // Archive critical logs before deletion
+    await this.auditService.archiveCriticalLogs(oneYearAgo);
+
+    // Delete audit logs older than 1 year
+    const deleted = await this.prisma.auditLog.deleteMany({
+      where: {
+        createdAt: { lt: oneYearAgo },
+      },
+    });
+
+    console.log(`Cleaned up ${deleted.count} audit logs (>1 year)`);
+    
+    // Log the cleanup action itself (meta!)
+    await this.auditService.log({
+      action: 'AUDIT_LOG_CLEANUP',
+      resource: 'AUDIT_LOG',
+      metadata: { deletedCount: deleted.count },
+    });
+  }
+}
+```
+
+```typescript
+// src/queues/jobs/cleanup/session-cleanup.job.ts
+import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+
+@Injectable()
+export class SessionCleanupJob {
+  constructor(
+    private prisma: PrismaService,
+    private redis: RedisService,
+  ) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async cleanupExpiredSessions() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Delete expired sessions from database
+    const deleted = await this.prisma.session.deleteMany({
+      where: {
+        expiresAt: { lt: new Date() },
+        OR: [
+          { lastActivityAt: { lt: sevenDaysAgo } },
+          { isActive: false },
+        ],
+      },
+    });
+
+    // Clean Redis session cache
+    await this.redis.cleanupExpiredSessions();
+
+    console.log(`Cleaned up ${deleted.count} expired sessions`);
+  }
+}
+```
 
 **Security Requirements:**
 - Secure data deletion (overwrite)

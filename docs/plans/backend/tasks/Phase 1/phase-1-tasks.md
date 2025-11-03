@@ -451,6 +451,245 @@ export const Roles = (...roles: Role[]) => SetMetadata('roles', roles);
 
 ---
 
+#### 6.4 HTTP-only Cookies для токенов (CRITICAL SECURITY)
+
+**Задача 6.4.1:** Изменить метод generateTokens() для установки cookies
+
+**Файл:** `api/src/auth/auth.service.ts`
+
+```typescript
+async generateTokens(userId: string, res: Response) {
+  const payload: JwtPayload = { 
+    sub: userId, 
+    role: user.role 
+  };
+
+  // Generate tokens
+  const accessToken = this.jwtService.sign(payload, {
+    secret: this.configService.get('JWT_ACCESS_SECRET'),
+    expiresIn: '15m',
+  });
+
+  const refreshToken = this.jwtService.sign(payload, {
+    secret: this.configService.get('JWT_REFRESH_SECRET'),
+    expiresIn: '7d',
+  });
+
+  // Set HTTP-only cookies (CRITICAL для безопасности)
+  res.cookie('accessToken', accessToken, {
+    httpOnly: true,        // Not accessible via JavaScript (XSS protection)
+    secure: true,          // HTTPS only (production)
+    sameSite: 'strict',    // CSRF protection
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    path: '/',
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/auth/refresh', // Только для refresh endpoint
+  });
+
+  // Store refresh token in database
+  await this.storeRefreshToken(userId, refreshToken);
+
+  return { message: 'Authentication successful' };
+}
+```
+
+**Задача 6.4.2:** Обновить JwtStrategy для извлечения токена из cookies
+
+**Файл:** `api/src/auth/strategies/jwt.strategy.ts`
+
+```typescript
+import { ExtractJwt } from 'passport-jwt';
+import { Request } from 'express';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+  constructor(configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtStrategy.extractJWT,
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback для mobile apps
+      ]),
+      secretOrKey: configService.get('JWT_ACCESS_SECRET'),
+    });
+  }
+
+  private static extractJWT(req: Request): string | null {
+    if (req.cookies && 'accessToken' in req.cookies) {
+      return req.cookies.accessToken;
+    }
+    return null;
+  }
+
+  async validate(payload: JwtPayload) {
+    return { userId: payload.sub, role: payload.role };
+  }
+}
+```
+
+**Задача 6.4.3:** Обновить JwtRefreshStrategy
+
+**Файл:** `api/src/auth/strategies/jwt-refresh.strategy.ts`
+
+```typescript
+@Injectable()
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+  constructor(configService: ConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          if (req.cookies && 'refreshToken' in req.cookies) {
+            return req.cookies.refreshToken;
+          }
+          return null;
+        },
+      ]),
+      secretOrKey: configService.get('JWT_REFRESH_SECRET'),
+      passReqToCallback: true, // Передать request в validate()
+    });
+  }
+
+  async validate(req: Request, payload: JwtPayload) {
+    const refreshToken = req.cookies?.refreshToken;
+    return { userId: payload.sub, refreshToken };
+  }
+}
+```
+
+**Задача 6.4.4:** Установить cookie-parser
+
+```bash
+pnpm add cookie-parser
+pnpm add @types/cookie-parser -D
+```
+
+**Задача 6.4.5:** Настроить cookie-parser в main.ts
+
+**Файл:** `api/src/main.ts`
+
+```typescript
+import * as cookieParser from 'cookie-parser';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  
+  // Cookie parser MUST be before any auth middleware
+  app.use(cookieParser());
+  
+  // ... rest of configuration
+  
+  await app.listen(3000);
+}
+```
+
+**Задача 6.4.6:** Обновить login endpoint
+
+**Файл:** `api/src/auth/auth.controller.ts`
+
+```typescript
+@Post('login')
+@UseGuards(LocalAuthGuard)
+@ApiOperation({ summary: 'Login with email and password' })
+@ApiResponse({ status: 200, description: 'Login successful (tokens in HTTP-only cookies)' })
+@Throttle(5, 60) // 5 attempts per minute
+async login(
+  @CurrentUser() user: JwtPayload,
+  @Res({ passthrough: true }) res: Response,
+) {
+  // Generate tokens and set cookies
+  return this.authService.generateTokens(user.userId, res);
+}
+```
+
+**Задача 6.4.7:** Обновить refresh endpoint
+
+```typescript
+@Post('refresh')
+@UseGuards(JwtRefreshGuard)
+@ApiOperation({ summary: 'Refresh access token using refresh token from cookie' })
+@ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+async refreshTokens(
+  @CurrentUser() user: JwtPayload,
+  @Res({ passthrough: true }) res: Response,
+) {
+  return this.authService.generateTokens(user.userId, res);
+}
+```
+
+**Задача 6.4.8:** Обновить logout endpoint для очистки cookies
+
+```typescript
+@Post('logout')
+@UseGuards(JwtAuthGuard)
+@ApiOperation({ summary: 'Logout and clear cookies' })
+async logout(
+  @CurrentUser() user: JwtPayload,
+  @Res({ passthrough: true }) res: Response,
+) {
+  // Clear cookies
+  res.clearCookie('accessToken', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+  });
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/auth/refresh',
+  });
+
+  // Delete refresh token from database
+  await this.authService.logout(user.userId);
+
+  return { message: 'Logged out successfully' };
+}
+```
+
+**Security Notes:**
+- ✅ **httpOnly: true** - JavaScript не может получить доступ к токенам (защита от XSS)
+- ✅ **secure: true** - Только HTTPS в production (в development можно отключить)
+- ✅ **sameSite: 'strict'** - Защита от CSRF атак
+- ✅ **path** - Ограничение области видимости cookie
+- ✅ **maxAge** - Автоматическое удаление после истечения срока
+
+**Environment Variables:**
+```env
+# .env
+COOKIE_SECURE=true  # false для localhost development
+```
+
+**Для development окружения:**
+```typescript
+// auth.service.ts
+const isProduction = this.configService.get('NODE_ENV') === 'production';
+
+res.cookie('accessToken', accessToken, {
+  httpOnly: true,
+  secure: isProduction, // false в development
+  sameSite: 'strict',
+  maxAge: 15 * 60 * 1000,
+});
+```
+
+**Acceptance Criteria:**
+- ✅ Токены хранятся в HTTP-only cookies
+- ✅ JavaScript не может получить доступ к токенам
+- ✅ Cookies работают только по HTTPS (production)
+- ✅ sameSite: 'strict' защищает от CSRF
+- ✅ Logout очищает cookies
+- ✅ Refresh token работает из cookie
+- ✅ Mobile apps могут использовать Bearer token как fallback
+
+---
+
 ### 7. OAuth2.0 Integration (Day 6-7)
 
 #### 7.1 Google OAuth
@@ -773,9 +1012,10 @@ async logoutAll(@Req() req) {
 **Задача 12.1.2:** JWT Security
 - [ ] Access token expires in 15 min ✓
 - [ ] Refresh token expires in 7 days ✓
-- [ ] Tokens in HTTP-only cookies (backend sets) ✓
+- [ ] **Tokens in HTTP-only cookies (Task 6.4 - MUST IMPLEMENT)** ✓
 - [ ] Strong JWT secrets (256-bit) ✓
 - [ ] Token rotation on refresh ✓
+- [ ] Cookie security flags (httpOnly, secure, sameSite) ✓
 
 **Задача 12.1.3:** Session Security
 - [ ] Failed login tracking ✓
@@ -791,6 +1031,247 @@ async logoutAll(@Req() req) {
 - ✅ All security requirements met
 - ✅ No vulnerabilities found
 - ✅ Code review completed
+
+---
+
+### 13. RolesGuard Usage Examples (IMPORTANT)
+
+**⚠️ КРИТИЧНО:** RolesGuard создан в Task 6.3.2, но должен быть использован во всех последующих фазах для защиты admin endpoints.
+
+#### 13.1 Как использовать RolesGuard
+
+**Базовый пример:**
+```typescript
+// В любом контроллере
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/users')
+async getAllUsers() {
+  // Только ADMIN может получить доступ
+  return this.usersService.findAll();
+}
+```
+
+**Множественные роли:**
+```typescript
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN, UserRole.CONTRACTOR)
+@Get('contractor/dashboard')
+async getContractorDashboard() {
+  // ADMIN или CONTRACTOR могут получить доступ
+  return this.dashboardService.getContractorData();
+}
+```
+
+#### 13.2 Примеры использования в будущих фазах
+
+**Phase 2 (Users Module):**
+```typescript
+// Admin может просматривать всех пользователей
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/users')
+async getAllUsers() {
+  return this.usersService.findAll();
+}
+
+// Admin может верифицировать подрядчиков
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Patch('admin/users/:id/verify')
+async verifyContractor(@Param('id') userId: string) {
+  return this.usersService.verifyContractor(userId);
+}
+```
+
+**Phase 3 (Orders Module):**
+```typescript
+// Admin может видеть все заказы
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/orders')
+async getAllOrders() {
+  return this.ordersService.findAll();
+}
+
+// Только CLIENT может создавать заказы
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.CLIENT)
+@Post('orders')
+async createOrder(@Body() createOrderDto: CreateOrderDto) {
+  return this.ordersService.create(createOrderDto);
+}
+
+// Только CONTRACTOR может принимать заказы
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.CONTRACTOR)
+@Post('orders/:id/proposals')
+async submitProposal(@Param('id') orderId: string) {
+  return this.proposalsService.create(orderId);
+}
+```
+
+**Phase 6 (Payments Module):**
+```typescript
+// Admin может выполнять manual refunds
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Post('admin/payments/:id/refund')
+async manualRefund(
+  @Param('id') paymentId: string,
+  @Body() refundDto: ManualRefundDto,
+) {
+  return this.paymentsService.manualRefund(paymentId, refundDto);
+}
+
+// Admin может видеть все транзакции
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/payments')
+async getAllPayments() {
+  return this.paymentsService.findAll();
+}
+```
+
+**Phase 7 (Disputes Module):**
+```typescript
+// Только ADMIN может разрешать споры
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Post('admin/disputes/:id/resolve')
+async resolveDispute(
+  @Param('id') disputeId: string,
+  @Body() resolutionDto: DisputeResolutionDto,
+) {
+  return this.disputesService.resolve(disputeId, resolutionDto);
+}
+
+// Admin может видеть все споры
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
+@Get('admin/disputes')
+async getAllDisputes() {
+  return this.disputesService.findAll();
+}
+```
+
+**Phase 10 (Admin Panel API):**
+```typescript
+// ВСЕ endpoints Admin Panel должны использовать RolesGuard
+
+@Controller('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN) // Применяется ко всему контроллеру
+export class AdminController {
+  
+  @Get('dashboard')
+  async getDashboard() {
+    // Только ADMIN
+  }
+  
+  @Get('statistics')
+  async getStatistics() {
+    // Только ADMIN
+  }
+  
+  @Patch('users/:id/suspend')
+  async suspendUser(@Param('id') userId: string) {
+    // Только ADMIN
+  }
+}
+```
+
+#### 13.3 Global RolesGuard (Alternative Approach)
+
+Можно также сделать RolesGuard глобальным:
+
+**Файл:** `api/src/app.module.ts`
+
+```typescript
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/guards/roles.guard';
+
+@Module({
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
+})
+export class AppModule {}
+```
+
+**Тогда в контроллерах можно использовать только @Roles:**
+```typescript
+@Get('admin/users')
+@Roles(UserRole.ADMIN) // RolesGuard применяется автоматически
+async getAllUsers() {
+  return this.usersService.findAll();
+}
+```
+
+#### 13.4 Testing RolesGuard
+
+**Unit Test:**
+```typescript
+describe('RolesGuard', () => {
+  let guard: RolesGuard;
+  let reflector: Reflector;
+
+  beforeEach(() => {
+    reflector = new Reflector();
+    guard = new RolesGuard(reflector);
+  });
+
+  it('should allow access when user has required role', () => {
+    const context = createMockExecutionContext({
+      user: { userId: '123', role: UserRole.ADMIN },
+    });
+    
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole.ADMIN]);
+    
+    expect(guard.canActivate(context)).toBe(true);
+  });
+
+  it('should deny access when user lacks required role', () => {
+    const context = createMockExecutionContext({
+      user: { userId: '123', role: UserRole.CLIENT },
+    });
+    
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole.ADMIN]);
+    
+    expect(guard.canActivate(context)).toBe(false);
+  });
+});
+```
+
+**E2E Test:**
+```typescript
+describe('RolesGuard E2E', () => {
+  it('should deny access to admin endpoint for non-admin user', () => {
+    return request(app.getHttpServer())
+      .get('/admin/users')
+      .set('Authorization', `Bearer ${clientToken}`)
+      .expect(403);
+  });
+
+  it('should allow access to admin endpoint for admin user', () => {
+    return request(app.getHttpServer())
+      .get('/admin/users')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+  });
+});
+```
+
+**Acceptance Criteria:**
+- ✅ RolesGuard создан и зарегистрирован
+- ✅ @Roles decorator работает
+- ✅ Примеры использования для всех фаз документированы
+- ✅ Unit и E2E тесты написаны
+- ✅ Admin endpoints защищены в Phase 2+
 
 ---
 

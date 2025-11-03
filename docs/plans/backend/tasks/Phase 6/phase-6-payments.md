@@ -4,6 +4,8 @@
 **Duration:** Week 13-15 (3 weeks)  
 **Dependencies:** Phase 3 (Orders), Phase 5 (Reviews & Ratings)
 
+> **📝 Note:** Stripe Identity для верификации подрядчиков реализуется в **Phase 2 (User Management Module)**, так как это часть профиля пользователя и KYC процесса. См. `docs/plans/backend/tasks/Phase 2/phase-2-unified.md`.
+
 ---
 
 ## 📋 Overview
