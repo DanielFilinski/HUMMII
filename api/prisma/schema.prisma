@@ -82,6 +82,9 @@ model User {
   lastLoginAt         DateTime?
   lastLoginIp         String?
 
+  // Cookie preferences (PIPEDA compliance)
+  cookiePreferences Json? // { essential: boolean, functional: boolean, analytics: boolean, marketing: boolean }
+
   // Contractor specific
   contractor Contractor?
 

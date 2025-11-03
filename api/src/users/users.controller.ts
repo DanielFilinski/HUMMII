@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Delete,
   Body,
   UseGuards,
@@ -15,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateCookiePreferencesDto } from './dto/cookie-preferences.dto';
 
 interface JwtPayload {
   userId: string;
@@ -70,5 +72,20 @@ export class UsersController {
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async exportData(@CurrentUser() user: JwtPayload) {
     return this.usersService.exportUserData(user.userId);
+  }
+
+  @Post('me/cookie-preferences')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 updates per minute
+  @ApiOperation({
+    summary: 'Update cookie preferences (PIPEDA: Right to Withdraw Consent)',
+    description: 'Update your cookie consent preferences. Essential cookies cannot be disabled.',
+  })
+  @ApiResponse({ status: 200, description: 'Cookie preferences updated successfully' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async updateCookiePreferences(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateCookiePreferencesDto,
+  ) {
+    return this.usersService.updateCookiePreferences(user.userId, dto.preferences);
   }
 }

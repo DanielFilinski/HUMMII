@@ -29,6 +29,7 @@ export enum AuditAction {
   PROFILE_UPDATED = 'PROFILE_UPDATED',
   DATA_EXPORTED = 'DATA_EXPORTED', // Right to Data Portability
   ACCOUNT_DELETED = 'ACCOUNT_DELETED', // Right to Erasure
+  COOKIE_PREFERENCES_UPDATED = 'COOKIE_PREFERENCES_UPDATED', // Right to Withdraw Consent
 
   // Session management
   SESSION_CREATED = 'SESSION_CREATED',

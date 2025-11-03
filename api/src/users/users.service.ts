@@ -3,6 +3,7 @@ import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
 import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CookiePreferencesDto } from './dto/cookie-preferences.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +28,7 @@ export class UsersService {
         roles: true,
         isVerified: true,
         lastLoginAt: true,
+        cookiePreferences: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -249,6 +251,48 @@ export class UsersService {
       userData: userWithoutPassword,
       notice:
         'This export contains all your personal data stored in our system as per PIPEDA requirements.',
+    };
+  }
+
+  /**
+   * Update cookie preferences (PIPEDA: Right to Withdraw Consent)
+   */
+  async updateCookiePreferences(userId: string, preferences: CookiePreferencesDto) {
+    // Ensure essential cookies are always enabled (cannot be disabled)
+    const cookiePreferences = {
+      essential: true, // Always required
+      functional: preferences.functional ?? true,
+      analytics: preferences.analytics ?? false,
+      marketing: preferences.marketing ?? false,
+    };
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        cookiePreferences: cookiePreferences as any,
+      },
+      select: {
+        id: true,
+        email: true,
+        cookiePreferences: true,
+        updatedAt: true,
+      },
+    });
+
+    // Audit log: Cookie preferences updated (PIPEDA compliance)
+    await this.auditService.log({
+      userId,
+      action: AuditAction.COOKIE_PREFERENCES_UPDATED,
+      entity: AuditEntity.USER,
+      entityId: userId,
+      metadata: {
+        preferences: cookiePreferences,
+      },
+    });
+
+    return {
+      message: 'Cookie preferences updated successfully',
+      preferences: user.cookiePreferences,
     };
   }
 }

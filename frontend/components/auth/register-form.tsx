@@ -49,9 +49,10 @@ export function RegisterForm() {
     const hasLower = /[a-z]/.test(pass);
     const hasUpper = /[A-Z]/.test(pass);
     const hasNumber = /[0-9]/.test(pass);
-    const criteriaCount = [hasLower, hasUpper, hasNumber].filter(Boolean).length;
-    if (criteriaCount === 3 && pass.length >= 14) return 'strong';
-    if (criteriaCount >= 2 && pass.length >= 12) return 'medium';
+    const hasSpecial = /[@$!%*?&]/.test(pass);
+    const criteriaCount = [hasLower, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+    if (criteriaCount === 4 && pass.length >= 14) return 'strong';
+    if (criteriaCount >= 3 && pass.length >= 12) return 'medium';
     return 'weak';
   };
 

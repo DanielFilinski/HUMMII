@@ -459,10 +459,10 @@ export class SessionService {
 ```markdown
 ### Authentication & Authorization
 - [x] HTTP-only cookies для JWT токенов (КРИТИЧНО) ✅ РЕАЛИЗОВАНО
-- [ ] Token rotation при refresh
+- [x] Token rotation при refresh ✅ РЕАЛИЗОВАНО (старый токен удаляется при refresh)
 - [x] Failed login tracking (max 5 attempts) ✅ РЕАЛИЗОВАНО
 - [x] Account lockout (15 minutes after 5 failed attempts) ✅ РЕАЛИЗОВАНО
-- [ ] Password complexity validation (12+ chars, upper+lower+digit+special)
+- [x] Password complexity validation (12+ chars, upper+lower+digit+special) ✅ РЕАЛИЗОВАНО
 
 ### API Security
 - [x] Helmet.js с CSP настройками ✅ РЕАЛИЗОВАНО
@@ -494,11 +494,11 @@ export class SessionService {
 - [ ] Firewall rules (только 22, 80, 443)
 
 ### PIPEDA Compliance
-- [ ] Right to Access endpoint (GET /users/me/export)
-- [ ] Right to Erasure endpoint (DELETE /users/me)
-- [ ] Audit logging для всех data access
-- [ ] Privacy Policy (English + French)
-- [ ] Cookie consent banner
+- [x] Right to Access endpoint (GET /users/me/export) ✅ РЕАЛИЗОВАНО
+- [x] Right to Erasure endpoint (DELETE /users/me) ✅ РЕАЛИЗОВАНО
+- [x] Audit logging для всех data access ✅ РЕАЛИЗОВАНО
+- [x] Privacy Policy (English + French) ✅ РЕАЛИЗОВАНО
+- [x] Cookie consent backend support ✅ РЕАЛИЗОВАНО (endpoint POST /users/me/cookie-preferences)
 ```
 
 ---

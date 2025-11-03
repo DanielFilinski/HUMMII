@@ -19,7 +19,8 @@ export const registerSchema = z.object({
     .min(12, 'Password must be at least 12 characters long')
     .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/[@$!%*?&]/, 'Password must contain at least one special character (@$!%*?&)'),
   phone: z
     .string()
     .regex(/^\+1\d{10}$/, 'Phone must be a valid Canadian number (+1XXXXXXXXXX)')
