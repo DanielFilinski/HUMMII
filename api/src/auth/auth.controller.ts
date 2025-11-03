@@ -212,25 +212,34 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleAuthCallback(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
+  async googleAuthCallback(@Req() req: RequestWithUser, @Res() res: Response) {
     const userAgent = req.headers['user-agent'];
     const ipAddress = req.ip || req.connection?.remoteAddress;
-    const result = await this.authService.oauthLogin(req.user, userAgent, ipAddress);
+    
+    try {
+      const result = await this.authService.oauthLogin(req.user, userAgent, ipAddress);
 
-    // Set HTTP-only cookies for OAuth tokens
-    res.cookie(
-      CookieConfig.ACCESS_TOKEN_COOKIE,
-      result.accessToken,
-      CookieConfig.getAccessTokenOptions(this.configService),
-    );
+      // Set HTTP-only cookies
+      res.cookie(
+        CookieConfig.ACCESS_TOKEN_COOKIE,
+        result.accessToken,
+        CookieConfig.getAccessTokenOptions(this.configService),
+      );
 
-    res.cookie(
-      CookieConfig.REFRESH_TOKEN_COOKIE,
-      result.refreshToken,
-      CookieConfig.getRefreshTokenOptions(this.configService),
-    );
+      res.cookie(
+        CookieConfig.REFRESH_TOKEN_COOKIE,
+        result.refreshToken,
+        CookieConfig.getRefreshTokenOptions(this.configService),
+      );
 
-    return { user: result.user };
+      // Redirect to frontend with success
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+      return res.redirect(`${frontendUrl}/auth/callback?success=true`);
+    } catch (error) {
+      // Redirect to frontend with error
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+      return res.redirect(`${frontendUrl}/auth/callback?error=oauth_failed`);
+    }
   }
 
   @Get('sessions')

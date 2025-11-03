@@ -1,3 +1,5 @@
+**Cloudflare R2 + Images**
+
 ✅ Что было сделано:
 File Upload System (Cloudflare R2 + Images) - ЗАВЕРШЕНО
 Реализовано (12/15 задач):
@@ -36,5 +38,35 @@ Portfolio Management - 2 дня
 
 
 
+**Google OAuth 2.0 credentials**
 
+📝 Краткое резюме
+✅ Что было реализовано:
+Backend (NestJS):
+✅ Улучшен метод validateOAuthUser с валидацией email и provider
+✅ Обновлен Google callback endpoint для редиректа на frontend с обработкой ошибок
+✅ GoogleStrategy уже была готова (использует passport-google-oauth20)
+Frontend (Next.js):
+✅ Создан компонент GoogleIcon с официальным логотипом Google
+✅ Добавлена кнопка "Continue with Google" на страницу логина
+✅ Создана страница /auth/callback для обработки OAuth редиректа
+Документация:
+✅ google-oauth-setup.md - Пошаговая инструкция по настройке Google Cloud Console
+✅ google-oauth-testing.md - Полное руководство по тестированию с troubleshooting
+✅ google-oauth-security.md - Чеклист безопасности и PIPEDA compliance
+✅ google-oauth-README.md - Общий обзор и quick start
+🚀 Следующие шаги:
+1. Настройте Google Cloud Console (30 мин)
+Следуйте инструкциям в docs/setup/google-oauth-setup.md:
+Создайте проект
+Включите Google+ API
+Создайте OAuth 2.0 credentials
+Получите Client ID и Client Secret
+2. Добавьте environment variables:
+Backend (api/.env):
+GOOGLE_CLIENT_ID=ваш-client-id.apps.googleusercontent.comGOOGLE_CLIENT_SECRET=ваш-client-secretGOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callbackFRONTEND_URL=http://localhost:3001
+Frontend (frontend/.env.local):
+/localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000
+3. Запустите и протестируйте:
 

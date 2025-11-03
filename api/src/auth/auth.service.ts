@@ -616,7 +616,23 @@ export class AuthService {
    * Validate OAuth user
    */
   async validateOAuthUser(oauthData: any) {
-    return oauthData;
+    // Validate email exists
+    if (!oauthData.email) {
+      throw new UnauthorizedException('Email not provided by OAuth provider');
+    }
+
+    // Validate provider
+    if (!oauthData.provider || !['google', 'apple'].includes(oauthData.provider)) {
+      throw new UnauthorizedException('Invalid OAuth provider');
+    }
+
+    return {
+      email: oauthData.email.toLowerCase(),
+      name: oauthData.name || 'User',
+      avatar: oauthData.avatar || null,
+      provider: oauthData.provider,
+      providerId: oauthData.providerId,
+    };
   }
 
   /**
