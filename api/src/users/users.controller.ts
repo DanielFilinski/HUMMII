@@ -8,15 +8,21 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateCookiePreferencesDto } from './dto/cookie-preferences.dto';
+import { UploadAvatarResponseDto } from './dto/upload-avatar-response.dto';
+import { UploadService } from '../shared/upload/upload.service';
 
 interface JwtPayload {
   userId: string;
@@ -29,7 +35,10 @@ interface JwtPayload {
 @UseGuards(JwtAuthGuard, RolesGuard) // Apply both guards
 @ApiBearerAuth()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Get('me')
   @ApiOperation({
@@ -87,5 +96,63 @@ export class UsersController {
     @Body() dto: UpdateCookiePreferencesDto,
   ) {
     return this.usersService.updateCookiePreferences(user.userId, dto.preferences);
+  }
+
+  @Post('me/avatar')
+  @Throttle({ default: { limit: 5, ttl: 3600000 } }) // 5 uploads per hour
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: 'Upload user avatar',
+    description: 'Upload or update user avatar image. Old avatar will be automatically deleted.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Avatar image file (JPEG, PNG, WebP, max 2MB)',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar uploaded successfully',
+    type: UploadAvatarResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file type or size' })
+  @ApiResponse({ status: 413, description: 'File too large (max 2MB)' })
+  @ApiResponse({ status: 429, description: 'Too many requests (max 5 per hour)' })
+  async uploadAvatar(
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<UploadAvatarResponseDto> {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    // Get current user to check for existing avatar
+    const currentUser = await this.usersService.findById(user.userId);
+
+    // Delete old avatar if exists
+    if (currentUser.avatarId) {
+      await this.uploadService.deletePublicImage(currentUser.avatarId);
+    }
+
+    // Upload new avatar
+    const result = await this.uploadService.uploadAvatar(file, user.userId);
+
+    // Update user record with new avatar
+    await this.usersService.updateAvatar(user.userId, result.id, result.avatarUrl);
+
+    return {
+      avatarId: result.id,
+      avatarUrl: result.avatarUrl,
+      thumbnailUrl: result.thumbnailUrl,
+    };
   }
 }

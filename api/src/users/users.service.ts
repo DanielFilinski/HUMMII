@@ -25,6 +25,8 @@ export class UsersService {
         name: true,
         phone: true,
         avatar: true,
+        avatarId: true,
+        avatarUrl: true,
         roles: true,
         isVerified: true,
         lastLoginAt: true,
@@ -294,5 +296,67 @@ export class UsersService {
       message: 'Cookie preferences updated successfully',
       preferences: user.cookiePreferences,
     };
+  }
+
+  /**
+   * Update user avatar
+   * Sets Cloudflare Images ID and URL
+   * 
+   * @param userId - User ID
+   * @param avatarId - Cloudflare Images ID
+   * @param avatarUrl - Full avatar URL with variant
+   */
+  async updateAvatar(userId: string, avatarId: string, avatarUrl: string) {
+    // Get current avatar for audit log
+    const beforeUpdate = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        avatarId: true,
+        avatarUrl: true,
+        avatar: true, // Legacy field
+      },
+    });
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarId,
+        avatarUrl,
+        avatar: avatarUrl, // Update legacy field for backward compatibility
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        avatarId: true,
+        avatarUrl: true,
+        avatar: true,
+        updatedAt: true,
+      },
+    });
+
+    // Audit log: Avatar updated
+    await this.auditService.log({
+      userId,
+      action: AuditAction.PROFILE_UPDATED,
+      entity: AuditEntity.USER,
+      entityId: userId,
+      changes: {
+        before: {
+          avatarId: beforeUpdate?.avatarId || null,
+          avatarUrl: beforeUpdate?.avatarUrl || null,
+        },
+        after: {
+          avatarId,
+          avatarUrl,
+        },
+      },
+      metadata: {
+        action: 'avatar_upload',
+        cloudflareImageId: avatarId,
+      },
+    });
+
+    return user;
   }
 }

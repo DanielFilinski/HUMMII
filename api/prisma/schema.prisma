@@ -64,7 +64,9 @@ model User {
   password   String
   name       String
   phone      String?
-  avatar     String?
+  avatar     String? // Legacy field - kept for backward compatibility
+  avatarId   String? // Cloudflare Images ID
+  avatarUrl  String? // Full Cloudflare Images URL with variant
   roles      UserRole[] @default([CLIENT])
   isVerified Boolean    @default(false)
 
