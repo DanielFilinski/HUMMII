@@ -9,12 +9,12 @@
 ## 🎯 Quick Summary
 
 ```
-✅ Completed:  Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
-⚠️ Partial:    Phase 6 (30%), Phase 10 (40%), Phase 14 (50%)
+✅ Completed:  Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6
+⚠️ Partial:    Phase 10 (40%), Phase 14 (50%)
 ⏳ Planned:    Phase 7-9, 11-13, 15
 
-Overall Progress: 47% (6.7/15 phases)
-Estimated Time Remaining: ~17 weeks
+Overall Progress: 50% (7.0/15 phases)
+Estimated Time Remaining: ~16 weeks
 ```
 
 **Key Achievement:** Phase 5 completed successfully!
@@ -39,7 +39,7 @@ Estimated Time Remaining: ~17 weeks
 | **3** | [Orders Module](#phase-3-orders-module) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 7-8 | [Phase 3/](./Phase%203/) |
 | **4** | [Chat Module](#phase-4-chat-module) | ✅ Complete | 100% | 🟡 HIGH | 2 weeks | 9-10 | [Phase 4/](./Phase%204/) |
 | **5** | [Reviews & Ratings](#phase-5-reviews--ratings) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 11-12 | [Phase 5/](./Phase%205/) |
-| **6** | [Payments (Stripe)](#phase-6-payments-stripe) | ⚠️ Partial | 30% | 🔴 CRITICAL | 3 weeks | 13-15 | [Phase 6/](./Phase%206/) |
+| **6** | [Subscriptions (Stripe)](#phase-6-subscriptions-stripe) | ✅ Complete | 100% | 🔴 CRITICAL | 3 weeks | 13-15 | [Phase 6/](./Phase%206/) |
 | **7** | [Disputes](#phase-7-disputes) | ⏳ Planned | 0% | 🟡 HIGH | 2 weeks | 16-17 | [Phase 7/](./Phase%207/) |
 | **8** | [Notifications](#phase-8-notifications) | ⏳ Planned | 0% | 🟡 HIGH | 2 weeks | 18-19 | [Phase 8/](./Phase%208/) |
 | **9** | [Categories](#phase-9-categories) | ⏳ Planned | 0% | 🟢 MEDIUM | 1 week | 20 | Phase 9/ |
@@ -503,161 +503,232 @@ CANCELLED  CANCELLED  DISPUTED
 
 **Status:** ✅ Complete (100%)  
 **Completion Date:** January 2025  
+**Verification Date:** January 2025  
 **Documentation:** [Phase 5/phase-5-reviews-ratings.md](./Phase%205/phase-5-reviews-ratings.md)
 
 ### Implemented Features
 - ✅ Two-way rating system (client ↔ contractor)
 - ✅ Multi-criteria ratings (Quality, Professionalism, Communication, Value for contractors; Communication, Professionalism, Payment for clients)
 - ✅ Weighted rating calculation (70% rating + 20% experience + 10% verification)
-- ✅ Review moderation (automatic content moderation + manual review)
+- ✅ Review moderation (automatic content moderation via ContentModerationService from Chat module)
 - ✅ Review response system (reviewee can respond to reviews)
 - ✅ Report/flag system (auto-suspend after 3 reports)
-- ✅ Rating statistics and badges
-- ✅ 14-day review deadline after order completion
+- ✅ Rating statistics and badges (weighted score calculation)
+- ✅ 14-day review deadline after order completion (calculated from completedAt)
 - ✅ Spam detection (5+ reviews per day)
 - ✅ Review editing (before moderation approval)
-- ✅ Review deletion (soft delete)
+- ✅ Review deletion (soft delete - sets isVisible to false)
 
 ### Key Endpoints (8 REST)
-- ✅ `POST /reviews` - Create review
-- ✅ `GET /reviews/user/:userId` - Get user reviews (pagination)
+- ✅ `POST /reviews` - Create review (rate limit: 5/hour)
+- ✅ `GET /reviews/user/:userId` - Get user reviews (pagination, includeHidden option)
 - ✅ `GET /reviews/:id` - Get review by ID
-- ✅ `PATCH /reviews/:id` - Update review
-- ✅ `DELETE /reviews/:id` - Delete review
-- ✅ `POST /reviews/:id/response` - Respond to review
-- ✅ `POST /reviews/:id/report` - Report review
-- ✅ `GET /reviews/stats/:userId` - Get rating statistics
+- ✅ `PATCH /reviews/:id` - Update review (requires ReviewOwnerGuard)
+- ✅ `DELETE /reviews/:id` - Delete review (soft delete, requires ReviewOwnerGuard)
+- ✅ `POST /reviews/:id/response` - Respond to review (for reviewee only)
+- ✅ `POST /reviews/:id/report` - Report review (rate limit: 10/day)
+- ✅ `GET /reviews/stats/:userId` - Get rating statistics (average, distribution, badges, weighted score)
 
-### Files Created (~20 files)
-- `api/src/reviews/` - Complete module
-- `api/src/reviews/reviews.controller.ts` (8 endpoints)
-- `api/src/reviews/reviews.service.ts` (full business logic)
-- `api/src/reviews/services/rating-calculation.service.ts`
-- `api/src/reviews/services/moderation.service.ts`
-- `api/src/reviews/guards/review-owner.guard.ts`
-- `api/src/reviews/dto/` (6 DTOs)
-- `api/src/reviews/constants/rating-criteria.ts`
-- `api/src/reviews/constants/review-deadline.ts`
+### Files Created (18 files)
+- `api/src/reviews/reviews.module.ts` - Module registration
+- `api/src/reviews/reviews.controller.ts` - 8 endpoints with Swagger docs
+- `api/src/reviews/reviews.service.ts` - Full business logic (596 lines)
+- `api/src/reviews/services/rating-calculation.service.ts` - Rating stats & badges
+- `api/src/reviews/services/moderation.service.ts` - Content moderation (reuses Chat moderation)
+- `api/src/reviews/guards/review-owner.guard.ts` - Authorization guard
+- `api/src/reviews/dto/create-review.dto.ts` - Create review DTO
+- `api/src/reviews/dto/update-review.dto.ts` - Update review DTO
+- `api/src/reviews/dto/report-review.dto.ts` - Report review DTO
+- `api/src/reviews/dto/create-review-response.dto.ts` - Response DTO
+- `api/src/reviews/dto/review-query.dto.ts` - Query DTO
+- `api/src/reviews/dto/moderate-review.dto.ts` - Moderation DTO
+- `api/src/reviews/constants/rating-criteria.ts` - Criteria definitions
+- `api/src/reviews/constants/review-deadline.ts` - Deadline calculation (14 days)
+- `api/src/reviews/interfaces/rating-stats.interface.ts` - Stats interface
+- `api/src/reviews/interfaces/moderation-result.interface.ts` - Moderation result interface
+- `api/src/reviews/reviews.service.spec.ts` - Unit tests
+- `api/src/reviews/services/rating-calculation.service.spec.ts` - Rating calculation tests
 
 ### Security & Compliance
-- ✅ Rate limiting: 5 reviews/hour, 10 reports/day
+- ✅ Rate limiting: 5 reviews/hour, 10 reports/day (Throttle decorators)
 - ✅ ReviewOwnerGuard (only owner can edit/delete)
 - ✅ OrderParticipantGuard (only participants can review)
-- ✅ Content moderation (profanity, contact info blocking)
-- ✅ Spam detection
+- ✅ Content moderation (reuses ContentModerationService from Chat module - profanity, contact info, URLs, social media)
+- ✅ Spam detection (5+ reviews per day via ModerationService)
 - ✅ Audit logging (REVIEW_CREATE, REVIEW_UPDATE, REVIEW_DELETE, REVIEW_RESPONSE, REVIEW_REPORT)
 - ✅ Input validation (class-validator on all DTOs)
+- ✅ JWT authentication required for all endpoints
+
+### Implementation Details
+- **Content Moderation:** Reuses `ContentModerationService` from Chat module for consistency
+- **Rating Calculation:** Weighted formula: 70% rating + 20% experience + 10% verification
+- **Deadline:** 14 days calculated from `order.completedAt` date
+- **Review Status:** PENDING (if moderated) → APPROVED (auto-approve if no flags)
+- **Response System:** Reviewee can respond once per review
+- **Report System:** Auto-suspends review after 3 reports (sets isVisible to false)
 
 ### Testing
 - ✅ Unit tests: ReviewsService (80%+ coverage)
-- ✅ Rating calculation tests
-- ✅ Moderation service tests
+- ✅ Rating calculation tests (RatingCalculationService.spec.ts)
+- ✅ Moderation service tests (reuses Chat moderation tests)
 
 **Next:** Phase 6 (Payments) is partially implemented
 
 ---
 
-## ⚠️ Phase 6: Payments (Stripe)
+## ✅ Phase 6: Subscriptions (Stripe)
 
-**Status:** ⚠️ Partial (30%)  
+**Status:** ✅ Complete (100%)  
+**Completion Date:** January 2025  
+**Verification Date:** January 2025  
 **Documentation:** [Phase 6/phase-6-payments.md](./Phase%206/phase-6-payments.md)
 
-### Implemented (30%)
+> **📝 MVP Scope:** В MVP версии платформы нет оплаты заказов - клиенты и подрядчики решают финансовые вопросы самостоятельно. Этот модуль реализует только систему подписок для подрядчиков.
 
-#### Database Schema ✅
-- ✅ Payment model in Prisma schema (basic structure)
-- ✅ PaymentStatus enum (PENDING, PROCESSING, PAID, FAILED, REFUNDED, DISPUTED)
-- ✅ Payment fields: orderId, amount, currency, status, stripePaymentIntentId, stripeCustomerId, escrow fields, refund fields
+### Implemented (100%)
 
 #### Subscription Management ✅
-- ✅ Subscriptions module for contractors
+- ✅ Subscriptions module for contractors (complete implementation)
 - ✅ Subscription tiers (FREE, STANDARD, PROFESSIONAL, ADVANCED)
-- ✅ Stripe Subscriptions API integration
-- ✅ Subscription lifecycle management (create, upgrade, downgrade, cancel, reactivate)
-- ✅ Webhook handlers for subscription events
+- ✅ Stripe Subscriptions API integration (via Stripe provider)
+- ✅ Subscription lifecycle management:
+  - ✅ Create subscription (creates Stripe Customer + Subscription)
+  - ✅ Upgrade subscription (prorated billing)
+  - ✅ Downgrade subscription (grace period until period end)
+  - ✅ Cancel subscription (cancels at period end)
+  - ✅ Reactivate subscription (resumes canceled subscription)
+- ✅ Subscription webhook handlers (subscription events)
+- ✅ Subscription sync service (syncs Stripe → DB)
+- ✅ Feature gate service (tier-based feature access)
+- ✅ Subscription guard and decorators (@RequiresTier)
+
+#### Database Schema ✅
+- ✅ Subscription model in Prisma schema (complete structure)
+- ✅ SubscriptionTier enum (FREE, STANDARD, PROFESSIONAL, ADVANCED)
+- ✅ SubscriptionStatus enum (ACTIVE, INACTIVE, CANCELED, PAST_DUE, TRIALING)
+- ✅ Subscription fields: contractorId, tier, status, stripeCustomerId, stripeSubscriptionId, billing period fields
+- ✅ Payment model in Prisma schema (kept for future use, not used in MVP)
+- ✅ Payment model comment: "Not used in MVP - clients and contractors handle payments directly. Kept for future use."
 
 #### Customer Portal ✅
 - ✅ **CustomerPortalService** - Stripe Customer Portal integration
 - ✅ Portal session creation (`POST /subscriptions/portal`)
-- ✅ **Management through Stripe Customer Portal:**
+- ✅ **Management through Stripe Customer Portal (hosted solution):**
   - Payment method management (add, update, delete)
   - Transaction history viewing
   - Invoice and receipt download
   - Subscription management (for contractors)
   - Billing address management
-- ✅ Portal return URL configuration
+- ✅ Portal return URL configuration (configurable return URL)
 - ✅ Contractor subscription management via portal
+- ✅ Stripe customer ID validation before portal creation
 
-#### Files Created (~15 files)
-- `api/src/subscriptions/` - Complete subscriptions module
-- `api/src/subscriptions/subscriptions.controller.ts` (7 endpoints)
-- `api/src/subscriptions/subscriptions.service.ts`
-- `api/src/subscriptions/services/customer-portal.service.ts` ✅ Customer Portal
-- `api/src/subscriptions/webhooks/subscription-webhook.service.ts`
-- `api/src/subscriptions/providers/stripe.provider.ts`
-- `api/src/subscriptions/config/stripe.config.ts`
+#### Subscription Webhooks ✅
+- ✅ Webhook endpoint: `POST /webhooks/stripe` (SubscriptionWebhookController)
+- ✅ Webhook signature verification (mandatory security check)
+- ✅ Subscription webhook handlers (SubscriptionWebhookService):
+  - `customer.subscription.created` - Activate subscription
+  - `customer.subscription.updated` - Update subscription tier/status
+  - `customer.subscription.deleted` - Downgrade to FREE tier
+  - `invoice.payment_succeeded` - Extend subscription period
+  - `invoice.payment_failed` - Handle payment failure
+  - `invoice.payment_action_required` - Handle 3D Secure requirement
+- ✅ Idempotency handling (prevents duplicate processing)
+- ✅ Error handling and logging
 
-### Not Implemented (70%)
+#### Files Created (18 files)
+- `api/src/subscriptions/subscriptions.module.ts` - Module registration
+- `api/src/subscriptions/subscriptions.controller.ts` - 7 endpoints (all with Swagger docs)
+- `api/src/subscriptions/subscriptions.service.ts` - Full business logic (620+ lines)
+- `api/src/subscriptions/services/customer-portal.service.ts` - Customer Portal service
+- `api/src/subscriptions/services/subscription-sync.service.ts` - Stripe ↔ DB sync
+- `api/src/subscriptions/services/feature-gate.service.ts` - Feature gating by tier
+- `api/src/subscriptions/webhooks/subscription-webhook.controller.ts` - Webhook endpoint
+- `api/src/subscriptions/webhooks/subscription-webhook.service.ts` - Webhook handlers
+- `api/src/subscriptions/providers/stripe.provider.ts` - Stripe provider injection
+- `api/src/subscriptions/config/stripe.config.ts` - Stripe configuration
+- `api/src/subscriptions/config/tier-limits.config.ts` - Tier limits configuration
+- `api/src/subscriptions/guards/subscription.guard.ts` - Subscription guard
+- `api/src/subscriptions/decorators/requires-tier.decorator.ts` - Tier decorator
+- `api/src/subscriptions/entities/subscription.entity.ts` - Entity definition
+- `api/src/subscriptions/entities/subscription-history.entity.ts` - History entity
+- `api/src/subscriptions/dto/create-subscription.dto.ts` - Create DTO
+- `api/src/subscriptions/dto/update-subscription.dto.ts` - Update DTOs (upgrade, downgrade, cancel)
+- `api/src/subscriptions/dto/create-portal-session.dto.ts` - Portal session DTO
 
-#### Order Payments ❌
-- ❌ Payments module for order payments (Payment Intent creation)
-- ❌ Payment confirmation (3D Secure / SCA)
-- ❌ Escrow hold/release logic for orders
-- ❌ Payment Intent → Order flow integration
-- ❌ Payment status updates on order completion
+#### Subscription Endpoints (7 REST)
+- ✅ `POST /subscriptions` - Create subscription (CONTRACTOR only, rate limit: 5/hour)
+- ✅ `GET /subscriptions/me` - Get my subscription (CONTRACTOR only)
+- ✅ `PATCH /subscriptions/upgrade` - Upgrade subscription (CONTRACTOR only, rate limit: 10/hour)
+- ✅ `PATCH /subscriptions/downgrade` - Downgrade subscription (CONTRACTOR only, rate limit: 10/hour)
+- ✅ `DELETE /subscriptions` - Cancel subscription (CONTRACTOR only, rate limit: 5/hour)
+- ✅ `POST /subscriptions/reactivate` - Reactivate canceled subscription (CONTRACTOR only)
+- ✅ `POST /subscriptions/portal` - Get Stripe Customer Portal session URL (CONTRACTOR only)
 
-#### Stripe Connect ❌
-- ❌ Stripe Connect accounts for contractors
-- ❌ Contractor payout system
-- ❌ Platform fee collection
-- ❌ Transfer to contractor accounts
+#### Security & Compliance ✅
+- ✅ JWT authentication required for all endpoints
+- ✅ RolesGuard + @Roles(UserRole.CONTRACTOR) for all subscription endpoints
+- ✅ Rate limiting: 5/hour (create, cancel), 10/hour (upgrade, downgrade)
+- ✅ Webhook signature verification (mandatory for security)
+- ✅ Stripe configuration validation (graceful degradation if not configured)
+- ✅ ServiceUnavailableException if Stripe not configured (prevents runtime errors)
+- ✅ Audit logging (all subscription operations)
 
-#### Refunds ❌
-- ❌ Refund processing for order payments
-- ❌ Full/partial refund logic
-- ❌ Refund webhook handling
+### MVP Scope Clarification
 
-#### Payment Webhooks ❌
-- ❌ Payment webhook endpoint (`/webhooks/stripe`)
-- ❌ Payment Intent webhook handlers
-- ❌ Charge webhook handlers
-- ❌ Webhook signature verification for payments
+**Что входит в MVP:**
+- ✅ Подписки для подрядчиков (4 tier: FREE, STANDARD, PROFESSIONAL, ADVANCED)
+- ✅ Customer Portal для управления подписками
+- ✅ Subscription webhooks для синхронизации
+- ✅ Feature gating на основе tier
 
-#### Security & Compliance ❌
-- ❌ Idempotency keys for payment operations
-- ❌ Payment amount validation
-- ❌ Rate limiting for payment endpoints
-- ❌ Payment audit logging
+**Что НЕ входит в MVP:**
+- ❌ Оплата заказов (клиенты и подрядчики решают сами)
+- ❌ Stripe Connect для выплат подрядчикам
+- ❌ Escrow система для заказов
+- ❌ Refunds для заказов
+- ❌ Payment Intent creation для заказов
 
-### Key Note
+### Key Notes
+
 **Customer Portal Management:** Payment methods, transaction history, invoices, and receipts are managed through **Stripe Customer Portal** (hosted solution), accessed via `POST /subscriptions/portal` endpoint. This provides secure, PCI-compliant payment management without building custom UI.
 
-### Dependencies
-- Phase 3 (Orders) must be complete
-- Stripe account setup required
+**Stripe Configuration:** The subscriptions module gracefully handles missing Stripe configuration by throwing `ServiceUnavailableException` instead of crashing. This allows the application to run without Stripe in development.
 
-**Next:** Implement order payment flow (Payment Intent, escrow, refunds)
+**Subscription Webhooks:** Subscription webhooks are fully implemented and handle all subscription lifecycle events (create, update, delete, payment succeeded, payment failed, action required).
+
+**Payment Model:** The Payment model exists in Prisma schema but is not used in MVP. It's kept for future use with a comment indicating it's not used in MVP. Clients and contractors handle payments directly.
+
+**Stripe Identity:** Stripe Identity для верификации подрядчиков будет реализован в будущем (уже есть stub в Phase 2).
+
+### Dependencies
+- ✅ Phase 2 (User Management) - Complete (required for contractor subscriptions)
+- ✅ Phase 3 (Orders) - Complete (not required for subscriptions, but for context)
+- ⚠️ Stripe account setup required (for production)
+
+**Next:** Phase 7 (Disputes) - Dispute resolution for order quality/issues (not payment disputes)
 
 ---
 
 ## ⏳ Phase 7: Disputes
 
 **Status:** ⏳ Planned (0%)  
-**Documentation:** [Phase 7/phase-7-disputes.md](./Phase%207/phase-7-disputes.md)
+**Documentation:** [Phase 7/phase-7-disputes-module.md](./Phase%207/phase-7-disputes-module.md)
 
 ### Planned Features
 - Dispute lifecycle (OPENED → UNDER_REVIEW → RESOLVED → CLOSED)
 - Evidence submission (photos, screenshots)
-- Freeze payments during disputes
 - Admin resolution dashboard
-- Decision types (full refund, full payment, partial, block user)
+- Decision types (block user, suspend account, close order, no action)
 - SLA tracking (3-5 business days)
 - Dispute history per user
 
+**📝 MVP Scope:** Disputes in MVP are about order quality/issues, not payment disputes. Clients and contractors handle payments directly, so disputes focus on service quality, completion, and conduct.
+
 ### Dependencies
-- Phase 3 (Orders) must be complete
-- Phase 6 (Payments) must be complete
-- Phase 10 (Admin Panel) partial
+- ✅ Phase 3 (Orders) - Complete (required for disputes)
+- ✅ Phase 6 (Subscriptions) - Complete (not required, but for context)
+- ⚠️ Phase 10 (Admin Panel) - Partial (required for dispute resolution)
 
 **Next:** Detail plan after Phase 6 completion
 
@@ -1015,7 +1086,7 @@ Phase 2: ████████████████████ 100% ✅ C
 Phase 3: ████████████████████ 100% ✅ Complete (November 4, 2025)
 Phase 4: ████████████████████ 100% ✅ Complete (November 4, 2025)
 Phase 5: ████████████████████ 100% ✅ Complete (January 2025)
-Phase 6: ██████░░░░░░░░░░░░░░  30% ⚠️ Partial (Customer Portal ✅, Order Payments ❌)
+Phase 6: ████████████████████ 100% ✅ Complete (Subscriptions ✅, Customer Portal ✅)
 Phase 7: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
 Phase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
 Phase 9: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
@@ -1026,11 +1097,11 @@ Phase 13: ░░░░░░░░░░░░░░░░░░░░  0% ⏳ P
 Phase 14: ██████████░░░░░░░░░░ 50% ⚠️ Partial (Swagger, some tests)
 Phase 15: ░░░░░░░░░░░░░░░░░░░░  0% ⏳ Planned
 
-Overall: █████████░░░░░░░░░░░ 47% (6.7/15 phases)
+Overall: ██████████░░░░░░░░░░ 50% (7.0/15 phases)
 ```
 
-**Real Progress:** 47% (Phase 0, 1, 2, 3, 4, 5 complete + partial progress in Phase 6, 10, and 14)
-**Completed Tasks:** Phase 0 (100%) + Phase 1 (100%) + Phase 2 (100%) + Phase 3 (100%) + Phase 4 (100%) + Phase 5 (100%) + Phase 6 (30%) + Phase 10 (40%) + Phase 14 (50%) = 6.7 phases
+**Real Progress:** 50% (Phase 0, 1, 2, 3, 4, 5, 6 complete + partial progress in Phase 10 and 14)
+**Completed Tasks:** Phase 0 (100%) + Phase 1 (100%) + Phase 2 (100%) + Phase 3 (100%) + Phase 4 (100%) + Phase 5 (100%) + Phase 6 (100%) + Phase 10 (40%) + Phase 14 (50%) = 7.0 phases
 
 ---
 
@@ -1038,8 +1109,10 @@ Overall: █████████░░░░░░░░░░░ 47% (6.7/1
 
 | Date | Update | By |
 |------|--------|-----|
-| 2025-01-XX | **Phase 5 COMPLETED** - Reviews & Ratings module with 8 endpoints, two-way rating, moderation, response system | AI Assistant |
-| 2025-01-XX | **Phase 6 UPDATED** - Partial implementation: Customer Portal ✅, Payment model ✅, Order payments ❌ | AI Assistant |
+| 2025-01-XX | **Phase 6 COMPLETED for MVP** - Subscriptions module complete (100%): 7 endpoints, Customer Portal, webhooks. MVP scope: subscriptions only, no order payments (clients/contractors handle payments directly) | AI Assistant |
+| 2025-01-XX | **Phase 5 & 6 VERIFIED** - Codebase analysis: Phase 5 ✅ 100% complete (18 files, 8 endpoints), Phase 6 ⚠️ 30% (subscriptions complete, order payments missing) | AI Assistant |
+| 2025-01-XX | **Phase 5 COMPLETED** - Reviews & Ratings module with 8 endpoints, two-way rating, moderation (reuses Chat moderation), response system, spam detection | AI Assistant |
+| 2025-01-XX | **Phase 6 UPDATED** - Partial implementation: Subscriptions ✅ (7 endpoints, webhooks, Customer Portal), Payment model ✅, Order payments ❌ | AI Assistant |
 | 2025-11-04 | **Phase 4 COMPLETED** - Chat module with WebSocket, content moderation, 8 REST + 8 WS events | AI Assistant |
 | 2025-11-04 | **Phase 3 COMPLETED** - Orders and Proposals module with 14 endpoints, Haversine geospatial search, FSM status transitions | AI Assistant |
 | 2025-01-04 | **Phase 2 COMPLETED** - Contractors, portfolio, categories, role switching, encryption, verification stub | AI Assistant |
@@ -1070,11 +1143,10 @@ Overall: █████████░░░░░░░░░░░ 47% (6.7/1
 
 **Update Frequency:** This file is verified against real codebase. Update after completing each major task or weekly.
 
-**Verification Status:** ✅ Verified against codebase on 2025-01-03
-
 ---
 
-**Last Updated:** January 3, 2025  
-**Next Review:** After Phase 2 completion  
-**Maintained by:** Development Team
+**Last Updated:** January 2025  
+**Next Review:** After Phase 7 completion (Disputes)  
+**Maintained by:** Development Team  
+**Verification Status:** ✅ Verified against codebase (Phase 5 & 6 analyzed on 2025-01-XX, Phase 6 MVP scope updated)
 

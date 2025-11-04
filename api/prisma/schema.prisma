@@ -547,6 +547,7 @@ model UserRatingStats {
 // PAYMENT MODELS
 // ============================================================================
 
+// Not used in MVP - clients and contractors handle payments directly. Kept for future use.
 model Payment {
   id String @id @default(uuid())
 

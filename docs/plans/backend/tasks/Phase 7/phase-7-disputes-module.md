@@ -2,8 +2,10 @@
 
 **Статус:** 🟡 HIGH Priority  
 **Продолжительность:** Week 16-17 (2 недели)  
-**Зависимости:** Phase 6 (Payments), Phase 3 (Orders), Phase 1 (Auth)  
-**Последнее обновление:** 29 октября 2025
+**Зависимости:** Phase 3 (Orders), Phase 1 (Auth), Phase 10 (Admin Panel)  
+**Последнее обновление:** January 2025
+
+> **📝 MVP Scope:** В MVP версии платформы споры касаются качества работы и проблем с заказами, а не платежных споров. Клиенты и подрядчики решают финансовые вопросы самостоятельно, поэтому споры фокусируются на качестве сервиса, завершении работы и поведении сторон.
 
 ---
 
@@ -16,7 +18,6 @@
 - **Управление статусами** - Жизненный цикл спора от создания до разрешения
 - **Загрузка доказательств** - Безопасная загрузка файлов с валидацией
 - **Админ-панель** - Инструменты для разрешения споров
-- **Автоматизация выплат** - Распределение средств после решения
 - **Уведомления** - Информирование сторон о статусе спора
 
 ---
@@ -25,17 +26,16 @@
 
 ### Бизнес-цели
 - Обеспечить справедливое разрешение конфликтов
-- Снизить количество возвратов через платежные системы
 - Повысить доверие пользователей к платформе
-- Автоматизировать процесс распределения средств
 - Обеспечить соблюдение PIPEDA при обработке споров
+- Улучшить качество сервиса через систему разрешения споров
 
 ### Критерии успеха
-- ✅ 100% споров проходят через систему (не через Stripe disputes)
+- ✅ 100% споров проходят через систему
 - ✅ Среднее время разрешения спора < 3 рабочих дня
 - ✅ Все доказательства проходят валидацию безопасности
-- ✅ Автоматическое распределение средств в 95% случаев
 - ✅ Уведомления доставляются в реальном времени
+- ✅ Админы могут эффективно разрешать споры
 
 ---
 
@@ -54,7 +54,7 @@ CREATE TABLE disputes (
     -- Dispute details
     reason dispute_reason_enum NOT NULL,
     description TEXT NOT NULL,
-    amount_in_dispute INTEGER NOT NULL, -- cents
+    amount_in_dispute INTEGER, -- Optional: for reference only (not used for payments in MVP)
     
     -- Status tracking
     status dispute_status_enum DEFAULT 'open',
@@ -66,21 +66,11 @@ CREATE TABLE disputes (
     resolved_by UUID REFERENCES users(id),
     resolved_at TIMESTAMP WITH TIME ZONE,
     
-    -- Financial
-    refund_amount INTEGER DEFAULT 0, -- cents
-    contractor_amount INTEGER DEFAULT 0, -- cents
-    platform_fee_refund INTEGER DEFAULT 0, -- cents
-    
     -- Timestamps
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     -- Constraints
-    CONSTRAINT valid_amounts CHECK (
-        refund_amount >= 0 AND 
-        contractor_amount >= 0 AND 
-        refund_amount + contractor_amount <= amount_in_dispute
-    ),
     CONSTRAINT different_parties CHECK (initiated_by != respondent_id)
 );
 
@@ -139,10 +129,10 @@ CREATE TYPE dispute_reason_enum AS ENUM (
     'late_completion',
     'different_from_description',
     'contractor_unresponsive',
-    'client_payment_issues',
     'client_changed_requirements',
     'safety_concerns',
     'fraudulent_activity',
+    'inappropriate_behavior',
     'other'
 );
 
@@ -155,11 +145,11 @@ CREATE TYPE dispute_status_enum AS ENUM (
 );
 
 CREATE TYPE dispute_resolution_enum AS ENUM (
-    'full_refund',           -- Полный возврат клиенту
-    'partial_refund',        -- Частичный возврат
-    'full_payment',          -- Полная оплата подрядчику
-    'split_payment',         -- Разделение суммы
-    'no_resolution'          -- Спор закрыт без решения
+    'block_user',            -- Блокировка пользователя
+    'suspend_account',       -- Временная блокировка аккаунта
+    'close_order',           -- Закрытие заказа
+    'warn_user',             -- Предупреждение пользователю
+    'no_action'              -- Спор закрыт без действий
 );
 
 CREATE TYPE dispute_priority_enum AS ENUM (
@@ -215,7 +205,7 @@ src/disputes/
 │   └── admin-dispute.guard.ts   # Админ доступ
 ├── services/
 │   ├── evidence.service.ts      # Обработка файлов
-│   ├── resolution.service.ts    # Автоматизация выплат
+│   ├── resolution.service.ts    # Разрешение споров
 │   └── notification.service.ts  # Уведомления о спорах
 └── tests/
     ├── disputes.controller.spec.ts
@@ -325,20 +315,19 @@ src/disputes/
 - Недопустимые переходы блокируются
 - Audit log ведется для всех изменений
 
-#### 7.2.3: Интеграция с Orders и Payments
+#### 7.2.3: Интеграция с Orders
 **Приоритет:** 🔴 CRITICAL  
-**Время:** 3 часа  
+**Время:** 2 часа  
 
 **Подзадачи:**
 - [ ] Проверка существования и статуса заказа
 - [ ] Проверка права создания спора (участники заказа)
-- [ ] Интеграция с Stripe для удержания средств
-- [ ] Блокировка средств на время рассмотрения спора
+- [ ] Валидация статуса заказа (только для completed/in_progress заказов)
 
 **Критерии приемки:**
 - Споры создаются только для валидных заказов
-- Средства блокируются при создании спора
-- Интеграция с Stripe работает
+- Доступ к спорам ограничен участниками заказа
+- Интеграция с Orders module работает
 
 ---
 
@@ -433,7 +422,7 @@ interface CreateDisputeDto {
   orderId: string;
   reason: DisputeReason;
   description: string; // min 50, max 2000 characters
-  amountInDispute: number; // в копейках
+  amountInDispute?: number; // Optional: for reference only (not used for payments in MVP)
 }
 
 // Response
@@ -551,22 +540,25 @@ export class DisputesController {
 
 #### 7.6.1: ResolutionService для админов
 **Приоритет:** 🟡 HIGH  
-**Время:** 4 часа  
+**Время:** 3 часа  
 
 **Подзадачи:**
 - [ ] Создать `resolution.service.ts`
 - [ ] Реализовать методы разрешения споров
-- [ ] Автоматический расчет распределения средств
-- [ ] Интеграция со Stripe для выплат/возвратов
+- [ ] Применение решений (блокировка пользователя, закрытие заказа и т.д.)
 - [ ] Создание audit trail для решений
+- [ ] Интеграция с Admin Panel для применения решений
 
 ```typescript
 interface ResolveDisputeDto {
   resolutionType: DisputeResolution;
   reason: string;
-  refundAmount?: number; // копейки
-  contractorAmount?: number; // копейки
   adminNotes?: string;
+  actionDetails?: {
+    userId?: string; // Для block_user или suspend_account
+    orderId?: string; // Для close_order
+    warningMessage?: string; // Для warn_user
+  };
 }
 
 @Injectable()
@@ -577,18 +569,17 @@ export class ResolutionService {
     adminId: string
   ) {
     // 1. Валидация разрешения
-    // 2. Расчет сумм
-    // 3. Выполнение Stripe операций
-    // 4. Обновление статуса спора
-    // 5. Отправка уведомлений
-    // 6. Audit logging
+    // 2. Применение решения (блокировка, закрытие заказа и т.д.)
+    // 3. Обновление статуса спора
+    // 4. Отправка уведомлений
+    // 5. Audit logging
   }
 }
 ```
 
 **Критерии приемки:**
 - Споры разрешаются корректно
-- Финансовые операции выполняются
+- Решения применяются (блокировка пользователя, закрытие заказа)
 - Audit trail ведется
 - Уведомления отправляются
 
@@ -933,25 +924,27 @@ npm run test:security rate-limiting
 ### Internal Dependencies
 - **Phase 1 (Auth)** - JWT tokens, user roles
 - **Phase 3 (Orders)** - Order validation, participants
-- **Phase 6 (Payments)** - Stripe integration, escrow
-- **Phase 8 (Notifications)** - Email/push notifications
+- **Phase 10 (Admin Panel)** - Admin dispute resolution dashboard
+- **Phase 8 (Notifications)** - Email/push notifications (future)
+
+> **📝 MVP Scope:** В MVP нет зависимости от Phase 6 (Payments), так как споры касаются качества работы и проблем с заказами, а не платежных споров.
 
 ### External Services
-- **Stripe** - Payment holds, refunds, payouts
 - **AWS S3** - File storage для доказательств  
 - **ClamAV/VirusTotal** - Virus scanning
-- **OneSignal** - Push notifications
-- **SendGrid** - Email notifications
+- **OneSignal** - Push notifications (future)
+- **SendGrid** - Email notifications (future)
 
 ### API Dependencies
 ```typescript
 // Orders service integration
 await this.ordersService.validateOrderForDispute(orderId, userId);
 
-// Payments service integration  
-await this.paymentsService.holdPayment(orderId, amount);
+// Admin service integration (for user blocking, order closing)
+await this.adminService.blockUser(userId, reason);
+await this.ordersService.closeOrder(orderId, reason);
 
-// Notifications service integration
+// Notifications service integration (future)
 await this.notificationsService.sendDisputeCreated(disputeId);
 ```
 
@@ -962,8 +955,8 @@ await this.notificationsService.sendDisputeCreated(disputeId);
 ### Business Metrics
 - **Dispute Resolution Time:** < 3 business days average
 - **User Satisfaction:** > 85% satisfaction with dispute process
-- **Platform Protection:** < 1% disputes escalated to Stripe
-- **Automation Rate:** 95% automatic fund distribution
+- **Dispute Resolution Rate:** > 90% disputes resolved successfully
+- **Admin Efficiency:** < 1 hour average time to resolve dispute
 
 ### Technical Metrics
 - **API Response Time:** < 500ms for all endpoints
