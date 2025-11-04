@@ -1,0 +1,24 @@
+{
+  "name": "figma-extractor",
+  "version": "1.0.0",
+  "description": "Extract HTML/CSS/colors/fonts from Figma components for free",
+  "private": true,
+  "scripts": {
+    "extract": "tsx extract-all.ts",
+    "component": "tsx extract-component.ts",
+    "colors": "tsx extract-colors.ts",
+    "fonts": "tsx extract-fonts.ts",
+    "compile": "tsx compile-page.ts",
+    "preview": "tsx compile-page.ts && open output/compiled/index.html || xdg-open output/compiled/index.html || start output/compiled/index.html",
+    "screenshot": "tsx export-screenshot.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6"
+  }
+}
+
