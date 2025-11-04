@@ -17,6 +17,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { VerificationModule } from './verification/verification.module';
 import { OrdersModule } from './orders/orders.module';
 import { ChatModule } from './chat/chat.module';
+import { ReviewsModule } from './reviews/reviews.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -70,6 +71,7 @@ import { validate } from './config/env.validation';
     VerificationModule, // Verification stub (Stripe Identity placeholder)
     OrdersModule, // Orders and proposals management (Phase 3)
     ChatModule, // Real-time chat for order communication (Phase 4)
+    ReviewsModule, // Reviews and ratings system (Phase 5)
   ],
   controllers: [AppController],
   providers: [

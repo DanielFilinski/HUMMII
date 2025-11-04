@@ -102,14 +102,14 @@ export class ResourceOwnerGuard implements CanActivate {
         case 'review':
           const review = await this.prisma.review.findUnique({
             where: { id: resourceId },
-            select: { authorId: true },
+            select: { reviewerId: true },
           });
 
           if (!review) {
             throw new NotFoundException('Review not found');
           }
 
-          return review.authorId === userId;
+          return review.reviewerId === userId;
 
         case 'user':
           // User can only access their own profile

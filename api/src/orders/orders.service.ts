@@ -222,7 +222,15 @@ export class OrdersService {
     }
 
     if (newStatus === OrderStatus.COMPLETED) {
-      updateData.completedAt = new Date();
+      const completedAt = new Date();
+      updateData.completedAt = completedAt;
+      
+      // Set review eligibility and deadline (14 days from completion)
+      const reviewDeadline = new Date(completedAt);
+      reviewDeadline.setDate(reviewDeadline.getDate() + 14);
+      
+      (updateData as any).isReviewEligible = true;
+      (updateData as any).reviewDeadline = reviewDeadline;
     }
 
     const updatedOrder = await this.prisma.order.update({

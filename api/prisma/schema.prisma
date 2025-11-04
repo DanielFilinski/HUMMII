@@ -5,12 +5,12 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  binaryTargets  = ["native", "linux-musl-arm64-openssl-3.0.x"]
+  binaryTargets   = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================================================
@@ -60,6 +60,30 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+  SUSPENDED
+}
+
+enum ReportReason {
+  SPAM
+  INAPPROPRIATE
+  FAKE
+  OFFENSIVE
+  CONTACT_INFO
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  ACTIONED
+  DISMISSED
+}
+
 // ============================================================================
 // USER MODELS
 // ============================================================================
@@ -102,15 +126,19 @@ model User {
   deletedAt DateTime? // Soft delete for PIPEDA compliance
 
   // Relations
-  clientOrders     Order[]        @relation("ClientOrders")
-  contractorOrders Order[]        @relation("ContractorOrders")
-  sentMessages     Message[]      @relation("SentMessages")
-  receivedMessages Message[]      @relation("ReceivedMessages")
-  givenReviews     Review[]       @relation("ReviewAuthor")
-  receivedReviews  Review[]       @relation("ReviewRecipient")
+  clientOrders     Order[]          @relation("ClientOrders")
+  contractorOrders Order[]          @relation("ContractorOrders")
+  sentMessages     Message[]        @relation("SentMessages")
+  receivedMessages Message[]        @relation("ReceivedMessages")
+  reviewsGiven     Review[]         @relation("ReviewsGiven")
+  reviewsReceived  Review[]         @relation("ReviewsReceived")
+  reviewsModerated Review[]         @relation("ReviewsModerated")
+  reportsGiven     ReviewReport[]   @relation("ReportsGiven")
+  reportsReviewed  ReviewReport[]   @relation("ReportsReviewed")
   notifications    Notification[]
   sessions         Session[]
-  auditLogs        AuditLog[]     @relation("AuditLogs")
+  auditLogs        AuditLog[]       @relation("AuditLogs")
+  ratingStats      UserRatingStats?
 
   @@index([email])
   @@index([phone])
@@ -266,10 +294,14 @@ model Order {
   startedAt   DateTime?
   completedAt DateTime?
 
+  // Review eligibility
+  isReviewEligible Boolean   @default(false)
+  reviewDeadline   DateTime?
+
   // Relations
   proposals Proposal[]
   messages  Message[]
-  reviews   Review[]
+  review    Review?
   payment   Payment?
   dispute   Dispute?
 
@@ -293,10 +325,10 @@ model Proposal {
   contractorId String
   contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
 
-  message        String         @db.Text
-  proposedPrice  Decimal        @db.Decimal(10, 2)
-  estimatedDays  Int?
-  
+  message       String  @db.Text
+  proposedPrice Decimal @db.Decimal(10, 2)
+  estimatedDays Int?
+
   status    ProposalStatus @default(PENDING)
   expiresAt DateTime?
 
@@ -366,39 +398,132 @@ model Review {
   id String @id @default(uuid())
 
   orderId String @unique
-  order   Order  @relation(fields: [orderId], references: [id])
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  authorId String
-  author   User   @relation("ReviewAuthor", fields: [authorId], references: [id])
+  // Participants
+  reviewerId String // User who leaves review
+  reviewer   User   @relation("ReviewsGiven", fields: [reviewerId], references: [id])
 
-  recipientId String
-  recipient   User   @relation("ReviewRecipient", fields: [recipientId], references: [id])
+  revieweeId String // User being reviewed
+  reviewee   User   @relation("ReviewsReceived", fields: [revieweeId], references: [id])
 
-  // Ratings (1-5)
-  qualityRating         Int? // Contractor only
-  professionalismRating Int
-  communicationRating   Int
-  valueRating           Int? // Contractor only
-  paymentRating         Int? // Client only
-
-  // Overall rating (calculated)
-  overallRating Decimal @db.Decimal(3, 2)
-
-  comment String? @db.Text
+  // Content
+  rating          Decimal @db.Decimal(3, 2) // Overall rating (1.00 - 5.00)
+  comment         String? @db.Text
+  criteriaRatings Json // { quality: 5, professionalism: 4, communication: 5, value: 4 } or { communication: 5, professionalism: 4, payment: 5 }
 
   // Moderation
-  isModerated     Boolean @default(false)
-  isPublished     Boolean @default(true)
-  moderationNotes String?
+  status          ReviewStatus @default(PENDING)
+  moderationFlags String[] // ['profanity', 'contact_info', etc.]
+  moderatedAt     DateTime?
+  moderatedBy     String?
+  moderator       User?        @relation("ReviewsModerated", fields: [moderatedBy], references: [id])
+  moderationNotes String?      @db.Text
+
+  // Metadata
+  isEdited  Boolean   @default(false)
+  editedAt  DateTime?
+  isVisible Boolean   @default(true)
 
   // Response
-  response    String?   @db.Text
-  respondedAt DateTime?
+  response ReviewResponse?
+
+  // Reports
+  reports     ReviewReport[]
+  reportCount Int            @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([revieweeId, status])
+  @@index([reviewerId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
   @@map("reviews")
+}
+
+model ReviewResponse {
+  id       String @id @default(uuid())
+  reviewId String @unique
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  // Content
+  content String @db.Text
+
+  // Moderation
+  status          ReviewStatus @default(PENDING)
+  moderationFlags String[]
+  moderatedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([reviewId])
+  @@map("review_responses")
+}
+
+model ReviewReport {
+  id       String @id @default(uuid())
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  reporterId String
+  reporter   User   @relation("ReportsGiven", fields: [reporterId], references: [id])
+
+  // Report details
+  reason      ReportReason
+  description String?      @db.Text
+
+  // Status
+  status     ReportStatus @default(PENDING)
+  reviewedBy String?
+  reviewer   User?        @relation("ReportsReviewed", fields: [reviewedBy], references: [id])
+  reviewedAt DateTime?
+  resolution String?      @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, reporterId])
+  @@index([status])
+  @@index([reviewId])
+  @@map("review_reports")
+}
+
+model UserRatingStats {
+  id       String   @id @default(uuid())
+  userId   String   @unique
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userType UserRole // CLIENT or CONTRACTOR
+
+  // Overall statistics
+  averageRating Decimal @default(0.00) @db.Decimal(3, 2)
+  totalReviews  Int     @default(0)
+
+  // Contractor-specific criteria averages
+  avgQuality         Decimal? @db.Decimal(3, 2)
+  avgProfessionalism Decimal? @db.Decimal(3, 2)
+  avgCommunication   Decimal? @db.Decimal(3, 2)
+  avgValue           Decimal? @db.Decimal(3, 2)
+
+  // Client-specific criteria averages
+  avgPayment Decimal? @db.Decimal(3, 2)
+
+  // Rating distribution (count of 1-5 star reviews)
+  ratingDistribution Json // { "5": 10, "4": 5, "3": 2, "2": 0, "1": 0 }
+
+  // Badges
+  badges String[] // ['verified', 'top_pro', 'new']
+
+  // Weighted score (for ranking)
+  weightedScore Decimal @default(0.00) @db.Decimal(5, 2)
+
+  updatedAt DateTime @updatedAt
+
+  @@index([averageRating])
+  @@index([weightedScore])
+  @@index([userId])
+  @@map("user_rating_stats")
 }
 
 // ============================================================================

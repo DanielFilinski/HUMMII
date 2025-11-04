@@ -62,7 +62,13 @@ import { Redis } from 'ioredis';
       inject: [ConfigService],
     },
   ],
-  exports: [ChatService, ChatGateway, ChatSessionService, ChatExportService],
+  exports: [
+    ChatService,
+    ChatGateway,
+    ChatSessionService,
+    ChatExportService,
+    ContentModerationService,
+  ],
 })
 export class ChatModule {}
 

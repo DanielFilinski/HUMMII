@@ -29,6 +29,8 @@ import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { AddUserRoleDto } from './dto/add-user-role.dto';
 import { RemoveUserRoleDto } from './dto/remove-user-role.dto';
 import { VerifyContractorDto } from './dto/verify-contractor.dto';
+import { ModerateReviewDto } from '../reviews/dto/moderate-review.dto';
+import { ReportStatus } from '@prisma/client';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -294,5 +296,79 @@ export class AdminController {
     @Body('reason') reason?: string,
   ) {
     return this.adminService.rejectPortfolioItem(id, admin.userId, reason);
+  }
+
+  // ==================== REVIEW MODERATION ====================
+
+  @Get('reviews/pending')
+  @ApiOperation({ summary: 'Get pending reviews queue (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Pending reviews retrieved successfully' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getPendingReviews(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.adminService.getPendingReviews({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  }
+
+  @Get('reviews/flagged')
+  @ApiOperation({ summary: 'Get flagged reviews (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Flagged reviews retrieved successfully' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getFlaggedReviews(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.adminService.getFlaggedReviews({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  }
+
+  @Patch('reviews/:id/moderate')
+  @ApiOperation({ summary: 'Moderate review (approve/reject) (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Review moderated successfully' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  @ApiParam({ name: 'id', description: 'Review ID' })
+  async moderateReview(
+    @Param('id') id: string,
+    @Body() dto: ModerateReviewDto,
+    @CurrentUser() admin: any,
+  ) {
+    return this.adminService.moderateReview(id, dto, admin.userId);
+  }
+
+  @Get('reviews/reports')
+  @ApiOperation({ summary: 'Get review reports queue (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Review reports retrieved successfully' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async getReviewReports(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.adminService.getReviewReports({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  }
+
+  @Patch('reviews/reports/:id/resolve')
+  @ApiOperation({ summary: 'Resolve review report (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Review report resolved successfully' })
+  @ApiResponse({ status: 404, description: 'Review report not found' })
+  @ApiParam({ name: 'id', description: 'Report ID' })
+  async resolveReviewReport(
+    @Param('id') id: string,
+    @CurrentUser() admin: any,
+    @Body('resolution') resolution: string,
+    @Body('status') status: ReportStatus,
+  ) {
+    return this.adminService.resolveReviewReport(id, admin.userId, resolution, status);
   }
 }

@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
-import { UserRole, VerificationStatus } from '@prisma/client';
-import { AuditAction } from '../shared/audit/enums/audit-action.enum';
+import { UserRole, VerificationStatus, ReviewStatus, ReportStatus } from '@prisma/client';
+import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
 import { VerifyContractorDto } from './dto/verify-contractor.dto';
+import { ModerateReviewDto } from '../reviews/dto/moderate-review.dto';
+import { RatingCalculationService } from '../reviews/services/rating-calculation.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly ratingCalculationService: RatingCalculationService,
   ) {}
 
   // ==================== USER MANAGEMENT ====================
@@ -868,5 +871,321 @@ export class AdminService {
       message: 'Portfolio item rejected',
       reason,
     };
+  }
+
+  // ==================== REVIEW MODERATION ====================
+
+  /**
+   * Get pending reviews queue
+   */
+  async getPendingReviews(filters: { page: number; limit: number }) {
+    const { page, limit } = filters;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      status: ReviewStatus.PENDING,
+    };
+
+    const [reviews, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        include: {
+          reviewer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          reviewee: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          order: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'asc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({ where }),
+    ]);
+
+    return {
+      data: reviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get flagged reviews
+   */
+  async getFlaggedReviews(filters: { page: number; limit: number }) {
+    const { page, limit } = filters;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      OR: [
+        { status: ReviewStatus.FLAGGED },
+        { status: ReviewStatus.SUSPENDED },
+        { reportCount: { gte: 1 } },
+      ],
+    };
+
+    const [reviews, total] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        include: {
+          reviewer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          reviewee: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          order: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+          reports: {
+            include: {
+              reporter: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { reportCount: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({ where }),
+    ]);
+
+    return {
+      data: reviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Moderate review (approve/reject)
+   */
+  async moderateReview(
+    reviewId: string,
+    dto: ModerateReviewDto,
+    adminId: string,
+  ) {
+    const review = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+    });
+
+    if (!review) {
+      throw new NotFoundException('Review not found');
+    }
+
+    const updateData: any = {
+      status: dto.status,
+      moderatedAt: new Date(),
+      moderatedBy: adminId,
+      moderationNotes: dto.moderationNotes,
+    };
+
+    // If approved, make visible
+    if (dto.status === ReviewStatus.APPROVED) {
+      updateData.isVisible = true;
+    }
+
+    // If rejected, hide
+    if (dto.status === ReviewStatus.REJECTED) {
+      updateData.isVisible = false;
+    }
+
+    const updatedReview = await this.prisma.review.update({
+      where: { id: reviewId },
+      data: updateData,
+      include: {
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        reviewee: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // If approved, update rating statistics
+    if (dto.status === ReviewStatus.APPROVED) {
+      this.ratingCalculationService.updateUserRatingStats(review.revieweeId).catch(
+        (error) => {
+          // Log error but don't fail the request
+          console.error(`Failed to update rating stats: ${error.message}`);
+        },
+      );
+
+      this.ratingCalculationService.updateUserBadges(review.revieweeId).catch(
+        (error) => {
+          console.error(`Failed to update badges: ${error.message}`);
+        },
+      );
+    }
+
+    // Audit log
+    await this.auditService.log({
+      userId: adminId,
+      action: AuditAction.REVIEW_UPDATED,
+      entity: AuditEntity.REVIEW,
+      entityId: reviewId,
+      metadata: {
+        status: dto.status,
+        moderationNotes: dto.moderationNotes,
+      },
+    });
+
+    return updatedReview;
+  }
+
+  /**
+   * Get review reports queue
+   */
+  async getReviewReports(filters: { page: number; limit: number }) {
+    const { page, limit } = filters;
+    const skip = (page - 1) * limit;
+
+    const where = {
+      status: ReportStatus.PENDING,
+    };
+
+    const [reports, total] = await Promise.all([
+      this.prisma.reviewReport.findMany({
+        where,
+        include: {
+          review: {
+            include: {
+              reviewer: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              reviewee: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          reporter: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.reviewReport.count({ where }),
+    ]);
+
+    return {
+      data: reports,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Resolve review report
+   */
+  async resolveReviewReport(
+    reportId: string,
+    adminId: string,
+    resolution: string,
+    status: ReportStatus,
+  ) {
+    const report = await this.prisma.reviewReport.findUnique({
+      where: { id: reportId },
+    });
+
+    if (!report) {
+      throw new NotFoundException('Review report not found');
+    }
+
+    const updatedReport = await this.prisma.reviewReport.update({
+      where: { id: reportId },
+      data: {
+        status,
+        reviewedBy: adminId,
+        reviewedAt: new Date(),
+        resolution,
+      },
+    });
+
+    // If actioned, update review status
+    if (status === ReportStatus.ACTIONED) {
+      await this.prisma.review.update({
+        where: { id: report.reviewId },
+        data: {
+          status: ReviewStatus.SUSPENDED,
+          isVisible: false,
+        },
+      });
+    }
+
+    // Audit log
+    await this.auditService.log({
+      userId: adminId,
+      action: AuditAction.REVIEW_REPORTED,
+      entity: AuditEntity.REVIEW,
+      entityId: report.reviewId,
+      metadata: {
+        reportId,
+        status,
+        resolution,
+      },
+    });
+
+    return updatedReport;
   }
 }

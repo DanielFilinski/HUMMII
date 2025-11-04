@@ -3,9 +3,10 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { PrismaModule } from '../shared/prisma/prisma.module';
 import { AuditModule } from '../shared/audit/audit.module';
+import { ReviewsModule } from '../reviews/reviews.module';
 
 @Module({
-  imports: [PrismaModule, AuditModule],
+  imports: [PrismaModule, AuditModule, ReviewsModule],
   controllers: [AdminController],
   providers: [AdminService],
   exports: [AdminService],

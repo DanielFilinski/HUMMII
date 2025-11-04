@@ -142,6 +142,45 @@ export class UsersService {
       where: { userId },
     });
 
+    // Anonymize reviews (soft delete - keep for statistics)
+    await this.prisma.review.updateMany({
+      where: {
+        OR: [
+          { reviewerId: userId },
+          { revieweeId: userId },
+        ],
+      },
+      data: {
+        isVisible: false,
+        comment: null, // Remove PII from comments
+      },
+    });
+
+    // Anonymize review responses (find reviews first, then update responses)
+    const userReviews = await this.prisma.review.findMany({
+      where: {
+        OR: [
+          { reviewerId: userId },
+          { revieweeId: userId },
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (userReviews.length > 0) {
+      const reviewIds = userReviews.map((r) => r.id);
+      await this.prisma.reviewResponse.updateMany({
+        where: {
+          reviewId: {
+            in: reviewIds,
+          },
+        },
+        data: {
+          content: '[Content removed - account deleted]',
+        },
+      });
+    }
+
     // Audit log: Account deleted (PIPEDA compliance)
     await this.auditService.log({
       userId,
@@ -194,22 +233,35 @@ export class UsersService {
             createdAt: true,
           },
         },
-        givenReviews: {
+        reviewsGiven: {
           select: {
             id: true,
-            overallRating: true,
+            orderId: true,
+            revieweeId: true,
+            rating: true,
             comment: true,
+            criteriaRatings: true,
+            status: true,
+            isVisible: true,
             createdAt: true,
+            updatedAt: true,
           },
         },
-        receivedReviews: {
+        reviewsReceived: {
           select: {
             id: true,
-            overallRating: true,
+            orderId: true,
+            reviewerId: true,
+            rating: true,
             comment: true,
+            criteriaRatings: true,
+            status: true,
+            isVisible: true,
             createdAt: true,
+            updatedAt: true,
           },
         },
+        ratingStats: true,
         contractor: {
           select: {
             bio: true,
