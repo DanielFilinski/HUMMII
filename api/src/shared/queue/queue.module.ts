@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NotificationProcessor } from './processors/notification.processor';
 
 @Module({
   imports: [
@@ -24,10 +25,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
-    BullModule.registerQueue({
-      name: 'email',
-    }),
+    BullModule.registerQueue(
+      {
+        name: 'email',
+      },
+      {
+        name: 'notifications', // Queue for order/proposal notifications
+      },
+    ),
   ],
+  providers: [NotificationProcessor],
   exports: [BullModule],
 })
 export class QueueModule {}

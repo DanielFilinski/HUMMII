@@ -38,6 +38,12 @@ enum OrderType {
   DIRECT
 }
 
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 enum PaymentStatus {
   PENDING
   PROCESSING
@@ -149,6 +155,7 @@ model Contractor {
   categories ContractorCategory[]
   portfolio  PortfolioItem[]
   services   Service[]
+  proposals  Proposal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,23 +248,23 @@ model Order {
   contractorId String?
   contractor   User?   @relation("ContractorOrders", fields: [contractorId], references: [id])
 
-  // Location (temporarily disabled for testing)
-  location   String? // Will be replaced with PostGIS later
+  // Location (Haversine search - simple lat/lon)
+  latitude   Float?
+  longitude  Float?
   address    String
   city       String
   province   String
   postalCode String
 
   // Budget
-  budgetMin   Decimal? @db.Decimal(10, 2)
-  budgetMax   Decimal? @db.Decimal(10, 2)
+  budget      Decimal? @db.Decimal(10, 2)
   agreedPrice Decimal? @db.Decimal(10, 2)
 
   // Dates
-  desiredStartDate      DateTime?
-  desiredCompletionDate DateTime?
-  actualStartDate       DateTime?
-  actualCompletionDate  DateTime?
+  deadline    DateTime?
+  publishedAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
 
   // Relations
   proposals Proposal[]
@@ -274,6 +281,7 @@ model Order {
   @@index([contractorId])
   @@index([status])
   @@index([categoryId])
+  @@index([latitude, longitude])
   @@map("orders")
 }
 
@@ -283,17 +291,21 @@ model Proposal {
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   contractorId String
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
 
-  message           String  @db.Text
-  proposedPrice     Decimal @db.Decimal(10, 2)
-  estimatedDuration String? // e.g., "3 days", "2 weeks"
-
-  status    String    @default("pending") // pending, accepted, rejected, expired
+  message        String         @db.Text
+  proposedPrice  Decimal        @db.Decimal(10, 2)
+  estimatedDays  Int?
+  
+  status    ProposalStatus @default(PENDING)
   expiresAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([orderId, contractorId])
+  @@index([contractorId])
+  @@index([status])
   @@map("proposals")
 }
 

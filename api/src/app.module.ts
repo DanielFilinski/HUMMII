@@ -15,6 +15,7 @@ import { AdminModule } from './admin/admin.module';
 import { ContractorsModule } from './contractors/contractors.module';
 import { CategoriesModule } from './categories/categories.module';
 import { VerificationModule } from './verification/verification.module';
+import { OrdersModule } from './orders/orders.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -66,6 +67,7 @@ import { validate } from './config/env.validation';
     ContractorsModule, // Contractor profiles and portfolio
     CategoriesModule, // Categories for contractors
     VerificationModule, // Verification stub (Stripe Identity placeholder)
+    OrdersModule, // Orders and proposals management (Phase 3)
   ],
   controllers: [AppController],
   providers: [
