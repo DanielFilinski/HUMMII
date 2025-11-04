@@ -38,6 +38,14 @@ const config: Config = {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        accent: {
+          1: '#16a34a',  // Primary green (Figma design)
+          2: '#22c55e',  // Secondary green (Figma design)
+        },
+        text: {
+          primary: '#0f172a',     // Dark blue-black (Figma design)
+          secondary: '#a0aac1',   // Gray (Figma design)
+        },
       },
       // Responsive spacing scale
       spacing: {

@@ -72,6 +72,101 @@
     "learnMore": "Learn more about how we use cookies in our",
     "saved": "Your cookie preferences have been saved.",
     "error": "Failed to save cookie preferences. Please try again."
+  },
+  "landing": {
+    "header": {
+      "categories": "Categories",
+      "howItWorks": "How It Works",
+      "postTask": "Post a Task",
+      "becomeContractor": "Become a Contractor",
+      "signInSignUp": "Sign in/ Sign Up",
+      "language": "Language"
+    },
+    "hero": {
+      "title": "Find the Right Expert for Any Task",
+      "searchPlaceholder": "Search for any service...",
+      "searchButton": "Search"
+    },
+    "categories": {
+      "title": "Categories",
+      "viewAll": "View all services",
+      "allCategories": "All Categories",
+      "browseAllCategories": "Browse all available service categories",
+      "searchCategories": "Search categories...",
+      "noResults": "No categories found",
+      "tryAdjusting": "Try adjusting your search"
+    },
+    "contractors": {
+      "title": "Top Contractors",
+      "viewProfile": "View Profile",
+      "perHour": "$/Hr",
+      "location": "Location:",
+      "priceRange": "Price:",
+      "resultsFound": "contractor(s) found",
+      "noResults": "No contractors found",
+      "tryFilters": "Try adjusting your filters"
+    },
+    "postTask": {
+      "title": "Post a task - Get it done",
+      "description": "Submit your request for any service - qualified specialists will respond directly.",
+      "button": "Post a Task"
+    },
+    "becomeContractor": {
+      "title": "Your Talent. Their Need. One Click Away.",
+      "description": "Start offering your skills and connect with clients who need your expertise.",
+      "button": "Become a Contractor"
+    },
+    "whyChoose": {
+      "title": "Why choose our Platform",
+      "easyToUse": {
+        "title": "Easy to Use",
+        "description": "Find services or clients in just a few clicks — clear categories, smart search, and smooth navigation."
+      },
+      "trustedCommunity": {
+        "title": "Trusted Community",
+        "description": "All users go through verification to make collaboration safe, transparent, and worry-free."
+      },
+      "directCommunication": {
+        "title": "Direct Communication",
+        "description": "Chat instantly, discuss details, and agree on tasks without leaving the platform."
+      },
+      "growReputation": {
+        "title": "Grow Your Reputation",
+        "description": "Earn ratings, collect reviews, and build trust that helps you get more opportunities"
+      }
+    },
+    "footer": {
+      "discover": "Discover",
+      "company": "Company",
+      "followUs": "Follow Us",
+      "language": "Language",
+      "needHelp": "Need Help?",
+      "contactSupport": "Contact support",
+      "copyright": "© 2025 All rights reserved.",
+      "termsAndConditions": "Terms and Conditions",
+      "privacyPolicy": "Privacy Policy",
+      "cookiePolicy": "Cookie Policy",
+      "becomeTasker": "Become a Tasker"
+    },
+    "profile": {
+      "about": "About",
+      "servicesOffered": "Services Offered",
+      "portfolio": "Portfolio",
+      "reviews": "Reviews",
+      "noReviews": "No reviews yet",
+      "beFirst": "Be the first to review this contractor",
+      "rating": "Rating:",
+      "completedJobs": "Completed Jobs:",
+      "hourlyRate": "Hourly Rate:",
+      "contact": "Contact",
+      "hireNow": "Hire Now",
+      "verified": "Verified",
+      "specialist": "Specialist"
+    },
+    "breadcrumbs": {
+      "home": "Home",
+      "categories": "Categories"
+    }
   }
 }
 
