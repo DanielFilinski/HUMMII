@@ -56,3 +56,4 @@ Replace with actual optimized images before production deployment.
 - Consider using WebP format for better compression
 - Store original high-resolution images separately
 
+

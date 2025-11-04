@@ -60,3 +60,4 @@ export type FooterSection = {
   links: FooterLink[];
 };
 
+

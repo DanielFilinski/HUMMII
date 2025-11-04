@@ -402,3 +402,4 @@ exportFigmaPageAsImage(nodeId, outputFile).catch(error => {
   process.exit(1);
 });
 
+
