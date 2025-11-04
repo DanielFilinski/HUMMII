@@ -16,6 +16,7 @@ import { ContractorsModule } from './contractors/contractors.module';
 import { CategoriesModule } from './categories/categories.module';
 import { VerificationModule } from './verification/verification.module';
 import { OrdersModule } from './orders/orders.module';
+import { ChatModule } from './chat/chat.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -68,6 +69,7 @@ import { validate } from './config/env.validation';
     CategoriesModule, // Categories for contractors
     VerificationModule, // Verification stub (Stripe Identity placeholder)
     OrdersModule, // Orders and proposals management (Phase 3)
+    ChatModule, // Real-time chat for order communication (Phase 4)
   ],
   controllers: [AppController],
   providers: [
