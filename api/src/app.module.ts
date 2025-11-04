@@ -12,6 +12,9 @@ import { AuditModule } from './shared/audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AdminModule } from './admin/admin.module';
+import { ContractorsModule } from './contractors/contractors.module';
+import { CategoriesModule } from './categories/categories.module';
+import { VerificationModule } from './verification/verification.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -60,6 +63,9 @@ import { validate } from './config/env.validation';
     AuthModule,
     UsersModule,
     AdminModule, // Admin panel API
+    ContractorsModule, // Contractor profiles and portfolio
+    CategoriesModule, // Categories for contractors
+    VerificationModule, // Verification stub (Stripe Identity placeholder)
   ],
   controllers: [AppController],
   providers: [

@@ -22,7 +22,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateCookiePreferencesDto } from './dto/cookie-preferences.dto';
 import { UploadAvatarResponseDto } from './dto/upload-avatar-response.dto';
+import { SwitchRoleDto } from './dto/switch-role.dto';
 import { UploadService } from '../shared/upload/upload.service';
+import { UserRole } from '@prisma/client';
 
 interface JwtPayload {
   userId: string;
@@ -154,5 +156,24 @@ export class UsersController {
       avatarUrl: result.avatarUrl,
       thumbnailUrl: result.thumbnailUrl,
     };
+  }
+
+  @Post('me/switch-role')
+  @Throttle({ default: { limit: 1, ttl: 86400000 } }) // 1 switch per day
+  @ApiOperation({
+    summary: 'Switch user role',
+    description: 'Switch between CLIENT and CONTRACTOR roles. User can have both roles simultaneously.',
+  })
+  @ApiResponse({ status: 200, description: 'Role switched successfully' })
+  @ApiResponse({ status: 400, description: 'User already has the specified role' })
+  @ApiResponse({ status: 429, description: 'Too many requests (max 1 per day)' })
+  async switchRole(@CurrentUser() user: JwtPayload, @Body() switchRoleDto: SwitchRoleDto) {
+    if (switchRoleDto.role === UserRole.CONTRACTOR) {
+      return this.usersService.switchToContractor(user.userId);
+    } else if (switchRoleDto.role === UserRole.CLIENT) {
+      return this.usersService.switchToClient(user.userId);
+    } else {
+      throw new BadRequestException('Invalid role. Must be CLIENT or CONTRACTOR');
+    }
   }
 }

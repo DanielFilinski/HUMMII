@@ -27,9 +27,19 @@ export enum AuditAction {
   // PIPEDA Rights
   PROFILE_VIEWED = 'PROFILE_VIEWED',
   PROFILE_UPDATED = 'PROFILE_UPDATED',
+  PROFILE_CREATED = 'PROFILE_CREATED',
   DATA_EXPORTED = 'DATA_EXPORTED', // Right to Data Portability
   ACCOUNT_DELETED = 'ACCOUNT_DELETED', // Right to Erasure
   COOKIE_PREFERENCES_UPDATED = 'COOKIE_PREFERENCES_UPDATED', // Right to Withdraw Consent
+
+  // Contractor actions
+  LOCATION_UPDATED = 'LOCATION_UPDATED',
+  PORTFOLIO_ITEM_ADDED = 'PORTFOLIO_ITEM_ADDED',
+  PORTFOLIO_ITEM_UPDATED = 'PORTFOLIO_ITEM_UPDATED',
+  PORTFOLIO_ITEM_DELETED = 'PORTFOLIO_ITEM_DELETED',
+  CATEGORY_ASSIGNED = 'CATEGORY_ASSIGNED',
+  CATEGORY_REMOVED = 'CATEGORY_REMOVED',
+  ROLE_SWITCHED = 'ROLE_SWITCHED',
 
   // Session management
   SESSION_CREATED = 'SESSION_CREATED',
@@ -52,10 +62,13 @@ export enum AuditAction {
  */
 export enum AuditEntity {
   USER = 'User',
+  CONTRACTOR = 'Contractor',
   SESSION = 'Session',
   ORDER = 'Order',
   PAYMENT = 'Payment',
   REVIEW = 'Review',
   MESSAGE = 'Message',
+  CATEGORY = 'Category',
+  PORTFOLIO = 'Portfolio',
   SYSTEM = 'System',
 }

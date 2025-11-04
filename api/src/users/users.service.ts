@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
 import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CookiePreferencesDto } from './dto/cookie-preferences.dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -358,5 +359,111 @@ export class UsersService {
     });
 
     return user;
+  }
+
+  /**
+   * Switch user to CONTRACTOR role
+   * Creates contractor profile if not exists
+   */
+  async switchToContractor(userId: string) {
+    // Get user
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { contractor: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if already has CONTRACTOR role
+    if (user.roles.includes(UserRole.CONTRACTOR)) {
+      throw new BadRequestException('User already has CONTRACTOR role');
+    }
+
+    // Add CONTRACTOR role
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          push: UserRole.CONTRACTOR,
+        },
+      },
+    });
+
+    // Create contractor profile if not exists
+    if (!user.contractor) {
+      await this.prisma.contractor.create({
+        data: {
+          userId,
+        },
+      });
+    }
+
+    // Audit log
+    await this.auditService.log({
+      userId,
+      action: AuditAction.ROLE_SWITCHED,
+      entity: AuditEntity.USER,
+      entityId: userId,
+      metadata: {
+        from: user.roles,
+        to: updatedUser.roles,
+        action: 'add_contractor_role',
+      },
+    });
+
+    return {
+      message: 'Successfully switched to CONTRACTOR role',
+      roles: updatedUser.roles,
+    };
+  }
+
+  /**
+   * Switch user to CLIENT role
+   * Keeps contractor profile if exists
+   */
+  async switchToClient(userId: string) {
+    // Get user
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if already has CLIENT role
+    if (user.roles.includes(UserRole.CLIENT)) {
+      throw new BadRequestException('User already has CLIENT role');
+    }
+
+    // Add CLIENT role
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        roles: {
+          push: UserRole.CLIENT,
+        },
+      },
+    });
+
+    // Audit log
+    await this.auditService.log({
+      userId,
+      action: AuditAction.ROLE_SWITCHED,
+      entity: AuditEntity.USER,
+      entityId: userId,
+      metadata: {
+        from: user.roles,
+        to: updatedUser.roles,
+        action: 'add_client_role',
+      },
+    });
+
+    return {
+      message: 'Successfully switched to CLIENT role',
+      roles: updatedUser.roles,
+    };
   }
 }

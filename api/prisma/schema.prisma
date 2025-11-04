@@ -117,17 +117,19 @@ model Contractor {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Profile
-  bio        String?  @db.Text
-  experience Int? // Years of experience
-  hourlyRate Decimal? @db.Decimal(10, 2)
+  bio          String?  @db.Text
+  experience   Int? // Years of experience
+  hourlyRate   Decimal? @db.Decimal(10, 2)
+  businessName String?
 
-  // Location (temporarily disabled for testing)
-  location      String? // Will be replaced with PostGIS later
+  // Location (simple lat/lon for MVP, PostGIS later)
+  latitude      Float?
+  longitude     Float?
   address       String?
   city          String?
   province      String?
   postalCode    String?
-  serviceRadius Int                                    @default(50) // km
+  serviceRadius Int     @default(50) // km
 
   // Verification
   verificationStatus      VerificationStatus @default(PENDING)
@@ -155,14 +157,12 @@ model Contractor {
 }
 
 model Category {
-  id          String     @id @default(uuid())
-  name        String     @unique
-  slug        String     @unique
-  description String?    @db.Text
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
+  description String? @db.Text
   icon        String?
-  parentId    String?
-  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children    Category[] @relation("CategoryHierarchy")
+  isActive    Boolean @default(true)
 
   contractors ContractorCategory[]
   orders      Order[]
@@ -178,6 +178,8 @@ model ContractorCategory {
   categoryId   String
   contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
   category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 
   @@id([contractorId, categoryId])
   @@map("contractor_categories")
