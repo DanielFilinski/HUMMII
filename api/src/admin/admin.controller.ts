@@ -31,6 +31,8 @@ import { RemoveUserRoleDto } from './dto/remove-user-role.dto';
 import { VerifyContractorDto } from './dto/verify-contractor.dto';
 import { ModerateReviewDto } from '../reviews/dto/moderate-review.dto';
 import { ReportStatus } from '@prisma/client';
+import { ChangeSubscriptionTierDto, ExtendSubscriptionDto } from './dto/manage-subscription.dto';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -38,7 +40,10 @@ import { ReportStatus } from '@prisma/client';
 @Roles(UserRole.ADMIN) // All routes require ADMIN role
 @ApiBearerAuth()
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly subscriptionsService: SubscriptionsService,
+  ) {}
 
   // ==================== USER MANAGEMENT ====================
 

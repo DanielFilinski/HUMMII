@@ -53,6 +53,22 @@ enum PaymentStatus {
   DISPUTED
 }
 
+enum SubscriptionTier {
+  FREE
+  STANDARD
+  PROFESSIONAL
+  ADVANCED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  TRIALING
+  UNPAID
+}
+
 enum VerificationStatus {
   PENDING
   IN_REVIEW
@@ -180,10 +196,11 @@ model Contractor {
   isAvailable Boolean @default(true)
 
   // Relations
-  categories ContractorCategory[]
-  portfolio  PortfolioItem[]
-  services   Service[]
-  proposals  Proposal[]
+  categories   ContractorCategory[]
+  portfolio    PortfolioItem[]
+  services     Service[]
+  proposals    Proposal[]
+  subscription Subscription?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -675,4 +692,74 @@ model AuditLog {
   @@index([entity])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// SUBSCRIPTION MODELS
+// ============================================================================
+
+model Subscription {
+  id           String     @id @default(uuid())
+  contractorId String     @unique
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  // Stripe references
+  stripeCustomerId     String  @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId        String // Price ID from Stripe
+
+  // Subscription details
+  tier   SubscriptionTier   @default(FREE)
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Billing
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+
+  // Trial (optional)
+  trialStart DateTime?
+  trialEnd   DateTime?
+
+  // Metadata
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  history SubscriptionHistory[]
+
+  @@index([contractorId])
+  @@index([stripeSubscriptionId])
+  @@index([tier])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model SubscriptionHistory {
+  id             String        @id @default(uuid())
+  contractorId   String
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  // Change details
+  action   String // CREATED, UPGRADED, DOWNGRADED, CANCELED, RENEWED, PAYMENT_FAILED
+  fromTier SubscriptionTier?
+  toTier   SubscriptionTier?
+
+  // Stripe reference
+  stripeEventId String? @unique
+
+  // Metadata
+  reason   String?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([contractorId])
+  @@index([subscriptionId])
+  @@index([createdAt])
+  @@map("subscription_history")
 }

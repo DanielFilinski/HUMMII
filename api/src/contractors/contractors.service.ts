@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
 import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
@@ -8,12 +8,15 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 import { CreatePortfolioItemDto } from './dto/create-portfolio-item.dto';
 import { UpdatePortfolioItemDto } from './dto/update-portfolio-item.dto';
 import { UserRole } from '@prisma/client';
+import { FeatureGateService } from '../subscriptions/services/feature-gate.service';
 
 @Injectable()
 export class ContractorsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    @Inject(forwardRef(() => FeatureGateService))
+    private readonly featureGateService: FeatureGateService,
   ) {}
 
   /**
@@ -349,9 +352,12 @@ export class ContractorsService {
       throw new BadRequestException('You can only add portfolio items to your own profile');
     }
 
-    // Check max 10 items limit
-    if (contractor.portfolio.length >= 10) {
-      throw new BadRequestException('Maximum 10 portfolio items allowed');
+    // Check subscription limits
+    const canAdd = await this.featureGateService.canAddPortfolioItem(contractor.id);
+    if (!canAdd.allowed) {
+      throw new BadRequestException(
+        `Maximum ${canAdd.max} portfolio items allowed for your subscription tier. You currently have ${canAdd.current} items. Please upgrade your subscription to add more.`,
+      );
     }
 
     // Create portfolio item
@@ -577,9 +583,12 @@ export class ContractorsService {
       throw new BadRequestException('You can only assign categories to your own profile');
     }
 
-    // Check max 5 categories
-    if (categoryIds.length > 5) {
-      throw new BadRequestException('Maximum 5 categories allowed');
+    // Check subscription limits
+    const canAdd = await this.featureGateService.canAddCategory(contractor.id);
+    if (categoryIds.length > canAdd.max) {
+      throw new BadRequestException(
+        `Maximum ${canAdd.max} categories allowed for your subscription tier. Please upgrade your subscription to add more categories.`,
+      );
     }
 
     // Verify all categories exist

@@ -34,8 +34,15 @@ FRONTEND_URL=http://localhost:3001
 # API URL
 API_URL=http://localhost:3000
 
-# Stripe Configuration (optional)
+# Stripe Configuration (optional in development, required in production)
+# In development: Application will start without Stripe, but subscription endpoints will return 503 Service Unavailable
+# In production: Stripe is required and application will fail to start if not configured
 STRIPE_SECRET_KEY=sk_test_your_stripe_key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
+STRIPE_PRICE_STANDARD=price_your_standard_price_id
+STRIPE_PRICE_PROFESSIONAL=price_your_professional_price_id
+STRIPE_PRICE_ADVANCED=price_your_advanced_price_id
 
 # Google OAuth (optional)
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -100,6 +107,29 @@ cp .env.local.example .env.local  # (use the content above)
 ```
 
 ## Important Notes
+
+### Stripe Configuration
+
+**Development Mode:**
+- Stripe is **optional** - application will start successfully without Stripe keys
+- Subscription endpoints will return `503 Service Unavailable` with message "Stripe is not configured"
+- This allows developers to work on other features without setting up Stripe
+
+**Production Mode:**
+- Stripe is **required** - application will fail to start if `STRIPE_SECRET_KEY` is not configured
+- All subscription-related endpoints require Stripe to be properly configured
+
+**To Enable Stripe Locally:**
+1. Create a Stripe account at https://stripe.com (use test mode for development)
+2. Get your test API keys from Stripe Dashboard
+3. Create subscription products and prices in Stripe Dashboard
+4. Set up a webhook endpoint in Stripe Dashboard pointing to your local endpoint (use Stripe CLI for local testing)
+5. Add all Stripe variables to `.env` file (see example above)
+6. Restart the application
+
+**Webhook Testing:**
+- Use Stripe CLI: `stripe listen --forward-to localhost:3000/webhooks/stripe`
+- This will give you a webhook secret starting with `whsec_`
 
 ### CORS Configuration
 - **FRONTEND_URL** in backend `.env` MUST match the URL where frontend runs

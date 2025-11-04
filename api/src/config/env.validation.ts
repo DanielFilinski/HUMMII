@@ -124,6 +124,18 @@ class EnvironmentVariables {
   STRIPE_SECRET_KEY?: string;
 
   /**
+   * Stripe Publishable Key
+   * Format: pk_test_... or pk_live_...
+   * Required for frontend Stripe integration
+   */
+  @IsString()
+  @Matches(/^pk_(test|live)_[A-Za-z0-9]{24,}$/, {
+    message: 'STRIPE_PUBLISHABLE_KEY must be valid Stripe publishable key (pk_test_... or pk_live_...)',
+  })
+  @IsOptional()
+  STRIPE_PUBLISHABLE_KEY?: string;
+
+  /**
    * Stripe Webhook Secret
    * Format: whsec_...
    * REQUIRED in production for webhook signature verification
@@ -135,6 +147,42 @@ class EnvironmentVariables {
   })
   @IsOptional()
   STRIPE_WEBHOOK_SECRET?: string;
+
+  /**
+   * Stripe Price ID for Standard tier subscription
+   * Format: price_...
+   * Required for subscription creation
+   */
+  @IsString()
+  @Matches(/^price_[A-Za-z0-9]{24,}$/, {
+    message: 'STRIPE_PRICE_STANDARD must be valid Stripe price ID (price_...)',
+  })
+  @IsOptional()
+  STRIPE_PRICE_STANDARD?: string;
+
+  /**
+   * Stripe Price ID for Professional tier subscription
+   * Format: price_...
+   * Required for subscription creation
+   */
+  @IsString()
+  @Matches(/^price_[A-Za-z0-9]{24,}$/, {
+    message: 'STRIPE_PRICE_PROFESSIONAL must be valid Stripe price ID (price_...)',
+  })
+  @IsOptional()
+  STRIPE_PRICE_PROFESSIONAL?: string;
+
+  /**
+   * Stripe Price ID for Advanced tier subscription
+   * Format: price_...
+   * Required for subscription creation
+   */
+  @IsString()
+  @Matches(/^price_[A-Za-z0-9]{24,}$/, {
+    message: 'STRIPE_PRICE_ADVANCED must be valid Stripe price ID (price_...)',
+  })
+  @IsOptional()
+  STRIPE_PRICE_ADVANCED?: string;
 
   /**
    * Google OAuth Client ID

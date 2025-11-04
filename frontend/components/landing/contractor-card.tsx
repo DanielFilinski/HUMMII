@@ -54,3 +54,4 @@ export function ContractorCard({ contractor, locale }: ContractorCardProps) {
 }
 
 
+

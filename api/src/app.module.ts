@@ -18,6 +18,7 @@ import { VerificationModule } from './verification/verification.module';
 import { OrdersModule } from './orders/orders.module';
 import { ChatModule } from './chat/chat.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -72,6 +73,7 @@ import { validate } from './config/env.validation';
     OrdersModule, // Orders and proposals management (Phase 3)
     ChatModule, // Real-time chat for order communication (Phase 4)
     ReviewsModule, // Reviews and ratings system (Phase 5)
+    SubscriptionsModule, // Subscription management (Phase 6)
   ],
   controllers: [AppController],
   providers: [

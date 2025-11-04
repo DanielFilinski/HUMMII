@@ -62,3 +62,4 @@ export function CategoryCard({ category, locale }: CategoryCardProps) {
 }
 
 
+

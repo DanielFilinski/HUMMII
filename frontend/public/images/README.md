@@ -57,3 +57,4 @@ Replace with actual optimized images before production deployment.
 - Store original high-resolution images separately
 
 
+

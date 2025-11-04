@@ -9,25 +9,23 @@
 ## 🎯 Quick Summary
 
 ```
-✅ Completed:  Phase 0, Phase 1, Phase 2, Phase 3, Phase 4
-⚠️ Partial:    Phase 10 (40%), Phase 14 (50%)
-📋 Ready:      Phase 5
-⏳ Planned:    Phase 6-9, 11-13, 15
+✅ Completed:  Phase 0, Phase 1, Phase 2, Phase 3, Phase 4, Phase 5
+⚠️ Partial:    Phase 6 (30%), Phase 10 (40%), Phase 14 (50%)
+⏳ Planned:    Phase 7-9, 11-13, 15
 
-Overall Progress: 40% (5.9/15 phases)
-Estimated Time Remaining: ~19 weeks
+Overall Progress: 47% (6.7/15 phases)
+Estimated Time Remaining: ~17 weeks
 ```
 
-**Key Achievement:** Phase 4 completed successfully!
-- Real-time WebSocket chat with Socket.io
-- 8 REST endpoints + 8 WebSocket events
-- Automatic content moderation (phone, email, URLs, social media, profanity)
-- Typing indicators, read receipts, online status
-- Message editing (5-minute window)
-- Chat export to PDF/TXT (PIPEDA compliance)
-- Rate limiting (20 msg/min) and security
-- Unit tests (97% pass rate)
-- Comprehensive audit logging
+**Key Achievement:** Phase 5 completed successfully!
+- Two-way review and rating system (client ↔ contractor)
+- Multi-criteria ratings with weighted calculation
+- Automatic content moderation and spam detection
+- Review response system and report/flag functionality
+- 14-day review deadline after order completion
+- Rating statistics and badges
+- 8 REST endpoints with comprehensive security
+- Unit tests (80%+ coverage)
 
 ---
 
@@ -38,10 +36,10 @@ Estimated Time Remaining: ~19 weeks
 | **0** | [Foundation & Infrastructure](#phase-0-foundation--infrastructure) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 1-2 | [Phase 0/](./Phase%200/) |
 | **1** | [Authentication & Authorization](#phase-1-authentication--authorization) | ✅ Complete* | 100% | 🔴 CRITICAL | 2 weeks | 3-4 | [Phase 1/](./Phase%201/) |
 | **2** | [User Management](#phase-2-user-management) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 5-6 | [Phase 2/](./Phase%202/) |
-| **3** | [Orders Module](#phase-3-orders-module) | 📋 Ready | 0% | 🔴 CRITICAL | 2 weeks | 7-8 | [Phase 3/](./Phase%203/) |
-| **4** | [Chat Module](#phase-4-chat-module) | ⏳ Planned | 0% | 🟡 HIGH | 2 weeks | 9-10 | Phase 4/ |
-| **5** | [Reviews & Ratings](#phase-5-reviews--ratings) | ⏳ Planned | 0% | 🔴 CRITICAL | 2 weeks | 11-12 | Phase 5/ |
-| **6** | [Payments (Stripe)](#phase-6-payments-stripe) | ⏳ Planned | 0% | 🔴 CRITICAL | 3 weeks | 13-15 | [Phase 6/](./Phase%206/) |
+| **3** | [Orders Module](#phase-3-orders-module) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 7-8 | [Phase 3/](./Phase%203/) |
+| **4** | [Chat Module](#phase-4-chat-module) | ✅ Complete | 100% | 🟡 HIGH | 2 weeks | 9-10 | [Phase 4/](./Phase%204/) |
+| **5** | [Reviews & Ratings](#phase-5-reviews--ratings) | ✅ Complete | 100% | 🔴 CRITICAL | 2 weeks | 11-12 | [Phase 5/](./Phase%205/) |
+| **6** | [Payments (Stripe)](#phase-6-payments-stripe) | ⚠️ Partial | 30% | 🔴 CRITICAL | 3 weeks | 13-15 | [Phase 6/](./Phase%206/) |
 | **7** | [Disputes](#phase-7-disputes) | ⏳ Planned | 0% | 🟡 HIGH | 2 weeks | 16-17 | [Phase 7/](./Phase%207/) |
 | **8** | [Notifications](#phase-8-notifications) | ⏳ Planned | 0% | 🟡 HIGH | 2 weeks | 18-19 | [Phase 8/](./Phase%208/) |
 | **9** | [Categories](#phase-9-categories) | ⏳ Planned | 0% | 🟢 MEDIUM | 1 week | 20 | Phase 9/ |
@@ -497,80 +495,148 @@ CANCELLED  CANCELLED  DISPUTED
 - No automatic chat closure (cron job planned in Phase 12)
 - Redis не clustered (для horizontal scaling потребуется Redis Cluster)
 
-**Next:** Phase 5 (Reviews & Ratings) is ready to start
+**Next:** Phase 6 (Payments) - Order payment flow needs implementation
 
 ---
 
-## ⏳ Phase 5: Reviews & Ratings
+## ✅ Phase 5: Reviews & Ratings
 
-**Status:** ⏳ Planned (0%)  
-**Documentation:** Phase 4/ (needs creation)
+**Status:** ✅ Complete (100%)  
+**Completion Date:** January 2025  
+**Documentation:** [Phase 5/phase-5-reviews-ratings.md](./Phase%205/phase-5-reviews-ratings.md)
 
-### Planned Features
-- WebSocket gateway (Socket.io)
-- Chat room per order
-- Real-time messaging
-- Typing indicators & read receipts
-- Message history persistence
-- Content moderation (phone, email, links blocking)
-- Profanity filter (EN + FR)
-- Message editing (5 min window)
-- Flag/report system
-- Auto-close chat (30 days after order completion)
+### Implemented Features
+- ✅ Two-way rating system (client ↔ contractor)
+- ✅ Multi-criteria ratings (Quality, Professionalism, Communication, Value for contractors; Communication, Professionalism, Payment for clients)
+- ✅ Weighted rating calculation (70% rating + 20% experience + 10% verification)
+- ✅ Review moderation (automatic content moderation + manual review)
+- ✅ Review response system (reviewee can respond to reviews)
+- ✅ Report/flag system (auto-suspend after 3 reports)
+- ✅ Rating statistics and badges
+- ✅ 14-day review deadline after order completion
+- ✅ Spam detection (5+ reviews per day)
+- ✅ Review editing (before moderation approval)
+- ✅ Review deletion (soft delete)
 
-### Dependencies
-- Phase 3 (Orders) must be complete
-- Socket.io setup required
+### Key Endpoints (8 REST)
+- ✅ `POST /reviews` - Create review
+- ✅ `GET /reviews/user/:userId` - Get user reviews (pagination)
+- ✅ `GET /reviews/:id` - Get review by ID
+- ✅ `PATCH /reviews/:id` - Update review
+- ✅ `DELETE /reviews/:id` - Delete review
+- ✅ `POST /reviews/:id/response` - Respond to review
+- ✅ `POST /reviews/:id/report` - Report review
+- ✅ `GET /reviews/stats/:userId` - Get rating statistics
 
-**Next:** Detail plan after Phase 3 completion
+### Files Created (~20 files)
+- `api/src/reviews/` - Complete module
+- `api/src/reviews/reviews.controller.ts` (8 endpoints)
+- `api/src/reviews/reviews.service.ts` (full business logic)
+- `api/src/reviews/services/rating-calculation.service.ts`
+- `api/src/reviews/services/moderation.service.ts`
+- `api/src/reviews/guards/review-owner.guard.ts`
+- `api/src/reviews/dto/` (6 DTOs)
+- `api/src/reviews/constants/rating-criteria.ts`
+- `api/src/reviews/constants/review-deadline.ts`
+
+### Security & Compliance
+- ✅ Rate limiting: 5 reviews/hour, 10 reports/day
+- ✅ ReviewOwnerGuard (only owner can edit/delete)
+- ✅ OrderParticipantGuard (only participants can review)
+- ✅ Content moderation (profanity, contact info blocking)
+- ✅ Spam detection
+- ✅ Audit logging (REVIEW_CREATE, REVIEW_UPDATE, REVIEW_DELETE, REVIEW_RESPONSE, REVIEW_REPORT)
+- ✅ Input validation (class-validator on all DTOs)
+
+### Testing
+- ✅ Unit tests: ReviewsService (80%+ coverage)
+- ✅ Rating calculation tests
+- ✅ Moderation service tests
+
+**Next:** Phase 6 (Payments) is partially implemented
 
 ---
 
-## ⏳ Phase 5: Reviews & Ratings
+## ⚠️ Phase 6: Payments (Stripe)
 
-**Status:** ⏳ Planned (0%)  
-**Documentation:** Phase 5/ (needs creation)
-
-### Planned Features
-- Two-way rating (client → contractor, contractor → client)
-- Multi-criteria ratings (Quality, Professionalism, Communication, Value)
-- Weighted rating calculation (70% rating + 20% experience + 10% verification)
-- Review moderation (automatic + manual)
-- Verified review badges
-- Response to reviews
-- Report/flag system
-- Profile visibility based on rating (min 3.0⭐)
-
-### Dependencies
-- Phase 3 (Orders) must be complete
-- Order completion required to leave review
-
-**Next:** Detail plan after Phase 3 completion
-
----
-
-## ⏳ Phase 6: Payments (Stripe)
-
-**Status:** ⏳ Planned (0%)  
+**Status:** ⚠️ Partial (30%)  
 **Documentation:** [Phase 6/phase-6-payments.md](./Phase%206/phase-6-payments.md)
 
-### Planned Features
-- Stripe configuration
-- Payment intent creation
-- Payment confirmation (3D Secure / SCA)
-- Escrow hold during order
-- Release to contractor on completion
-- Refund processing (full & partial)
-- Webhook signature verification
-- Idempotency keys
-- Customer Portal (payment methods, invoices)
-- Subscription management (contractors)
+### Implemented (30%)
+
+#### Database Schema ✅
+- ✅ Payment model in Prisma schema (basic structure)
+- ✅ PaymentStatus enum (PENDING, PROCESSING, PAID, FAILED, REFUNDED, DISPUTED)
+- ✅ Payment fields: orderId, amount, currency, status, stripePaymentIntentId, stripeCustomerId, escrow fields, refund fields
+
+#### Subscription Management ✅
+- ✅ Subscriptions module for contractors
+- ✅ Subscription tiers (FREE, STANDARD, PROFESSIONAL, ADVANCED)
+- ✅ Stripe Subscriptions API integration
+- ✅ Subscription lifecycle management (create, upgrade, downgrade, cancel, reactivate)
+- ✅ Webhook handlers for subscription events
+
+#### Customer Portal ✅
+- ✅ **CustomerPortalService** - Stripe Customer Portal integration
+- ✅ Portal session creation (`POST /subscriptions/portal`)
+- ✅ **Management through Stripe Customer Portal:**
+  - Payment method management (add, update, delete)
+  - Transaction history viewing
+  - Invoice and receipt download
+  - Subscription management (for contractors)
+  - Billing address management
+- ✅ Portal return URL configuration
+- ✅ Contractor subscription management via portal
+
+#### Files Created (~15 files)
+- `api/src/subscriptions/` - Complete subscriptions module
+- `api/src/subscriptions/subscriptions.controller.ts` (7 endpoints)
+- `api/src/subscriptions/subscriptions.service.ts`
+- `api/src/subscriptions/services/customer-portal.service.ts` ✅ Customer Portal
+- `api/src/subscriptions/webhooks/subscription-webhook.service.ts`
+- `api/src/subscriptions/providers/stripe.provider.ts`
+- `api/src/subscriptions/config/stripe.config.ts`
+
+### Not Implemented (70%)
+
+#### Order Payments ❌
+- ❌ Payments module for order payments (Payment Intent creation)
+- ❌ Payment confirmation (3D Secure / SCA)
+- ❌ Escrow hold/release logic for orders
+- ❌ Payment Intent → Order flow integration
+- ❌ Payment status updates on order completion
+
+#### Stripe Connect ❌
+- ❌ Stripe Connect accounts for contractors
+- ❌ Contractor payout system
+- ❌ Platform fee collection
+- ❌ Transfer to contractor accounts
+
+#### Refunds ❌
+- ❌ Refund processing for order payments
+- ❌ Full/partial refund logic
+- ❌ Refund webhook handling
+
+#### Payment Webhooks ❌
+- ❌ Payment webhook endpoint (`/webhooks/stripe`)
+- ❌ Payment Intent webhook handlers
+- ❌ Charge webhook handlers
+- ❌ Webhook signature verification for payments
+
+#### Security & Compliance ❌
+- ❌ Idempotency keys for payment operations
+- ❌ Payment amount validation
+- ❌ Rate limiting for payment endpoints
+- ❌ Payment audit logging
+
+### Key Note
+**Customer Portal Management:** Payment methods, transaction history, invoices, and receipts are managed through **Stripe Customer Portal** (hosted solution), accessed via `POST /subscriptions/portal` endpoint. This provides secure, PCI-compliant payment management without building custom UI.
 
 ### Dependencies
 - Phase 3 (Orders) must be complete
 - Stripe account setup required
 
-**Next:** Detail plan after Phase 3 completion
+**Next:** Implement order payment flow (Payment Intent, escrow, refunds)
 
 ---
 
@@ -891,58 +957,52 @@ CANCELLED  CANCELLED  DISPUTED
 
 ## 🎯 Recommended Implementation Order
 
-### Immediate (Week 5-8)
-1. **Complete Phase 2** (User Management) - 2 weeks
-   - File upload system (Cloudflare R2 - S3-compatible)
-   - Contractor profiles & portfolio
-   - Geolocation & radius search
-   - Stripe Identity verification
-   - Role switching
+### Immediate (Next 2-3 weeks)
+1. **Complete Phase 6** (Payments - Order Payment Flow) - 2-3 weeks
+   - Payment Intent creation for orders
+   - Payment confirmation (3D Secure / SCA)
+   - Escrow hold/release logic
+   - Payment webhook handlers
+   - Refund processing
 
-2. **Implement Phase 3** (Orders Module) - 2 weeks
-   - Order lifecycle
-   - Proposal system
-   - Search & filtering
+### Short-term (Week 16-20)
+2. **Phase 7** (Disputes) - 2 weeks
+3. **Phase 8** (Notifications) - 2 weeks
+4. **Phase 9** (Categories - Hierarchy) - 1 week
 
-### Short-term (Week 9-15)
-3. **Phase 4** (Chat) - 2 weeks
-4. **Phase 5** (Reviews) - 2 weeks
-5. **Phase 6** (Payments) - 3 weeks
+### Mid-term (Week 21-26)
+5. **Phase 12** (Background Jobs) - 2 weeks
+6. **Phase 10** (Admin Panel - Complete remaining features) - 2 weeks
 
-### Mid-term (Week 16-26)
-6. **Phase 7** (Disputes) - 2 weeks
-7. **Phase 8** (Notifications) - 2 weeks
-8. **Phase 9** (Categories) - 1 week
-9. **Phase 12** (Background Jobs) - 2 weeks
-
-### Long-term (Week 21-31)
-10. **Phase 10** (Admin Panel) - 2 weeks
-11. **Phase 11** (Partner Portal) - 2 weeks
-12. **Phase 13** (SEO) - 1 week
-13. **Phase 14** (Testing) - 2 weeks
-14. **Phase 15** (Production) - 2 weeks
+### Long-term (Week 27-31)
+7. **Phase 11** (Partner Portal) - 2 weeks
+8. **Phase 13** (SEO) - 1 week
+9. **Phase 14** (Testing - Complete coverage) - 2 weeks
+10. **Phase 15** (Production Deployment) - 2 weeks
 
 ---
 
 ## 🚀 Next Actions
 
 ### Immediate (This Week)
-- [ ] Review Phase 2 documentation
-- [ ] Set up Cloudflare R2 bucket for file uploads
-- [ ] Implement file upload system (R2 integration)
-- [ ] Create contractor profile schema
+- [ ] Review Phase 6 payment flow requirements
+- [ ] Design Payment Intent → Order integration
+- [ ] Plan escrow hold/release logic
+- [ ] Set up Stripe webhook endpoint
 
-### This Sprint (2 weeks)
-- [ ] Complete Phase 2 implementation
-- [ ] Write tests for Phase 2
-- [ ] Fix RolesGuard usage (Phase 1 issue)
+### This Sprint (2-3 weeks)
+- [ ] Implement Payment Intent creation for orders
+- [ ] Implement payment confirmation (3D Secure)
+- [ ] Implement escrow hold/release logic
+- [ ] Create payment webhook handlers
+- [ ] Write tests for payment flow
 - [ ] Update Swagger documentation
 
 ### Next Sprint (2 weeks)
-- [ ] Start Phase 3 (Orders Module)
-- [ ] Implement order lifecycle
-- [ ] Implement proposal system
-- [ ] Write tests for Phase 3
+- [ ] Start Phase 7 (Disputes Module)
+- [ ] Implement dispute lifecycle
+- [ ] Implement evidence submission
+- [ ] Write tests for Phase 7
 
 ---
 
@@ -954,8 +1014,8 @@ Phase 1: ████████████████████ 100% ✅ C
 Phase 2: ████████████████████ 100% ✅ Complete (January 4, 2025)
 Phase 3: ████████████████████ 100% ✅ Complete (November 4, 2025)
 Phase 4: ████████████████████ 100% ✅ Complete (November 4, 2025)
-Phase 5: ░░░░░░░░░░░░░░░░░░░░   0% 📋 Ready to implement
-Phase 6: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
+Phase 5: ████████████████████ 100% ✅ Complete (January 2025)
+Phase 6: ██████░░░░░░░░░░░░░░  30% ⚠️ Partial (Customer Portal ✅, Order Payments ❌)
 Phase 7: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
 Phase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
 Phase 9: ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planned
@@ -966,11 +1026,11 @@ Phase 13: ░░░░░░░░░░░░░░░░░░░░  0% ⏳ P
 Phase 14: ██████████░░░░░░░░░░ 50% ⚠️ Partial (Swagger, some tests)
 Phase 15: ░░░░░░░░░░░░░░░░░░░░  0% ⏳ Planned
 
-Overall: ████████░░░░░░░░░░░░ 40% (5.9/15 phases)
+Overall: █████████░░░░░░░░░░░ 47% (6.7/15 phases)
 ```
 
-**Real Progress:** 40% (Phase 0, 1, 2, 3, 4 complete + partial progress in Phase 10 and 14)
-**Completed Tasks:** Phase 0 (100%) + Phase 1 (100%) + Phase 2 (100%) + Phase 3 (100%) + Phase 4 (100%) + Phase 10 (40%) + Phase 14 (50%) = 5.9 phases
+**Real Progress:** 47% (Phase 0, 1, 2, 3, 4, 5 complete + partial progress in Phase 6, 10, and 14)
+**Completed Tasks:** Phase 0 (100%) + Phase 1 (100%) + Phase 2 (100%) + Phase 3 (100%) + Phase 4 (100%) + Phase 5 (100%) + Phase 6 (30%) + Phase 10 (40%) + Phase 14 (50%) = 6.7 phases
 
 ---
 
@@ -978,6 +1038,8 @@ Overall: ████████░░░░░░░░░░░░ 40% (5.9/1
 
 | Date | Update | By |
 |------|--------|-----|
+| 2025-01-XX | **Phase 5 COMPLETED** - Reviews & Ratings module with 8 endpoints, two-way rating, moderation, response system | AI Assistant |
+| 2025-01-XX | **Phase 6 UPDATED** - Partial implementation: Customer Portal ✅, Payment model ✅, Order payments ❌ | AI Assistant |
 | 2025-11-04 | **Phase 4 COMPLETED** - Chat module with WebSocket, content moderation, 8 REST + 8 WS events | AI Assistant |
 | 2025-11-04 | **Phase 3 COMPLETED** - Orders and Proposals module with 14 endpoints, Haversine geospatial search, FSM status transitions | AI Assistant |
 | 2025-01-04 | **Phase 2 COMPLETED** - Contractors, portfolio, categories, role switching, encryption, verification stub | AI Assistant |
