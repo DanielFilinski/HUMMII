@@ -11,6 +11,7 @@ import { SessionCleanupJob } from './jobs/cleanup/session-cleanup.job';
 import { NotificationCleanupJob } from './jobs/cleanup/notification-cleanup.job';
 import { AuditCleanupJob } from './jobs/cleanup/audit-cleanup.job';
 import { TempFilesCleanupJob } from './jobs/cleanup/temp-files-cleanup.job';
+import { AnalyticsCleanupJob } from './jobs/cleanup/analytics-cleanup.job';
 import { DbMaintenanceJob } from './jobs/maintenance/db-maintenance.job';
 import { DailyStatsJob } from './jobs/analytics/daily-stats.job';
 import { RatingRecalcJob } from './jobs/analytics/rating-recalc.job';
@@ -60,6 +61,7 @@ import { QueueMetricsService } from './monitoring/queue-metrics.service';
     NotificationCleanupJob,
     AuditCleanupJob,
     TempFilesCleanupJob,
+    AnalyticsCleanupJob,
     // Maintenance jobs
     DbMaintenanceJob,
     // Analytics jobs

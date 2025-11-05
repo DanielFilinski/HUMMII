@@ -286,6 +286,7 @@ model Contractor {
   services     Service[]
   proposals    Proposal[]
   subscription Subscription?
+  slug         ContractorSlug?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1031,4 +1032,71 @@ model FeatureFlag {
   @@index([name])
   @@index([enabled])
   @@map("feature_flags")
+}
+
+// ============================================================================
+// SEO MODELS
+// ============================================================================
+
+model ContractorSlug {
+  id          String   @id @default(cuid())
+  contractorId String   @unique
+  slug        String   @unique
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contractor  Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("contractor_slugs")
+}
+
+model UrlRedirect {
+  id          String   @id @default(cuid())
+  fromPath    String   @unique
+  toPath      String
+  statusCode  Int      @default(301)
+  createdAt   DateTime @default(now())
+
+  @@index([fromPath])
+  @@index([toPath])
+  @@map("url_redirects")
+}
+
+// ============================================================================
+// ANALYTICS MODELS (PIPEDA Compliant - No PII)
+// ============================================================================
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  eventType  String   // 'profile_view', 'search', 'conversion', 'order_view'
+  sessionId  String   // Anonymous session (NOT user ID)
+  entityId   String?  // Contractor ID, Order ID (if relevant)
+  metadata   Json?    // Event-specific data (NO PII)
+  ipHash     String?  // Hashed IP (SHA-256) for geolocation only
+  userAgent  String?  // Browser info (anonymized)
+  createdAt  DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([sessionId])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("analytics_events")
+}
+
+model SearchAnalytics {
+  id        String   @id @default(cuid())
+  query     String   // Search term (anonymized if PII detected)
+  category  String?
+  location  String?  // City/region only (NO full address)
+  results   Int      // Number of results
+  sessionId String   // Anonymous session
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([category])
+  @@index([location])
+  @@map("search_analytics")
 }

@@ -22,6 +22,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SeoModule } from './seo/seo.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { HealthModule } from './health/health.module';
 import { validate } from './config/env.validation';
 
@@ -83,6 +85,8 @@ import { validate } from './config/env.validation';
     SubscriptionsModule, // Subscription management (Phase 6)
     DisputesModule, // Dispute resolution system (Phase 7)
     NotificationsModule, // Notifications system (Phase 8)
+    SeoModule, // SEO optimization and sitemap (Phase 13)
+    AnalyticsModule, // Privacy-compliant analytics (Phase 13)
     HealthModule, // Health check endpoints
   ],
   controllers: [AppController],
