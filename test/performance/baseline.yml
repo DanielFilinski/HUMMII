@@ -1,0 +1,30 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Baseline measurement"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Baseline Performance Test"
+    flow:
+      - get:
+          url: "/"
+          capture:
+            - json: "$.status"
+              as: "health_status"
+      - get:
+          url: "/api/v1/categories/public"
+          capture:
+            - json: "$.length"
+              as: "categories_count"
+      - get:
+          url: "/api/v1/orders/search"
+          qs:
+            status: "PUBLISHED"
+            page: 1
+            limit: 10
+

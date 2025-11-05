@@ -1,0 +1,52 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    name: Security Vulnerability Scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        working-directory: api
+        run: pnpm install --frozen-lockfile
+
+      - name: Run npm audit
+        working-directory: api
+        run: npm audit --audit-level=high || true
+
+      - name: Check for high/critical vulnerabilities
+        working-directory: api
+        run: |
+          if npm audit --audit-level=high 2>&1 | grep -q "found.*high\|found.*critical"; then
+            echo "⚠️ High or critical vulnerabilities found!"
+            npm audit --audit-level=high
+            exit 1
+          else
+            echo "✅ No high or critical vulnerabilities found"
+          fi
+
+      - name: Run security audit script
+        run: ./scripts/security-audit.sh || true
+

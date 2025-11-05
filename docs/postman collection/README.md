@@ -68,6 +68,99 @@ pnpm run start:dev
 - `Export User Data` - Export all user data (PIPEDA)
 - `Delete User Account` - Soft delete account (PIPEDA)
 
+### Contractors
+- `Create Contractor Profile` - Create contractor profile
+- `Update Contractor Profile` - Update contractor information
+- `Get Contractor Profile` - Get contractor profile
+- `Update Location` - Update contractor location
+- `Add Portfolio Item` - Add portfolio item
+- `Update Portfolio Item` - Update portfolio item
+- `Delete Portfolio Item` - Delete portfolio item
+- `Assign Categories` - Assign categories to contractor
+
+### Orders
+- `Create Order` - Create new order
+- `Publish Order` - Publish order
+- `Get Order Details` - Get order information
+- `Update Order Status` - Update order status
+- `Search Orders` - Search and filter orders
+- `Submit Proposal` - Submit proposal for order
+- `Accept Proposal` - Accept contractor proposal
+- `Reject Proposal` - Reject contractor proposal
+
+### Chat
+- `Get Messages` - Get chat message history
+- `Send Message` - Send message (REST fallback)
+- `Edit Message` - Edit message (within 5 minutes)
+- `Mark as Read` - Mark messages as read
+- `Export Chat` - Export chat as PDF/TXT (PIPEDA)
+
+### Reviews
+- `Create Review` - Create review for completed order
+- `Get User Reviews` - Get reviews for a user
+- `Update Review` - Update review (before moderation)
+- `Delete Review` - Delete review (soft delete)
+- `Respond to Review` - Respond to review
+- `Report Review` - Report inappropriate review
+- `Get Review Statistics` - Get rating statistics
+
+### Subscriptions
+- `Create Subscription` - Create subscription (CONTRACTOR only)
+- `Get My Subscription` - Get current subscription
+- `Upgrade Subscription` - Upgrade subscription tier
+- `Downgrade Subscription` - Downgrade subscription tier
+- `Cancel Subscription` - Cancel subscription
+- `Reactivate Subscription` - Reactivate canceled subscription
+- `Customer Portal` - Get Stripe Customer Portal session
+
+### Notifications
+- `Get Notifications` - Get user notifications
+- `Get Unread Count` - Get unread notifications count
+- `Mark as Read` - Mark notification as read
+- `Mark All as Read` - Mark all notifications as read
+- `Delete Notification` - Delete notification
+- `Get Preferences` - Get notification preferences
+- `Update Preferences` - Update notification preferences
+
+### Disputes
+- `Create Dispute` - Create dispute for order
+- `Get Disputes` - Get user disputes
+- `Get Dispute Details` - Get dispute information
+- `Upload Evidence` - Upload dispute evidence
+- `Add Message` - Add message to dispute
+- `Get Messages` - Get dispute messages
+
+### Categories
+- `Get Category Tree` - Get hierarchical category structure
+- `Get Popular Categories` - Get popular categories
+- `Get Public Categories` - Get all active categories
+- `Get Subcategories` - Get category subcategories
+- `Create Category` - Create category (ADMIN only)
+- `Update Category` - Update category (ADMIN only)
+- `Delete Category` - Delete category (ADMIN only)
+
+### SEO & Analytics
+- `Generate Slug` - Generate unique slug for contractor
+- `Validate Slug` - Check slug availability
+- `Update Slug` - Update contractor slug
+- `Get Sitemap` - Get sitemap XML
+- `Track View` - Track profile/order view
+- `Track Search` - Track search query
+- `Track Conversion` - Track conversion event
+
+### Admin
+- `User Management` - List, view, update users
+- `Contractor Verification` - Approve/reject contractors
+- `Portfolio Moderation` - Approve/reject portfolio items
+- `Review Moderation` - Moderate reviews
+- `Order Management` - Manage orders
+- `Subscription Management` - Manage subscriptions
+- `Notification Management` - Send bulk notifications
+- `System Settings` - Manage system settings
+- `Feature Flags` - Manage feature flags
+- `Audit Logs` - View audit logs
+- `Statistics` - Get platform statistics
+
 ### Security Tests
 - `Register - Weak Password` - Test validation
 - `Register - Invalid Email` - Test validation
@@ -246,7 +339,65 @@ The collection includes PIPEDA compliance endpoints:
 
 ---
 
-**Last Updated:** January 2025  
-**Version:** 1.0.0  
+## 🔄 Updating the Collection
+
+### Automatic Update (Recommended)
+
+The Postman collection can be automatically updated from Swagger documentation:
+
+```bash
+# From project root
+./scripts/update-postman-collection.sh
+```
+
+This script will:
+1. Export Swagger JSON from the running API
+2. Convert Swagger to Postman collection format
+3. Update `docs/postman collection/Hummii-API.postman_collection.json`
+4. Preserve existing test scripts and environment variables
+
+### Manual Update
+
+1. Ensure API is running: `cd api && npm run start:dev`
+2. Export Swagger: `cd api && npm run export-swagger`
+3. Convert to Postman: `openapi2postmanv2 -s docs/api/swagger.json -o "docs/postman collection/Hummii-API.postman_collection.json"`
+
+### Adding Custom Test Scripts
+
+After updating the collection, you may need to add custom test scripts for specific endpoints. Test scripts are preserved during automatic updates, but new endpoints will have basic scripts.
+
+## 📝 Notes
+
+### Collection Organization
+
+The collection is organized by modules:
+- Authentication
+- Users
+- Contractors
+- Orders
+- Chat
+- Reviews
+- Subscriptions
+- Notifications
+- Disputes
+- Categories
+- SEO & Analytics
+- Admin
+- Security Tests
+
+Each module folder contains all related endpoints with proper authentication and test scripts.
+
+### Rate Limits
+
+- **Login**: 5 requests per minute
+- **Register**: 5 requests per minute
+- **Password Reset**: 3 requests per minute
+- **Chat Messages**: 20 messages per minute
+- **Order Creation**: 10 orders per hour
+- **Review Creation**: 5 reviews per hour
+- **Global**: 100 requests per minute
+
+**Last Updated:** January 6, 2025  
+**Version:** 2.0.0  
 **API Version:** 1.0
 

@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "hummii-api-collection-2025",
 		"name": "Hummii API",
-		"description": "Complete API collection for Hummii platform - Service Marketplace for Canada\n\nIncludes:\n- Authentication endpoints (register, login, refresh, logout)\n- User management (profile, update, delete, export)\n- Session management\n- Password reset flow\n- PIPEDA compliance endpoints",
+		"description": "Complete API collection for Hummii platform - Service Marketplace for Canada\n\nIncludes:\n- Authentication endpoints (register, login, refresh, logout)\n- User management (profile, update, delete, export)\n- Session management\n- Password reset flow\n- PIPEDA compliance endpoints\n- Orders, Proposals, Contractors, Categories\n- Reviews, Chat, Notifications\n- Subscriptions, Disputes, Verification\n- SEO, Analytics, Sitemap\n- Admin endpoints\n- Webhooks, Metrics, Health checks",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "hummii-api"
 	},
@@ -951,6 +951,2094 @@
 				}
 			],
 			"description": "Security and validation tests"
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Fix plumbing issue\",\n  \"description\": \"Need a plumber to fix leaky faucet\",\n  \"categoryId\": \"category-id\",\n  \"budget\": 200,\n  \"location\": {\n    \"address\": \"123 Main St\",\n    \"city\": \"Toronto\",\n    \"province\": \"ON\",\n    \"postalCode\": \"M1A 1A1\",\n    \"latitude\": 43.6532,\n    \"longitude\": -79.3832\n  }\n}"
+						},
+						"url": {"raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"]},
+						"description": "Create a new order. Requires authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Publish Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/orders/:id/publish", "host": ["{{base_url}}"], "path": ["orders", ":id", "publish"], "variable": [{"key": "id", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Publish order to make it visible to contractors"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/orders/:id", "host": ["{{base_url}}"], "path": ["orders", ":id"], "variable": [{"key": "id", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Get order details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated title\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/orders/:id", "host": ["{{base_url}}"], "path": ["orders", ":id"], "variable": [{"key": "id", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Update order details"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/orders/:id/status", "host": ["{{base_url}}"], "path": ["orders", ":id", "status"], "variable": [{"key": "id", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Update order status"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/search?page=1&limit=20&categoryId=cat-id&minBudget=100&maxBudget=500",
+							"host": ["{{base_url}}"],
+							"path": ["orders", "search"],
+							"query": [
+								{"key": "page", "value": "1", "description": "Page number"},
+								{"key": "limit", "value": "20", "description": "Items per page"},
+								{"key": "categoryId", "value": "cat-id", "description": "Category ID"},
+								{"key": "minBudget", "value": "100", "description": "Minimum budget"},
+								{"key": "maxBudget", "value": "500", "description": "Maximum budget"}
+							]
+						},
+						"description": "Search and filter orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/orders/my-orders?page=1&limit=20", "host": ["{{base_url}}"], "path": ["orders", "my-orders"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get current user's orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/orders/:id", "host": ["{{base_url}}"], "path": ["orders", ":id"], "variable": [{"key": "id", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Delete order (soft delete)"
+					},
+					"response": []
+				}
+			],
+			"description": "Order management endpoints"
+		},
+		{
+			"name": "Proposals",
+			"item": [
+				{
+					"name": "Submit Proposal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"I can help with this project\",\n  \"estimatedPrice\": 250,\n  \"estimatedTime\": \"2-3 days\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/orders/:orderId/proposals", "host": ["{{base_url}}"], "path": ["orders", ":orderId", "proposals"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Submit proposal for an order (CONTRACTOR only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Proposals",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/orders/:orderId/proposals", "host": ["{{base_url}}"], "path": ["orders", ":orderId", "proposals"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Get proposals for an order (order owner only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Accept Proposal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/proposals/:id/accept", "host": ["{{base_url}}"], "path": ["proposals", ":id", "accept"], "variable": [{"key": "id", "value": "{{proposal_id}}", "description": "Proposal ID"}]},
+						"description": "Accept a proposal"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Proposal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/proposals/:id/reject", "host": ["{{base_url}}"], "path": ["proposals", ":id", "reject"], "variable": [{"key": "id", "value": "{{proposal_id}}", "description": "Proposal ID"}]},
+						"description": "Reject a proposal"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Proposals",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/proposals/my-proposals?page=1&limit=20", "host": ["{{base_url}}"], "path": ["proposals", "my-proposals"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get current user's proposals"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Proposal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Updated message\",\n  \"estimatedPrice\": 300\n}"
+						},
+						"url": {"raw": "{{base_url}}/proposals/:id", "host": ["{{base_url}}"], "path": ["proposals", ":id"], "variable": [{"key": "id", "value": "{{proposal_id}}", "description": "Proposal ID"}]},
+						"description": "Update proposal (only if not accepted/rejected)"
+					},
+					"response": []
+				}
+			],
+			"description": "Order proposal endpoints"
+		},
+		{
+			"name": "Contractors",
+			"item": [
+				{
+					"name": "Create Contractor Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bio\": \"Experienced contractor\",\n  \"businessName\": \"My Business\",\n  \"hourlyRate\": 50,\n  \"experience\": 5,\n  \"location\": {\n    \"address\": \"123 Main St\",\n    \"city\": \"Toronto\",\n    \"province\": \"ON\",\n    \"postalCode\": \"M1A 1A1\",\n    \"latitude\": 43.6532,\n    \"longitude\": -79.3832\n  }\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me", "host": ["{{base_url}}"], "path": ["contractors", "me"]},
+						"description": "Create contractor profile (CONTRACTOR role required)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Contractor Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/me", "host": ["{{base_url}}"], "path": ["contractors", "me"]},
+						"description": "Get current user's contractor profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contractor Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bio\": \"Updated bio\",\n  \"hourlyRate\": 60\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me", "host": ["{{base_url}}"], "path": ["contractors", "me"]},
+						"description": "Update contractor profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Location",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"latitude\": 43.6532,\n  \"longitude\": -79.3832,\n  \"address\": \"123 Main St\",\n  \"city\": \"Toronto\",\n  \"province\": \"ON\",\n  \"postalCode\": \"M1A 1A1\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me/location", "host": ["{{base_url}}"], "path": ["contractors", "me", "location"]},
+						"description": "Update contractor location"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contractor Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/:id", "host": ["{{base_url}}"], "path": ["contractors", ":id"], "variable": [{"key": "id", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Get public contractor profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Find Nearby Contractors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/contractors/nearby?lat=43.6532&lon=-79.3832&radius=50&categoryId=cat-id",
+							"host": ["{{base_url}}"],
+							"path": ["contractors", "nearby"],
+							"query": [
+								{"key": "lat", "value": "43.6532", "description": "Latitude"},
+								{"key": "lon", "value": "-79.3832", "description": "Longitude"},
+								{"key": "radius", "value": "50", "description": "Radius in km"},
+								{"key": "categoryId", "value": "cat-id", "description": "Category ID"}
+							]
+						},
+						"description": "Find contractors near a location"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Portfolio Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Project title\",\n  \"description\": \"Project description\",\n  \"imageUrl\": \"https://example.com/image.jpg\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me/portfolio", "host": ["{{base_url}}"], "path": ["contractors", "me", "portfolio"]},
+						"description": "Add portfolio item (max 10 items)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Portfolio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/me/portfolio", "host": ["{{base_url}}"], "path": ["contractors", "me", "portfolio"]},
+						"description": "Get current user's portfolio"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Portfolio Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated title\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me/portfolio/:id", "host": ["{{base_url}}"], "path": ["contractors", "me", "portfolio", ":id"], "variable": [{"key": "id", "value": "{{portfolio_item_id}}", "description": "Portfolio item ID"}]},
+						"description": "Update portfolio item"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Portfolio Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/me/portfolio/:id", "host": ["{{base_url}}"], "path": ["contractors", "me", "portfolio", ":id"], "variable": [{"key": "id", "value": "{{portfolio_item_id}}", "description": "Portfolio item ID"}]},
+						"description": "Delete portfolio item"
+					},
+					"response": []
+				},
+				{
+					"name": "Reorder Portfolio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"itemIds\": [\"id1\", \"id2\", \"id3\"]\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me/portfolio/reorder", "host": ["{{base_url}}"], "path": ["contractors", "me", "portfolio", "reorder"]},
+						"description": "Reorder portfolio items"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Portfolio",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/:id/portfolio", "host": ["{{base_url}}"], "path": ["contractors", ":id", "portfolio"], "variable": [{"key": "id", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Get public portfolio for a contractor"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryIds\": [\"cat-id-1\", \"cat-id-2\"]\n}"
+						},
+						"url": {"raw": "{{base_url}}/contractors/me/categories", "host": ["{{base_url}}"], "path": ["contractors", "me", "categories"]},
+						"description": "Assign categories to contractor (max 5)"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/me/categories/:id", "host": ["{{base_url}}"], "path": ["contractors", "me", "categories", ":id"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Remove category from contractor"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/contractors/me/categories", "host": ["{{base_url}}"], "path": ["contractors", "me", "categories"]},
+						"description": "Get current user's assigned categories"
+					},
+					"response": []
+				}
+			],
+			"description": "Contractor profile and management endpoints"
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{
+					"name": "Get Category Tree",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/tree", "host": ["{{base_url}}"], "path": ["categories", "tree"]},
+						"description": "Get hierarchical category structure"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Popular Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/popular?limit=10", "host": ["{{base_url}}"], "path": ["categories", "popular"], "query": [{"key": "limit", "value": "10"}]},
+						"description": "Get popular categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Public Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/public", "host": ["{{base_url}}"], "path": ["categories", "public"]},
+						"description": "Get all active categories"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Categories",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"]},
+						"description": "Get all categories (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subcategories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/:id/subcategories", "host": ["{{base_url}}"], "path": ["categories", ":id", "subcategories"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Get subcategories for a category"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Path",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/:id/path", "host": ["{{base_url}}"], "path": ["categories", ":id", "path"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Get category path (breadcrumb)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Get category details"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nameEn\": \"Plumbing\",\n  \"nameFr\": \"Plomberie\",\n  \"slug\": \"plumbing\",\n  \"description\": \"Plumbing services\",\n  \"parentId\": null\n}"
+						},
+						"url": {"raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"]},
+						"description": "Create category (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nameEn\": \"Updated Name\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Update category (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"], "variable": [{"key": "id", "value": "{{category_id}}", "description": "Category ID"}]},
+						"description": "Delete category (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Category management endpoints"
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Create Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"order-id\",\n  \"rating\": 5,\n  \"comment\": \"Great service!\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/reviews", "host": ["{{base_url}}"], "path": ["reviews"]},
+						"description": "Create review for completed order (rate limit: 5/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Reviews",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/reviews/user/:userId?page=1&limit=20", "host": ["{{base_url}}"], "path": ["reviews", "user", ":userId"], "variable": [{"key": "userId", "value": "{{user_id}}", "description": "User ID"}], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get reviews for a user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Get review details"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated comment\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Update review (only before moderation)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Delete review (soft delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Respond to Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"response\": \"Thank you for your feedback!\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/reviews/:id/response", "host": ["{{base_url}}"], "path": ["reviews", ":id", "response"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Respond to review"
+					},
+					"response": []
+				},
+				{
+					"name": "Report Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"SPAM\",\n  \"description\": \"This review is spam\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/reviews/:id/report", "host": ["{{base_url}}"], "path": ["reviews", ":id", "report"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Report inappropriate review"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Review Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/reviews/stats/:userId", "host": ["{{base_url}}"], "path": ["reviews", "stats", ":userId"], "variable": [{"key": "userId", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Get rating statistics for a user"
+					},
+					"response": []
+				}
+			],
+			"description": "Review and rating endpoints"
+		},
+		{
+			"name": "Chat",
+			"item": [
+				{
+					"name": "Get Messages",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/chat/:orderId/messages?page=1&limit=50", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "messages"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "50"}]},
+						"description": "Get message history for an order"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Hello, I can help with this project\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/chat/:orderId/messages", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "messages"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Send message (REST fallback, prefer WebSocket)"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated message\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/chat/:orderId/messages/:messageId", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "messages", ":messageId"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}, {"key": "messageId", "value": "{{message_id}}", "description": "Message ID"}]},
+						"description": "Edit message (within 5 minutes)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"messageIds\": [\"msg-id-1\", \"msg-id-2\"]\n}"
+						},
+						"url": {"raw": "{{base_url}}/chat/:orderId/mark-read", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "mark-read"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Mark messages as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/chat/:orderId/unread-count", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "unread-count"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Get unread message count"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Chats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/chat/my-chats?page=1&limit=20", "host": ["{{base_url}}"], "path": ["chat", "my-chats"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get user's active chats"
+					},
+					"response": []
+				},
+				{
+					"name": "Export Chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/chat/:orderId/export?format=json",
+							"host": ["{{base_url}}"],
+							"path": ["chat", ":orderId", "export"],
+							"variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}],
+							"query": [{"key": "format", "value": "json", "description": "Format: json, pdf, txt"}]
+						},
+						"description": "Export chat (PIPEDA: Right to Data Portability)"
+					},
+					"response": []
+				},
+				{
+					"name": "Report Chat",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"SPAM\",\n  \"description\": \"Inappropriate content\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/chat/:orderId/report", "host": ["{{base_url}}"], "path": ["chat", ":orderId", "report"], "variable": [{"key": "orderId", "value": "{{order_id}}", "description": "Order ID"}]},
+						"description": "Report inappropriate chat content"
+					},
+					"response": []
+				}
+			],
+			"description": "Chat endpoints (REST fallback, prefer WebSocket for real-time)"
+		},
+		{
+			"name": "Notifications",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications?page=1&limit=20&unreadOnly=false", "host": ["{{base_url}}"], "path": ["notifications"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "unreadOnly", "value": "false"}]},
+						"description": "Get user notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Count",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/unread-count", "host": ["{{base_url}}"], "path": ["notifications", "unread-count"]},
+						"description": "Get unread notifications count"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/:id/read", "host": ["{{base_url}}"], "path": ["notifications", ":id", "read"], "variable": [{"key": "id", "value": "{{notification_id}}", "description": "Notification ID"}]},
+						"description": "Mark notification as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/mark-all-read", "host": ["{{base_url}}"], "path": ["notifications", "mark-all-read"]},
+						"description": "Mark all notifications as read"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/:id", "host": ["{{base_url}}"], "path": ["notifications", ":id"], "variable": [{"key": "id", "value": "{{notification_id}}", "description": "Notification ID"}]},
+						"description": "Delete notification"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete All Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"]},
+						"description": "Delete all notifications"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Preferences",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/preferences", "host": ["{{base_url}}"], "path": ["notifications", "preferences"]},
+						"description": "Get notification preferences"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Preferences",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emailOrders\": true,\n  \"emailMessages\": false,\n  \"pushOrders\": true\n}"
+						},
+						"url": {"raw": "{{base_url}}/notifications/preferences", "host": ["{{base_url}}"], "path": ["notifications", "preferences"]},
+						"description": "Update notification preferences (security alerts cannot be disabled)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Preferences",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/notifications/preferences/reset", "host": ["{{base_url}}"], "path": ["notifications", "preferences", "reset"]},
+						"description": "Reset notification preferences to defaults"
+					},
+					"response": []
+				}
+			],
+			"description": "Notification management endpoints"
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "Create Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tier\": \"STANDARD\",\n  \"paymentMethodId\": \"pm_xxx\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/subscriptions", "host": ["{{base_url}}"], "path": ["subscriptions"]},
+						"description": "Create subscription (CONTRACTOR only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/subscriptions/me", "host": ["{{base_url}}"], "path": ["subscriptions", "me"]},
+						"description": "Get current subscription"
+					},
+					"response": []
+				},
+				{
+					"name": "Upgrade Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tier\": \"PROFESSIONAL\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/subscriptions/upgrade", "host": ["{{base_url}}"], "path": ["subscriptions", "upgrade"]},
+						"description": "Upgrade subscription tier"
+					},
+					"response": []
+				},
+				{
+					"name": "Downgrade Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tier\": \"STANDARD\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/subscriptions/downgrade", "host": ["{{base_url}}"], "path": ["subscriptions", "downgrade"]},
+						"description": "Downgrade subscription tier"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/subscriptions", "host": ["{{base_url}}"], "path": ["subscriptions"]},
+						"description": "Cancel subscription"
+					},
+					"response": []
+				},
+				{
+					"name": "Reactivate Subscription",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/subscriptions/reactivate", "host": ["{{base_url}}"], "path": ["subscriptions", "reactivate"]},
+						"description": "Reactivate canceled subscription"
+					},
+					"response": []
+				},
+				{
+					"name": "Customer Portal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"returnUrl\": \"https://app.hummii.ca/subscriptions\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/subscriptions/portal", "host": ["{{base_url}}"], "path": ["subscriptions", "portal"]},
+						"description": "Get Stripe Customer Portal session URL"
+					},
+					"response": []
+				}
+			],
+			"description": "Subscription management endpoints (CONTRACTOR only)"
+		},
+		{
+			"name": "Disputes",
+			"item": [
+				{
+					"name": "Create Dispute",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"orderId\": \"order-id\",\n  \"reason\": \"QUALITY\",\n  \"description\": \"Service quality issue\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/disputes", "host": ["{{base_url}}"], "path": ["disputes"]},
+						"description": "Create dispute for order (rate limit: 5/day)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Disputes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/disputes?page=1&limit=20&status=OPENED", "host": ["{{base_url}}"], "path": ["disputes"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "status", "value": "OPENED"}]},
+						"description": "Get user disputes (pagination, filtering)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Dispute Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/disputes/:id", "host": ["{{base_url}}"], "path": ["disputes", ":id"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}]},
+						"description": "Get dispute details"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Evidence",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "file", "type": "file", "src": []},
+								{"key": "description", "value": "Evidence description", "type": "text"}
+							]
+						},
+						"url": {"raw": "{{base_url}}/disputes/:id/evidence", "host": ["{{base_url}}"], "path": ["disputes", ":id", "evidence"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}]},
+						"description": "Upload dispute evidence (max 5 files, 5MB each, rate limit: 10/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Evidence",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/disputes/:id/evidence", "host": ["{{base_url}}"], "path": ["disputes", ":id", "evidence"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}]},
+						"description": "Get evidence list for dispute"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Evidence",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {"raw": "{{base_url}}/disputes/:id/evidence/:evidenceId", "host": ["{{base_url}}"], "path": ["disputes", ":id", "evidence", ":evidenceId"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}, {"key": "evidenceId", "value": "{{evidence_id}}", "description": "Evidence ID"}]},
+						"description": "Delete evidence (owner only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Message",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Additional information about the dispute\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/disputes/:id/messages", "host": ["{{base_url}}"], "path": ["disputes", ":id", "messages"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}]},
+						"description": "Add message to dispute (rate limit: 20/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Messages",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/disputes/:id/messages?page=1&limit=50", "host": ["{{base_url}}"], "path": ["disputes", ":id", "messages"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "50"}]},
+						"description": "Get dispute messages with pagination"
+					},
+					"response": []
+				}
+			],
+			"description": "Dispute resolution endpoints"
+		},
+		{
+			"name": "Verification",
+			"item": [
+				{
+					"name": "Create Verification Session",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {"raw": "{{base_url}}/verification/create", "host": ["{{base_url}}"], "path": ["verification", "create"]},
+						"description": "Create verification session (stub - Stripe Identity integration)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Verification Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/verification/status", "host": ["{{base_url}}"], "path": ["verification", "status"]},
+						"description": "Get verification status (stub)"
+					},
+					"response": []
+				}
+			],
+			"description": "Identity verification endpoints (Stripe Identity stub)"
+		},
+		{
+			"name": "SEO",
+			"item": [
+				{
+					"name": "Generate Slug",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John's Plumbing Services\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/seo/generate-slug", "host": ["{{base_url}}"], "path": ["seo", "generate-slug"]},
+						"description": "Generate unique slug for contractor (rate limit: 5/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/seo/validate-slug/:slug", "host": ["{{base_url}}"], "path": ["seo", "validate-slug", ":slug"], "variable": [{"key": "slug", "value": "johns-plumbing", "description": "Slug to validate"}]},
+						"description": "Check slug availability"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Slug",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"slug\": \"new-slug\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/seo/update-slug", "host": ["{{base_url}}"], "path": ["seo", "update-slug"]},
+						"description": "Update contractor slug (creates redirect)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get SEO Metadata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/seo/metadata/:contractorId", "host": ["{{base_url}}"], "path": ["seo", "metadata", ":contractorId"], "variable": [{"key": "contractorId", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Get SEO metadata for contractor"
+					},
+					"response": []
+				},
+				{
+					"name": "Get OpenGraph Metadata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/seo/opengraph/:contractorId", "host": ["{{base_url}}"], "path": ["seo", "opengraph", ":contractorId"], "variable": [{"key": "contractorId", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Get OpenGraph metadata for social sharing"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Structured Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/seo/structured-data/:contractorId", "host": ["{{base_url}}"], "path": ["seo", "structured-data", ":contractorId"], "variable": [{"key": "contractorId", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Get JSON-LD structured data schema"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Redirects",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/seo/redirects?page=1&limit=20", "host": ["{{base_url}}"], "path": ["seo", "redirects"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get redirect history"
+					},
+					"response": []
+				}
+			],
+			"description": "SEO and metadata endpoints"
+		},
+		{
+			"name": "Sitemap",
+			"item": [
+				{
+					"name": "Get Sitemap Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/sitemap.xml", "host": ["{{base_url}}"], "path": ["sitemap.xml"]},
+						"description": "Get main sitemap index"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Static Sitemap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/sitemap-static.xml", "host": ["{{base_url}}"], "path": ["sitemap-static.xml"]},
+						"description": "Get static pages sitemap"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contractors Sitemap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/sitemap-contractors.xml", "host": ["{{base_url}}"], "path": ["sitemap-contractors.xml"]},
+						"description": "Get contractors sitemap (verified only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Categories Sitemap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/sitemap-categories.xml", "host": ["{{base_url}}"], "path": ["sitemap-categories.xml"]},
+						"description": "Get categories sitemap"
+					},
+					"response": []
+				}
+			],
+			"description": "XML sitemap endpoints"
+		},
+		{
+			"name": "Analytics",
+			"item": [
+				{
+					"name": "Track View",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"entityType\": \"CONTRACTOR\",\n  \"entityId\": \"contractor-id\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/analytics/track-view", "host": ["{{base_url}}"], "path": ["analytics", "track-view"]},
+						"description": "Track profile/order view (anonymous, rate limit: 100/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Track Search",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"plumber\",\n  \"categoryId\": \"cat-id\",\n  \"resultsCount\": 10\n}"
+						},
+						"url": {"raw": "{{base_url}}/analytics/track-search", "host": ["{{base_url}}"], "path": ["analytics", "track-search"]},
+						"description": "Track search query (anonymous, rate limit: 100/hour)"
+					},
+					"response": []
+				},
+				{
+					"name": "Track Conversion",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"conversionType\": \"ORDER_CREATED\",\n  \"orderId\": \"order-id\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/analytics/track-conversion", "host": ["{{base_url}}"], "path": ["analytics", "track-conversion"]},
+						"description": "Track conversion event (anonymous, rate limit: 100/hour)"
+					},
+					"response": []
+				}
+			],
+			"description": "Analytics tracking endpoints (anonymous)"
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Stripe Webhook",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "stripe-signature", "value": "{{stripe_signature}}", "description": "Stripe webhook signature"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"customer.subscription.created\",\n  \"data\": {}\n}"
+						},
+						"url": {"raw": "{{base_url}}/webhooks/stripe", "host": ["{{base_url}}"], "path": ["webhooks", "stripe"]},
+						"description": "Handle Stripe webhook events (subscription lifecycle)"
+					},
+					"response": []
+				},
+				{
+					"name": "SendGrid Webhook",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "x-twilio-email-event-webhook-signature", "value": "{{sendgrid_signature}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\n  \"email\": \"user@example.com\",\n  \"event\": \"delivered\",\n  \"timestamp\": 1234567890\n}]"
+						},
+						"url": {"raw": "{{base_url}}/webhooks/sendgrid/events", "host": ["{{base_url}}"], "path": ["webhooks", "sendgrid", "events"]},
+						"description": "Handle SendGrid email webhook events"
+					},
+					"response": []
+				}
+			],
+			"description": "Webhook endpoints for external services"
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/users?page=1&limit=20&role=CLIENT", "host": ["{{base_url}}"], "path": ["admin", "users"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "role", "value": "CLIENT"}]},
+						"description": "Get all users (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/users/:id", "host": ["{{base_url}}"], "path": ["admin", "users", ":id"], "variable": [{"key": "id", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Get user details by ID (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Add User Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"ADMIN\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/users/:id/roles", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "roles"], "variable": [{"key": "id", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Add role to user (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove User Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"ADMIN\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/users/:id/roles", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "roles"], "variable": [{"key": "id", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Remove role from user (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Lock User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Violation of terms\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/users/:id/lock", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "lock"], "variable": [{"key": "id", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Lock user account (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Unlock User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/users/:id/unlock", "host": ["{{base_url}}"], "path": ["admin", "users", ":id", "unlock"], "variable": [{"key": "id", "value": "{{user_id}}", "description": "User ID"}]},
+						"description": "Unlock user account (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Contractors",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/contractors/pending?page=1&limit=20", "host": ["{{base_url}}"], "path": ["admin", "contractors", "pending"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get contractors pending verification (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Contractor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Verified successfully\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/contractors/:id/verify", "host": ["{{base_url}}"], "path": ["admin", "contractors", ":id", "verify"], "variable": [{"key": "id", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Verify contractor (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Contractor",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Invalid documents\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/contractors/:id/reject", "host": ["{{base_url}}"], "path": ["admin", "contractors", ":id", "reject"], "variable": [{"key": "id", "value": "{{contractor_id}}", "description": "Contractor ID"}]},
+						"description": "Reject contractor verification (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Audit Logs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/audit-logs?page=1&limit=50&userId=user-id", "host": ["{{base_url}}"], "path": ["admin", "audit-logs"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "50"}, {"key": "userId", "value": "user-id"}]},
+						"description": "Get audit logs (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Platform Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/stats", "host": ["{{base_url}}"], "path": ["admin", "stats"]},
+						"description": "Get platform statistics (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Portfolio",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/portfolio/pending?page=1&limit=20", "host": ["{{base_url}}"], "path": ["admin", "portfolio", "pending"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get portfolio items pending moderation (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Portfolio Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/portfolio/:id/approve", "host": ["{{base_url}}"], "path": ["admin", "portfolio", ":id", "approve"], "variable": [{"key": "id", "value": "{{portfolio_item_id}}", "description": "Portfolio item ID"}]},
+						"description": "Approve portfolio item (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Portfolio Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Inappropriate content\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/portfolio/:id/reject", "host": ["{{base_url}}"], "path": ["admin", "portfolio", ":id", "reject"], "variable": [{"key": "id", "value": "{{portfolio_item_id}}", "description": "Portfolio item ID"}]},
+						"description": "Reject portfolio item (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Reviews",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/reviews/pending?page=1&limit=20", "host": ["{{base_url}}"], "path": ["admin", "reviews", "pending"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}]},
+						"description": "Get pending reviews queue (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Moderate Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"APPROVE\",\n  \"notes\": \"Review approved\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/reviews/:id/moderate", "host": ["{{base_url}}"], "path": ["admin", "reviews", ":id", "moderate"], "variable": [{"key": "id", "value": "{{review_id}}", "description": "Review ID"}]},
+						"description": "Moderate review (approve/reject) (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/orders?page=1&limit=20&status=OPENED", "host": ["{{base_url}}"], "path": ["admin", "orders"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "status", "value": "OPENED"}]},
+						"description": "Get all orders with filtering (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Subscriptions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/subscriptions?page=1&limit=20&tier=STANDARD", "host": ["{{base_url}}"], "path": ["admin", "subscriptions"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "tier", "value": "STANDARD"}]},
+						"description": "Get all subscriptions with filtering (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Bulk Notification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Platform Update\",\n  \"message\": \"New features available\",\n  \"type\": \"SYSTEM\",\n  \"targetUsers\": [\"user-id-1\", \"user-id-2\"],\n  \"targetRoles\": [\"CONTRACTOR\"]\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/notifications/bulk", "host": ["{{base_url}}"], "path": ["admin", "notifications", "bulk"]},
+						"description": "Send bulk notifications (admin only, max 1000 users)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Settings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/settings", "host": ["{{base_url}}"], "path": ["admin", "settings"]},
+						"description": "Get all system settings (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Setting",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"key\": \"platform_name\",\n  \"value\": \"Hummii\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/settings", "host": ["{{base_url}}"], "path": ["admin", "settings"]},
+						"description": "Update system setting (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Feature Flags",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/feature-flags", "host": ["{{base_url}}"], "path": ["admin", "feature-flags"]},
+						"description": "Get all feature flags (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Feature Flag",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"new_feature\",\n  \"enabled\": true,\n  \"description\": \"Enable new feature\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/feature-flags", "host": ["{{base_url}}"], "path": ["admin", "feature-flags"]},
+						"description": "Create feature flag (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Disputes Queue",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/disputes?page=1&limit=20&status=OPENED", "host": ["{{base_url}}"], "path": ["admin", "disputes"], "query": [{"key": "page", "value": "1"}, {"key": "limit", "value": "20"}, {"key": "status", "value": "OPENED"}]},
+						"description": "Get disputes queue (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve Dispute",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resolution\": \"FULL_REFUND\",\n  \"notes\": \"Service quality issue confirmed\"\n}"
+						},
+						"url": {"raw": "{{base_url}}/admin/disputes/:id/resolve", "host": ["{{base_url}}"], "path": ["admin", "disputes", ":id", "resolve"], "variable": [{"key": "id", "value": "{{dispute_id}}", "description": "Dispute ID"}]},
+						"description": "Resolve dispute (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category Analytics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/categories/analytics", "host": ["{{base_url}}"], "path": ["admin", "categories", "analytics"]},
+						"description": "Get category analytics (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin management endpoints (ADMIN role required)"
+		},
+		{
+			"name": "Analytics Admin",
+			"item": [
+				{
+					"name": "Get Analytics Overview",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/analytics/overview?startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["admin", "analytics", "overview"], "query": [{"key": "startDate", "value": "2025-01-01"}, {"key": "endDate", "value": "2025-12-31"}]},
+						"description": "Get general analytics statistics (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Contractor Performance",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/analytics/contractors?startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["admin", "analytics", "contractors"], "query": [{"key": "startDate", "value": "2025-01-01"}, {"key": "endDate", "value": "2025-12-31"}]},
+						"description": "Get contractor performance analytics (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Search Analytics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/analytics/searches?startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["admin", "analytics", "searches"], "query": [{"key": "startDate", "value": "2025-01-01"}, {"key": "endDate", "value": "2025-12-31"}]},
+						"description": "Get search analytics (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversion Analytics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/analytics/conversions?startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["admin", "analytics", "conversions"], "query": [{"key": "startDate", "value": "2025-01-01"}, {"key": "endDate", "value": "2025-12-31"}]},
+						"description": "Get conversion tracking data (admin only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Export Analytics Data",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {"raw": "{{base_url}}/admin/analytics/export?format=json&startDate=2025-01-01&endDate=2025-12-31", "host": ["{{base_url}}"], "path": ["admin", "analytics", "export"], "query": [{"key": "format", "value": "json", "description": "Format: csv, json"}, {"key": "startDate", "value": "2025-01-01"}, {"key": "endDate", "value": "2025-12-31"}]},
+						"description": "Export analytics data (CSV/JSON) (admin only)"
+					},
+					"response": []
+				}
+			],
+			"description": "Analytics admin endpoints (ADMIN role required)"
+		},
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}",
+							"host": ["{{base_url}}"],
+							"path": []
+						},
+						"description": "Health check endpoint"
+					},
+					"response": []
+				},
+				{
+					"name": "Get API Version",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/version",
+							"host": ["{{base_url}}"],
+							"path": ["version"]
+						},
+						"description": "Get API version"
+					},
+					"response": []
+				},
+				{
+					"name": "Queue Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/queue",
+							"host": ["{{base_url}}"],
+							"path": ["health", "queue"]
+						},
+						"description": "Queue health check endpoint"
+					},
+					"response": []
+				},
+				{
+					"name": "Queue Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health/queue/metrics",
+							"host": ["{{base_url}}"],
+							"path": ["health", "queue", "metrics"]
+						},
+						"description": "Queue performance metrics"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Prometheus Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/metrics",
+							"host": ["{{base_url}}"],
+							"path": ["metrics"]
+						},
+						"description": "Get Prometheus metrics in text format"
+					},
+					"response": []
+				}
+			],
+			"description": "Health check and monitoring endpoints"
 		}
 	],
 	"event": [
