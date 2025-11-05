@@ -261,18 +261,35 @@ model Contractor {
 
 model Category {
   id          String  @id @default(uuid())
-  name        String  @unique
+  name        String  @unique // Legacy field - kept for backward compatibility
+  nameEn      String // English name (required)
+  nameFr      String // French name (required)
   slug        String  @unique
   description String? @db.Text
   icon        String?
-  isActive    Boolean @default(true)
 
+  // Hierarchy
+  parentId String?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+
+  // Metadata
+  level     Int     @default(0) // 0 = root, 1+ = subcategory
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+  createdBy String? // Admin user ID for audit trail
+
+  // Relations
   contractors ContractorCategory[]
   orders      Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([parentId])
+  @@index([level])
+  @@index([isActive])
+  @@index([sortOrder])
   @@map("categories")
 }
 
@@ -282,6 +299,8 @@ model ContractorCategory {
   contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
   category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
+  // Metadata
+  isPrimary Boolean  @default(false) // Main category for contractor
   createdAt DateTime @default(now())
 
   @@id([contractorId, categoryId])
