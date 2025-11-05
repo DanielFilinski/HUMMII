@@ -1,7 +1,8 @@
 import { Process, Processor } from '@nestjs/bull';
-import { Logger, Inject, forwardRef } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { PrismaService } from '../../shared/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationType, Prisma } from '@prisma/client';
 
 /**
  * Notification Processor
@@ -35,9 +36,9 @@ export class NotificationProcessor {
 
   private async loadServices() {
     try {
-      const { OneSignalService } = await import('../../notifications/integrations/onesignal.service');
-      const { TemplateService } = await import('../../notifications/services/template.service');
-      const { NotificationsService } = await import('../../notifications/notifications.service');
+      const { OneSignalService } = await import('../../../notifications/integrations/onesignal.service');
+      const { TemplateService } = await import('../../../notifications/services/template.service');
+      const { NotificationsService } = await import('../../../notifications/notifications.service');
       
       // These will be injected via QueueModule or we'll use Prisma directly
       this.oneSignalService = OneSignalService;
@@ -46,6 +47,19 @@ export class NotificationProcessor {
     } catch (error) {
       this.logger.warn('Failed to load notification services:', error);
     }
+  }
+
+  /**
+   * Safely convert Prisma Json type to Record<string, any>
+   */
+  private safeMetadataToObject(metadata: Prisma.JsonValue | null): Record<string, any> {
+    if (metadata === null || metadata === undefined) {
+      return {};
+    }
+    if (typeof metadata === 'object' && !Array.isArray(metadata)) {
+      return metadata as Record<string, any>;
+    }
+    return {};
   }
 
   @Process('send-email')
@@ -64,28 +78,30 @@ export class NotificationProcessor {
       }
 
       // Get notification config
-      const { NOTIFICATION_CONFIG } = await import('../../notifications/types/notification-types');
-      const config = NOTIFICATION_CONFIG[type];
+      const { NOTIFICATION_CONFIG } = await import('../../../notifications/types/notification-types');
+      const notificationType = type as NotificationType;
+      const config = NOTIFICATION_CONFIG[notificationType];
       const template = config?.template || 'order-status-changed';
 
       // Load template service if not loaded
       if (!this.templateService) {
-        const { TemplateService } = await import('../../notifications/services/template.service');
+        const { TemplateService } = await import('../../../notifications/services/template.service');
         const { ConfigService } = await import('@nestjs/config');
         this.templateService = new TemplateService(new ConfigService());
       }
 
       // Render template
+      const metadata = this.safeMetadataToObject(notification.metadata);
       const html = this.templateService.render(template, {
         title: notification.title,
         body: notification.body,
         actionUrl: notification.actionUrl,
-        ...notification.metadata,
+        ...metadata,
       });
 
       // Load OneSignal service if not loaded
       if (!this.oneSignalService) {
-        const { OneSignalService } = await import('../../notifications/integrations/onesignal.service');
+        const { OneSignalService } = await import('../../../notifications/integrations/onesignal.service');
         const { ConfigService } = await import('@nestjs/config');
         this.oneSignalService = new OneSignalService(
           new ConfigService(),
@@ -102,7 +118,7 @@ export class NotificationProcessor {
         {
           userId,
           html,
-          ...notification.metadata,
+          ...metadata,
         },
       );
 
@@ -135,8 +151,8 @@ export class NotificationProcessor {
 
       // Load OneSignal service if not loaded
       if (!this.oneSignalService) {
-        const { OneSignalService } = await import('../../notifications/integrations/onesignal.service');
-        const { TemplateService } = await import('../../notifications/services/template.service');
+        const { OneSignalService } = await import('../../../notifications/integrations/onesignal.service');
+        const { TemplateService } = await import('../../../notifications/services/template.service');
         const { ConfigService } = await import('@nestjs/config');
         const templateService = new TemplateService(new ConfigService());
         this.oneSignalService = new OneSignalService(
@@ -147,6 +163,7 @@ export class NotificationProcessor {
       }
 
       // Send push via OneSignal
+      const metadata = this.safeMetadataToObject(notification.metadata);
       await this.oneSignalService.sendPush(
         userId,
         notification.title,
@@ -154,7 +171,7 @@ export class NotificationProcessor {
         {
           actionUrl: notification.actionUrl,
           notificationId: notification.id,
-          ...notification.metadata,
+          ...metadata,
         },
       );
 
@@ -202,7 +219,7 @@ export class NotificationProcessor {
 
       // Load template service if not loaded
       if (!this.templateService) {
-        const { TemplateService } = await import('../../notifications/services/template.service');
+        const { TemplateService } = await import('../../../notifications/services/template.service');
         const { ConfigService } = await import('@nestjs/config');
         this.templateService = new TemplateService(new ConfigService());
       }
@@ -216,7 +233,7 @@ export class NotificationProcessor {
 
       // Load OneSignal service if not loaded
       if (!this.oneSignalService) {
-        const { OneSignalService } = await import('../../notifications/integrations/onesignal.service');
+        const { OneSignalService } = await import('../../../notifications/integrations/onesignal.service');
         const { ConfigService } = await import('@nestjs/config');
         this.oneSignalService = new OneSignalService(
           new ConfigService(),

@@ -7,9 +7,8 @@ import { NotificationsService } from './notifications.service';
 import { NotificationsGateway } from './notifications.gateway';
 import { PreferencesController } from './preferences/preferences.controller';
 import { PreferencesService } from './preferences/preferences.service';
-import { TemplateService } from './services/template.service';
+import { TemplateModule } from './services/template.module';
 import { OneSignalModule } from './integrations/onesignal.module';
-import { OneSignalService } from './integrations/onesignal.service';
 import { PrismaModule } from '../shared/prisma/prisma.module';
 import { QueueModule } from '../shared/queue/queue.module';
 
@@ -29,6 +28,7 @@ import { QueueModule } from '../shared/queue/queue.module';
     PrismaModule,
     QueueModule,
     OneSignalModule,
+    TemplateModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -48,8 +48,6 @@ import { QueueModule } from '../shared/queue/queue.module';
     NotificationsService,
     NotificationsGateway,
     PreferencesService,
-    TemplateService,
-    OneSignalService,
   ],
   exports: [NotificationsService, NotificationsGateway, PreferencesService],
 })

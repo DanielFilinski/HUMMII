@@ -233,8 +233,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         
         // Send notification for offline user
         try {
-          const { NotificationsService } = await import('../notifications/notifications.service');
-          const { NotificationType } = await import('@prisma/client');
+          const { NotificationType, NotificationPriority } = await import('@prisma/client');
           
           // Get sender name for notification
           const sender = await this.prisma.user.findUnique({
@@ -242,13 +241,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             select: { name: true },
           });
 
-          // Create notification via service (will be injected properly)
-          // For now, use queue as fallback
-          const notificationQueue = this.chatService['notificationQueue'] || null;
-          if (notificationQueue) {
-            await notificationQueue.add('send-push', {
+          // Create notification via Prisma directly to avoid circular dependency
+          // Notification will be sent via queue processor when notification is created
+          await this.prisma.notification.create({
+            data: {
               userId: recipientId,
               type: NotificationType.MESSAGE_RECEIVED,
+              priority: NotificationPriority.MEDIUM,
               title: `New message from ${sender?.name || 'user'}`,
               body: message.content.substring(0, 100),
               actionUrl: `/orders/${data.orderId}/chat`,
@@ -257,8 +256,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 messageId: message.id,
                 senderId: user.id,
               },
-            });
-          }
+            },
+          });
         } catch (error) {
           this.logger.warn(`Failed to send notification for offline user ${recipientId}:`, error);
         }
