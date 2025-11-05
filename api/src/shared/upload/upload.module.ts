@@ -34,6 +34,7 @@ import { UploadService } from './upload.service';
   exports: [
     UploadService,
     UploadSecurityService, // Keep for backward compatibility
+    CloudflareR2Service, // Export for DisputesModule
   ],
 })
 export class UploadModule {}

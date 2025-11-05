@@ -100,6 +100,52 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum DisputeReason {
+  WORK_NOT_COMPLETED
+  WORK_QUALITY_ISSUES
+  LATE_COMPLETION
+  DIFFERENT_FROM_DESCRIPTION
+  CONTRACTOR_UNRESPONSIVE
+  CLIENT_CHANGED_REQUIREMENTS
+  SAFETY_CONCERNS
+  FRAUDULENT_ACTIVITY
+  INAPPROPRIATE_BEHAVIOR
+  OTHER
+}
+
+enum DisputeStatus {
+  OPENED
+  UNDER_REVIEW
+  AWAITING_INFO
+  RESOLVED
+  CLOSED
+}
+
+enum DisputeResolution {
+  BLOCK_USER
+  SUSPEND_ACCOUNT
+  CLOSE_ORDER
+  WARN_USER
+  NO_ACTION
+}
+
+enum DisputePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum EvidenceType {
+  PHOTO
+  SCREENSHOT
+  DOCUMENT
+  CONTRACT
+  COMMUNICATION
+  RECEIPT
+  OTHER
+}
+
 // ============================================================================
 // USER MODELS
 // ============================================================================
@@ -142,19 +188,24 @@ model User {
   deletedAt DateTime? // Soft delete for PIPEDA compliance
 
   // Relations
-  clientOrders     Order[]          @relation("ClientOrders")
-  contractorOrders Order[]          @relation("ContractorOrders")
-  sentMessages     Message[]        @relation("SentMessages")
-  receivedMessages Message[]        @relation("ReceivedMessages")
-  reviewsGiven     Review[]         @relation("ReviewsGiven")
-  reviewsReceived  Review[]         @relation("ReviewsReceived")
-  reviewsModerated Review[]         @relation("ReviewsModerated")
-  reportsGiven     ReviewReport[]   @relation("ReportsGiven")
-  reportsReviewed  ReviewReport[]   @relation("ReportsReviewed")
-  notifications    Notification[]
-  sessions         Session[]
-  auditLogs        AuditLog[]       @relation("AuditLogs")
-  ratingStats      UserRatingStats?
+  clientOrders      Order[]           @relation("ClientOrders")
+  contractorOrders  Order[]           @relation("ContractorOrders")
+  sentMessages      Message[]         @relation("SentMessages")
+  receivedMessages  Message[]         @relation("ReceivedMessages")
+  reviewsGiven      Review[]          @relation("ReviewsGiven")
+  reviewsReceived   Review[]          @relation("ReviewsReceived")
+  reviewsModerated  Review[]          @relation("ReviewsModerated")
+  reportsGiven      ReviewReport[]    @relation("ReportsGiven")
+  reportsReviewed   ReviewReport[]    @relation("ReportsReviewed")
+  notifications     Notification[]
+  sessions          Session[]
+  auditLogs         AuditLog[]        @relation("AuditLogs")
+  ratingStats       UserRatingStats?
+  disputesInitiated Dispute[]         @relation("DisputesInitiated")
+  disputesResponded Dispute[]         @relation("DisputesResponded")
+  disputesResolved  Dispute[]         @relation("DisputesResolved")
+  disputeEvidence   DisputeEvidence[]
+  disputeMessages   DisputeMessage[]
 
   @@index([email])
   @@index([phone])
@@ -589,24 +640,96 @@ model Dispute {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
 
-  openedById String
-  reason     String   @db.Text
-  evidence   String[] // Array of evidence URLs
+  // Parties
+  initiatedById String
+  initiatedBy   User   @relation("DisputesInitiated", fields: [initiatedById], references: [id])
+  respondentId  String
+  respondent    User   @relation("DisputesResponded", fields: [respondentId], references: [id])
 
-  status String @default("open") // open, in_review, resolved, closed
+  // Dispute details
+  reason      DisputeReason
+  description String          @db.Text // min 50, max 2000 chars
+  priority    DisputePriority @default(MEDIUM)
 
-  resolution   String?   @db.Text
-  resolvedById String? // Admin user ID
-  resolvedAt   DateTime?
+  // Status tracking
+  status DisputeStatus @default(OPENED)
 
-  // Fund distribution
-  clientRefundAmount      Decimal? @db.Decimal(10, 2)
-  contractorPaymentAmount Decimal? @db.Decimal(10, 2)
+  // Resolution
+  resolutionType   DisputeResolution?
+  resolutionReason String?            @db.Text
+  resolvedById     String?
+  resolvedBy       User?              @relation("DisputesResolved", fields: [resolvedById], references: [id])
+  resolvedAt       DateTime?
+  adminNotes       String?            @db.Text // Internal admin notes
+
+  // Amount in dispute (for reference only, not used for payments in MVP)
+  amountInDispute Decimal? @db.Decimal(10, 2)
+
+  // Relations
+  evidence DisputeEvidence[]
+  messages DisputeMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([initiatedById])
+  @@index([respondentId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
   @@map("disputes")
+}
+
+model DisputeEvidence {
+  id String @id @default(uuid())
+
+  disputeId String
+  dispute   Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  // File details
+  fileKey  String // S3 key
+  fileUrl  String // Signed URL (temporary)
+  fileSize Int // Bytes
+  mimeType String
+  fileHash String // SHA-256 hash
+
+  // Evidence details
+  evidenceType EvidenceType
+  description  String?      @db.Text // max 500 chars
+
+  // Security
+  virusScanStatus String? @default("pending") // pending, clean, infected
+  virusScanResult String?
+
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([disputeId])
+  @@index([uploadedById])
+  @@map("dispute_evidence")
+}
+
+model DisputeMessage {
+  id String @id @default(uuid())
+
+  disputeId String
+  dispute   Dispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id])
+
+  message    String  @db.Text // min 1, max 2000 chars
+  isInternal Boolean @default(false) // admin-only messages
+
+  createdAt DateTime @default(now())
+
+  @@index([disputeId])
+  @@index([senderId])
+  @@map("dispute_messages")
 }
 
 // ============================================================================

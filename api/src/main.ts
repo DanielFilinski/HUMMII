@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './core/filters/http-exception.filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
+import { StaticFilesMiddleware } from './core/middleware/static-files.middleware';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/winston.config';
 import { getHelmetConfig } from './config/helmet.config';
@@ -25,6 +26,12 @@ async function bootstrap() {
   // Cookie parser (for HTTP-only cookies with JWT tokens)
   // MUST be before helmet
   app.use(cookieParser());
+
+  // Handle frontend static file requests (sw.js, manifest.json, etc.)
+  // Returns 404 without logging to prevent unnecessary error logs
+  // MUST be before other middleware to intercept these requests early
+  const staticFilesMiddleware = new StaticFilesMiddleware();
+  app.use(staticFilesMiddleware.use.bind(staticFilesMiddleware));
 
   // Security headers with Helmet.js
   // Configured for PIPEDA compliance and maximum security
