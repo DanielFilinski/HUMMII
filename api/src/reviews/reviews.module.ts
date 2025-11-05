@@ -33,7 +33,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     ModerationService,
     ReviewOwnerGuard,
   ],
-  exports: [ReviewsService, RatingCalculationService],
+  exports: [ReviewsService, RatingCalculationService, ModerationService],
 })
 export class ReviewsModule {}
 

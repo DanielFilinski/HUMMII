@@ -997,3 +997,38 @@ model SubscriptionHistory {
   @@index([createdAt])
   @@map("subscription_history")
 }
+
+// ============================================================================
+// SYSTEM SETTINGS & FEATURE FLAGS
+// ============================================================================
+
+model SystemSettings {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String   @db.Text
+  type        String   @db.VarChar(50) // string, number, boolean, json
+  category    String   @db.VarChar(100) // general, security, limits, etc.
+  description String?  @db.Text
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@index([key])
+  @@index([category])
+  @@map("system_settings")
+}
+
+model FeatureFlag {
+  id               String   @id @default(uuid())
+  name             String   @unique
+  enabled          Boolean  @default(false)
+  rolloutPercentage Int    @default(0) // 0-100, percentage of users to enable for
+  description      String?  @db.Text
+  updatedBy        String?
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  @@index([name])
+  @@index([enabled])
+  @@map("feature_flags")
+}
