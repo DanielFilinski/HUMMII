@@ -54,6 +54,7 @@ RUN npm run build
 
 # Production stage
 FROM base AS production
+RUN apk add --no-cache wget curl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -80,6 +81,10 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
 
 CMD ["node", "server.js"]
 

@@ -1,0 +1,75 @@
+# Alertmanager Configuration for Hummii Production
+
+global:
+  resolve_timeout: 5m
+  # Slack webhook URL (configure in GitHub Secrets)
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+# Route configuration
+route:
+  receiver: 'default'
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 5s
+      group_interval: 5s
+      repeat_interval: 1h
+
+    # Warning alerts - less frequent
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      group_interval: 30s
+      repeat_interval: 6h
+
+# Receivers
+receivers:
+  # Default receiver
+  - name: 'default'
+    slack_configs:
+      - channel: '#alerts'
+        title: 'Hummii Production Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # Critical alerts receiver
+  - name: 'critical-alerts'
+    slack_configs:
+      - channel: '#alerts-critical'
+        title: '🚨 CRITICAL: Hummii Production Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+    email_configs:
+      - to: '${ALERT_EMAIL}'
+        from: 'alerts@hummii.ca'
+        smarthost: 'smtp.gmail.com:587'
+        auth_username: '${EMAIL_USERNAME}'
+        auth_password: '${EMAIL_PASSWORD}'
+        headers:
+          Subject: '🚨 CRITICAL Alert: Hummii Production'
+
+  # Warning alerts receiver
+  - name: 'warning-alerts'
+    slack_configs:
+      - channel: '#alerts'
+        title: '⚠️ WARNING: Hummii Production Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+# Inhibition rules
+inhibit_rules:
+  # If system is down, inhibit other alerts
+  - source_match:
+      severity: 'critical'
+      alertname: 'APIServiceDown'
+    target_match:
+      severity: 'warning'
+    equal: ['instance']
+

@@ -254,6 +254,24 @@ services:
         max-file: "3"
 
   # ====================================
+  # Certbot - SSL Certificate Management
+  # ====================================
+  certbot:
+    image: certbot/certbot:latest
+    container_name: hummii-certbot
+    restart: "no"
+    volumes:
+      - ./docker/nginx/ssl:/etc/letsencrypt:rw
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/certbot:/var/log/letsencrypt
+    command: certonly --standalone --agree-tos --email ${CERTBOT_EMAIL:-admin@hummii.ca} --non-interactive
+    networks:
+      - hummii-network
+    profiles:
+      - certbot
+    # Only run when manually invoked or via cron job
+
+  # ====================================
   # Nginx Reverse Proxy with SSL/TLS
   # ====================================
   nginx:

@@ -78,7 +78,7 @@ RUN npm run build
 
 # Production stage
 FROM base AS production
-RUN apk add --no-cache openssl openssl-dev
+RUN apk add --no-cache openssl openssl-dev wget curl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -87,14 +87,24 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nestjs
 
-# Copy built application
+# Copy built application and Prisma schema
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nestjs:nodejs /app/prisma ./prisma
+
+# Copy entrypoint script for production
+COPY --chown=nestjs:nodejs api-entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER nestjs
 
 EXPOSE 3000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["node", "dist/main"]
 

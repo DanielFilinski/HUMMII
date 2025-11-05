@@ -25,6 +25,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { SeoModule } from './seo/seo.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { HealthModule } from './health/health.module';
+import { MetricsModule } from './monitoring/metrics.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -88,6 +89,7 @@ import { validate } from './config/env.validation';
     SeoModule, // SEO optimization and sitemap (Phase 13)
     AnalyticsModule, // Privacy-compliant analytics (Phase 13)
     HealthModule, // Health check endpoints
+    MetricsModule, // Prometheus metrics for monitoring (Phase 15)
   ],
   controllers: [AppController],
   providers: [
