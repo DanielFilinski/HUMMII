@@ -89,6 +89,7 @@ export enum AuditAction {
   // System actions
   SYSTEM_ACTION = 'SYSTEM_ACTION',
   SECURITY_ALERT = 'SECURITY_ALERT',
+  DATA_CLEANUP = 'DATA_CLEANUP',
 }
 
 /**
@@ -108,5 +109,7 @@ export enum AuditEntity {
   DISPUTE = 'Dispute',
   DISPUTE_EVIDENCE = 'DisputeEvidence',
   DISPUTE_MESSAGE = 'DisputeMessage',
+  NOTIFICATION = 'Notification',
+  AUDIT_LOG = 'AuditLog',
   SYSTEM = 'System',
 }

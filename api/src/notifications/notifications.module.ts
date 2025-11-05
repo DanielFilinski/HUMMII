@@ -26,7 +26,7 @@ import { QueueModule } from '../shared/queue/queue.module';
 @Module({
   imports: [
     PrismaModule,
-    QueueModule,
+    forwardRef(() => QueueModule),
     OneSignalModule,
     TemplateModule,
     JwtModule.registerAsync({

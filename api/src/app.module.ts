@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { APP_GUARD } from '@nestjs/core';
@@ -21,6 +22,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { HealthModule } from './health/health.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -59,6 +61,9 @@ import { validate } from './config/env.validation';
       },
     ]),
 
+    // Scheduled tasks (cron jobs)
+    ScheduleModule.forRoot(),
+
     // Shared modules
     PrismaModule,
     QueueModule, // Background jobs and email queue
@@ -78,6 +83,7 @@ import { validate } from './config/env.validation';
     SubscriptionsModule, // Subscription management (Phase 6)
     DisputesModule, // Dispute resolution system (Phase 7)
     NotificationsModule, // Notifications system (Phase 8)
+    HealthModule, // Health check endpoints
   ],
   controllers: [AppController],
   providers: [
