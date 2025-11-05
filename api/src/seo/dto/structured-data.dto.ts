@@ -10,3 +10,4 @@ export class StructuredDataDto {
   [key: string]: unknown;
 }
 
+

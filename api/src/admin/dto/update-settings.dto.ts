@@ -58,3 +58,4 @@ export class BulkUpdateSettingsDto {
   settings: UpdateSettingsDto[];
 }
 
+

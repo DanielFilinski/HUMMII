@@ -11,3 +11,4 @@ import { QueueHealthController } from './queue.health';
   controllers: [QueueHealthController],
 })
 export class HealthModule {}
+

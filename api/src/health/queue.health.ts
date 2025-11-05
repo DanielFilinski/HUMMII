@@ -29,3 +29,4 @@ export class QueueHealthController {
     return this.queueMetricsService.getMetrics();
   }
 }
+
