@@ -13,6 +13,9 @@ import { UpdateProposalDto } from './dto/update-proposal.dto';
 import { OrderStatus, OrderType, ProposalStatus } from '@prisma/client';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { forwardRef, Inject, Optional } from '@nestjs/common';
+import { NotificationType } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ProposalsService {
@@ -20,7 +23,47 @@ export class ProposalsService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     @InjectQueue('notifications') private readonly notificationQueue: Queue,
+    @Optional() @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
   ) {}
+
+  private async sendNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    body: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ) {
+    try {
+      if (this.notificationsService) {
+        await this.notificationsService.create(userId, type, {
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      } else {
+        await this.notificationQueue.add('new-proposal', {
+          userId,
+          type,
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      }
+    } catch (error) {
+      await this.notificationQueue.add('new-proposal', {
+        userId,
+        type,
+        title,
+        body,
+        actionUrl,
+        metadata,
+      });
+    }
+  }
 
   /**
    * Create proposal for an order
@@ -109,13 +152,19 @@ export class ProposalsService {
       },
     });
 
-    // Queue notification to client
-    await this.notificationQueue.add('new-proposal', {
-      orderId: order.id,
-      proposalId: proposal.id,
-      contractorId,
-      clientId: order.clientId,
-    });
+    // Send notification to client about new proposal
+    await this.sendNotification(
+      order.clientId,
+      NotificationType.NEW_PROPOSAL,
+      `New proposal for order "${order.title}"`,
+      `A contractor has submitted a proposal for your order "${order.title}".`,
+      `/orders/${order.id}`,
+      {
+        orderId: order.id,
+        proposalId: proposal.id,
+        contractorId,
+      },
+    );
 
     // Audit log
     await this.auditService.log({
@@ -253,12 +302,18 @@ export class ProposalsService {
       return { accepted, updatedOrder };
     });
 
-    // Queue notifications
-    await this.notificationQueue.add('proposal-accepted', {
-      proposalId: proposal.id,
-      orderId: proposal.orderId,
-      contractorId: proposal.contractorId,
-    });
+    // Send notification to accepted contractor
+    await this.sendNotification(
+      proposal.contractor.user.id,
+      NotificationType.PROPOSAL_ACCEPTED,
+      `Your proposal was accepted`,
+      `Your proposal for order "${proposal.order.title}" has been accepted!`,
+      `/orders/${proposal.orderId}`,
+      {
+        proposalId: proposal.id,
+        orderId: proposal.orderId,
+      },
+    );
 
     // Notify rejected contractors
     const rejectedProposals = await this.prisma.proposal.findMany({
@@ -267,18 +322,31 @@ export class ProposalsService {
         id: { not: proposalId },
         status: ProposalStatus.REJECTED,
       },
-      select: {
-        id: true,
-        contractorId: true,
+      include: {
+        contractor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
       },
     });
 
     for (const rejected of rejectedProposals) {
-      await this.notificationQueue.add('proposal-rejected', {
-        proposalId: rejected.id,
-        orderId: proposal.orderId,
-        contractorId: rejected.contractorId,
-      });
+      await this.sendNotification(
+        rejected.contractor.user.id,
+        NotificationType.PROPOSAL_REJECTED,
+        `Your proposal was rejected`,
+        `Your proposal for order "${proposal.order.title}" has been rejected.`,
+        `/orders/${proposal.orderId}`,
+        {
+          proposalId: rejected.id,
+          orderId: proposal.orderId,
+        },
+      );
     }
 
     // Audit log
@@ -329,14 +397,31 @@ export class ProposalsService {
     const rejected = await this.prisma.proposal.update({
       where: { id: proposalId },
       data: { status: ProposalStatus.REJECTED },
+      include: {
+        contractor: {
+          include: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    // Queue notification
-    await this.notificationQueue.add('proposal-rejected', {
-      proposalId: proposal.id,
-      orderId: proposal.orderId,
-      contractorId: proposal.contractorId,
-    });
+    // Send notification to contractor
+    await this.sendNotification(
+      rejected.contractor.user.id,
+      NotificationType.PROPOSAL_REJECTED,
+      `Your proposal was rejected`,
+      `Your proposal for order "${proposal.order.title}" has been rejected.`,
+      `/orders/${proposal.orderId}`,
+      {
+        proposalId: proposal.id,
+        orderId: proposal.orderId,
+      },
+    );
 
     // Audit log
     await this.auditService.log({

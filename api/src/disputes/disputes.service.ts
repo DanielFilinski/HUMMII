@@ -5,6 +5,9 @@ import {
   BadRequestException,
   ConflictException,
   Logger,
+  forwardRef,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
@@ -15,11 +18,13 @@ import {
   DisputePriority,
   OrderStatus,
   UserRole,
+  NotificationType,
 } from '@prisma/client';
 import { CreateDisputeDto } from './dto/create-dispute.dto';
 import { UpdateDisputeStatusDto } from './dto/update-dispute-status.dto';
 import { DisputeQueryDto } from './dto/dispute-query.dto';
 import { canTransition } from './constants/status-transitions';
+import { NotificationsService } from '../notifications/notifications.service';
 
 /**
  * Disputes Service
@@ -33,7 +38,31 @@ export class DisputesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    @Optional() @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
   ) {}
+
+  private async sendNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    body: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ) {
+    try {
+      if (this.notificationsService) {
+        await this.notificationsService.create(userId, type, {
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to send notification to user ${userId}:`, error);
+    }
+  }
 
   /**
    * Create a new dispute
@@ -148,7 +177,21 @@ export class DisputesService {
       data: { status: OrderStatus.DISPUTED },
     });
 
-    // 8. Audit log
+    // 8. Send notification to respondent
+    await this.sendNotification(
+      respondentId,
+      NotificationType.DISPUTE_OPENED,
+      `Dispute opened for order "${dispute.order.title || dto.orderId}"`,
+      `A dispute has been opened for your order. Please respond within 48 hours.`,
+      `/disputes/${dispute.id}`,
+      {
+        disputeId: dispute.id,
+        orderId: dto.orderId,
+        reason: dto.reason,
+      },
+    );
+
+    // 9. Audit log
     await this.auditService.log({
       action: AuditAction.DISPUTE_CREATED,
       entity: AuditEntity.DISPUTE,
@@ -387,8 +430,61 @@ export class DisputesService {
             status: true,
           },
         },
+        initiatedBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        respondent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
+
+    // Send notifications to both parties
+    const statusMessages: Record<DisputeStatus, string> = {
+      [DisputeStatus.OPENED]: 'opened',
+      [DisputeStatus.UNDER_REVIEW]: 'under review',
+      [DisputeStatus.AWAITING_INFO]: 'awaiting information',
+      [DisputeStatus.RESOLVED]: 'resolved',
+      [DisputeStatus.CLOSED]: 'closed',
+    };
+
+    const statusMessage = statusMessages[dto.status] || dto.status.toLowerCase();
+
+    // Notify initiator
+    await this.sendNotification(
+      updatedDispute.initiatedById,
+      NotificationType.DISPUTE_STATUS_CHANGED,
+      `Dispute status updated`,
+      `Your dispute for order "${updatedDispute.order.title || dispute.orderId}" is now ${statusMessage}.`,
+      `/disputes/${disputeId}`,
+      {
+        disputeId,
+        orderId: dispute.orderId,
+        oldStatus: dispute.status,
+        newStatus: dto.status,
+      },
+    );
+
+    // Notify respondent
+    await this.sendNotification(
+      updatedDispute.respondentId,
+      NotificationType.DISPUTE_STATUS_CHANGED,
+      `Dispute status updated`,
+      `The dispute for order "${updatedDispute.order.title || dispute.orderId}" is now ${statusMessage}.`,
+      `/disputes/${disputeId}`,
+      {
+        disputeId,
+        orderId: dispute.orderId,
+        oldStatus: dispute.status,
+        newStatus: dto.status,
+      },
+    );
 
     // Audit log
     await this.auditService.log({

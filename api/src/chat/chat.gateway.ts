@@ -226,13 +226,42 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const recipientId = message.receiverId;
       this.server.to(`user:${recipientId}`).emit('new_message', message);
 
-      // If recipient is offline, queue message
+      // If recipient is offline, queue message and send notification
       const isOnline = await this.chatSessionService.isUserOnline(recipientId);
       if (!isOnline) {
         await this.chatSessionService.queueOfflineMessage(recipientId, message);
         
-        // TODO: Queue push notification (Phase 8)
-        this.logger.log(`Queued message for offline user ${recipientId}`);
+        // Send notification for offline user
+        try {
+          const { NotificationsService } = await import('../notifications/notifications.service');
+          const { NotificationType } = await import('@prisma/client');
+          
+          // Get sender name for notification
+          const sender = await this.prisma.user.findUnique({
+            where: { id: user.id },
+            select: { name: true },
+          });
+
+          // Create notification via service (will be injected properly)
+          // For now, use queue as fallback
+          const notificationQueue = this.chatService['notificationQueue'] || null;
+          if (notificationQueue) {
+            await notificationQueue.add('send-push', {
+              userId: recipientId,
+              type: NotificationType.MESSAGE_RECEIVED,
+              title: `New message from ${sender?.name || 'user'}`,
+              body: message.content.substring(0, 100),
+              actionUrl: `/orders/${data.orderId}/chat`,
+              metadata: {
+                orderId: data.orderId,
+                messageId: message.id,
+                senderId: user.id,
+              },
+            });
+          }
+        } catch (error) {
+          this.logger.warn(`Failed to send notification for offline user ${recipientId}:`, error);
+        }
       }
 
       // Increment unread count

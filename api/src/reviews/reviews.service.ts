@@ -4,16 +4,20 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  forwardRef,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AuditService } from '../shared/audit/audit.service';
 import { AuditAction, AuditEntity } from '../shared/audit/enums/audit-action.enum';
-import { ReviewStatus, UserRole, OrderStatus } from '@prisma/client';
+import { ReviewStatus, UserRole, OrderStatus, NotificationType } from '@prisma/client';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ModerationService } from './services/moderation.service';
 import { RatingCalculationService } from './services/rating-calculation.service';
 import { calculateReviewDeadline, isReviewDeadlinePassed } from './constants/review-deadline';
 import { ContractorRatingCriteria, ClientRatingCriteria } from './constants/rating-criteria';
+import { NotificationsService } from '../notifications/notifications.service';
 
 /**
  * Reviews Service
@@ -29,7 +33,31 @@ export class ReviewsService {
     private readonly auditService: AuditService,
     private readonly moderationService: ModerationService,
     private readonly ratingCalculationService: RatingCalculationService,
+    @Optional() @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
   ) {}
+
+  private async sendNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    body: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ) {
+    try {
+      if (this.notificationsService) {
+        await this.notificationsService.create(userId, type, {
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to send notification to user ${userId}:`, error);
+    }
+  }
 
   /**
    * Create a new review
@@ -164,7 +192,22 @@ export class ReviewsService {
       },
     );
 
-    // 13. Audit log
+    // 13. Send notification to reviewee
+    await this.sendNotification(
+      revieweeId,
+      NotificationType.REVIEW_SUBMITTED,
+      `New review received`,
+      `${review.reviewer.name} left you a ${review.rating}-star review${review.comment ? `: "${review.comment.substring(0, 50)}${review.comment.length > 50 ? '...' : ''}"` : ''}`,
+      `/reviews/${review.id}`,
+      {
+        reviewId: review.id,
+        orderId: dto.orderId,
+        rating,
+        reviewerId: userId,
+      },
+    );
+
+    // 14. Audit log
     await this.auditService.log({
       userId,
       action: AuditAction.REVIEW_CREATED,
@@ -425,6 +468,40 @@ export class ReviewsService {
         moderationFlags: moderationResult.flags,
       },
     });
+
+    // Get review with reviewer info
+    const reviewWithReviewer = await this.prisma.review.findUnique({
+      where: { id: reviewId },
+      include: {
+        reviewer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        order: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    // Send notification to reviewer about response
+    if (reviewWithReviewer) {
+      await this.sendNotification(
+        reviewWithReviewer.reviewer.id,
+        NotificationType.REVIEW_RESPONSE,
+        `Response to your review`,
+        `${reviewWithReviewer.revieweeId === userId ? 'You' : 'The user'} responded to your review${reviewWithReviewer.order ? ` for order "${reviewWithReviewer.order.title}"` : ''}.`,
+        `/reviews/${reviewId}`,
+        {
+          reviewId,
+          orderId: reviewWithReviewer.order?.id,
+        },
+      );
+    }
 
     // Audit log
     await this.auditService.log({

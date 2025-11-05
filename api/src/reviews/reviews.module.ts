@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ReviewsController } from './reviews.controller';
 import { ReviewsService } from './reviews.service';
 import { RatingCalculationService } from './services/rating-calculation.service';
@@ -7,6 +7,7 @@ import { PrismaModule } from '../shared/prisma/prisma.module';
 import { AuditModule } from '../shared/audit/audit.module';
 import { ChatModule } from '../chat/chat.module';
 import { ReviewOwnerGuard } from './guards/review-owner.guard';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 /**
  * Reviews Module
@@ -23,6 +24,7 @@ import { ReviewOwnerGuard } from './guards/review-owner.guard';
     PrismaModule,
     AuditModule,
     ChatModule, // For ContentModerationService
+    forwardRef(() => NotificationsModule),
   ],
   controllers: [ReviewsController],
   providers: [

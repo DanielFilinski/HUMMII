@@ -4,6 +4,9 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  forwardRef,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { AuditService } from '../../shared/audit/audit.service';
@@ -14,9 +17,11 @@ import {
   DisputeResolution,
   OrderStatus,
   UserRole,
+  NotificationType,
 } from '@prisma/client';
 import { ResolveDisputeDto } from '../dto/resolve-dispute.dto';
 import { canTransition } from '../constants/status-transitions';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 /**
  * Resolution Service
@@ -32,7 +37,31 @@ export class ResolutionService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly adminService: AdminService,
+    @Optional() @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
   ) {}
+
+  private async sendNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    body: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ) {
+    try {
+      if (this.notificationsService) {
+        await this.notificationsService.create(userId, type, {
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to send notification to user ${userId}:`, error);
+    }
+  }
 
   /**
    * Resolve dispute (admin only)
@@ -114,10 +143,61 @@ export class ResolutionService {
             email: true,
           },
         },
+        initiatedBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        respondent: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
-    // 5. Audit log
+    // 5. Send notifications to both parties
+    const resolutionMessages: Record<DisputeResolution, string> = {
+      [DisputeResolution.BLOCK_USER]: 'User blocked',
+      [DisputeResolution.SUSPEND_ACCOUNT]: 'Account suspended',
+      [DisputeResolution.CLOSE_ORDER]: 'Order closed',
+      [DisputeResolution.WARN_USER]: 'User warned',
+      [DisputeResolution.NO_ACTION]: 'No action taken',
+    };
+
+    const resolutionMessage = resolutionMessages[dto.resolutionType] || 'Resolved';
+
+    // Notify initiator
+    await this.sendNotification(
+      updatedDispute.initiatedById,
+      NotificationType.DISPUTE_RESOLVED,
+      `Dispute resolved`,
+      `Your dispute for order "${updatedDispute.order.title || dispute.orderId}" has been resolved. Resolution: ${resolutionMessage}.`,
+      `/disputes/${disputeId}`,
+      {
+        disputeId,
+        orderId: dispute.orderId,
+        resolutionType: dto.resolutionType,
+      },
+    );
+
+    // Notify respondent
+    await this.sendNotification(
+      updatedDispute.respondentId,
+      NotificationType.DISPUTE_RESOLVED,
+      `Dispute resolved`,
+      `The dispute for order "${updatedDispute.order.title || dispute.orderId}" has been resolved. Resolution: ${resolutionMessage}.`,
+      `/disputes/${disputeId}`,
+      {
+        disputeId,
+        orderId: dispute.orderId,
+        resolutionType: dto.resolutionType,
+      },
+    );
+
+    // 6. Audit log
     await this.auditService.log({
       action: AuditAction.DISPUTE_RESOLVED,
       entity: AuditEntity.DISPUTE,

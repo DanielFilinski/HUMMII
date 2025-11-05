@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #dc3545;">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #dc3545; margin: 0;">Hummii</h1>
+    </div>
+    
+    <h2 style="color: #dc3545; margin-top: 0;">⚠️ {{title}}</h2>
+    
+    <p style="color: #666; line-height: 1.6; font-weight: bold;">{{body}}</p>
+    
+    <div style="background: #fff3cd; padding: 15px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #ffc107;">
+      <p style="margin: 0; color: #856404; font-size: 14px;">
+        <strong>Important:</strong> This is a security alert. If you did not perform this action, please contact us immediately.
+      </p>
+    </div>
+    
+    {{#if actionUrl}}
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{baseUrl}}{{actionUrl}}" style="display: inline-block; padding: 12px 24px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        Review Activity
+      </a>
+    </div>
+    {{/if}}
+    
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #dee2e6;">
+    
+    <p style="font-size: 12px; color: #6c757d; line-height: 1.6;">
+      If you have any concerns, please contact us immediately at <a href="mailto:{{supportEmail}}" style="color: #dc3545;">{{supportEmail}}</a>
+    </p>
+    
+    <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
+      © {{currentYear}} Hummii. All rights reserved.
+    </p>
+  </div>
+</body>
+</html>
+

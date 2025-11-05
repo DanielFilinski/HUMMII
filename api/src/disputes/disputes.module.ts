@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DisputesController, AdminDisputesController } from './disputes.controller';
 import { DisputesService } from './disputes.service';
 import { EvidenceService } from './services/evidence.service';
@@ -10,6 +10,7 @@ import { AuditModule } from '../shared/audit/audit.module';
 import { AdminModule } from '../admin/admin.module';
 import { UploadModule } from '../shared/upload/upload.module';
 import { ChatModule } from '../chat/chat.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ChatModule } from '../chat/chat.module';
     AdminModule,
     UploadModule,
     ChatModule, // For ContentModerationService (optional)
+    forwardRef(() => NotificationsModule),
   ],
   controllers: [DisputesController, AdminDisputesController],
   providers: [

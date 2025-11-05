@@ -20,6 +20,7 @@ import { ChatModule } from './chat/chat.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { DisputesModule } from './disputes/disputes.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { validate } from './config/env.validation';
 
 @Module({
@@ -76,6 +77,7 @@ import { validate } from './config/env.validation';
     ReviewsModule, // Reviews and ratings system (Phase 5)
     SubscriptionsModule, // Subscription management (Phase 6)
     DisputesModule, // Dispute resolution system (Phase 7)
+    NotificationsModule, // Notifications system (Phase 8)
   ],
   controllers: [AppController],
   providers: [

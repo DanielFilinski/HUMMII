@@ -21,6 +21,9 @@ import {
 import { OrderWithDistance } from './interfaces/order-with-distance.interface';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { forwardRef, Inject, Optional } from '@nestjs/common';
+import { NotificationType, NotificationPriority } from '@prisma/client';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -28,7 +31,50 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     @InjectQueue('notifications') private readonly notificationQueue: Queue,
+    @Optional() @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationsService?: NotificationsService,
   ) {}
+
+  private async sendNotification(
+    userId: string,
+    type: NotificationType,
+    title: string,
+    body: string,
+    actionUrl?: string,
+    metadata?: Record<string, any>,
+  ) {
+    try {
+      // Use NotificationsService if available
+      if (this.notificationsService) {
+        await this.notificationsService.create(userId, type, {
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      } else {
+        // Fallback to queue if service not available
+        await this.notificationQueue.add('order-status-changed', {
+          userId,
+          type,
+          title,
+          body,
+          actionUrl,
+          metadata,
+        });
+      }
+    } catch (error) {
+      // Fallback to queue on error
+      await this.notificationQueue.add('order-status-changed', {
+        userId,
+        type,
+        title,
+        body,
+        actionUrl,
+        metadata,
+      });
+    }
+  }
 
   /**
    * Create new order (draft status by default)
@@ -255,14 +301,46 @@ export class OrdersService {
       },
     });
 
-    // Queue notification job
-    await this.notificationQueue.add('order-status-changed', {
-      orderId: order.id,
-      oldStatus: order.status,
-      newStatus,
-      clientId: order.clientId,
-      contractorId: order.contractorId,
-    });
+    // Send notifications to client and contractor
+    const statusMessages: Record<OrderStatus, string> = {
+      [OrderStatus.DRAFT]: 'draft',
+      [OrderStatus.PUBLISHED]: 'published',
+      [OrderStatus.IN_PROGRESS]: 'in progress',
+      [OrderStatus.PENDING_REVIEW]: 'pending review',
+      [OrderStatus.COMPLETED]: 'completed',
+      [OrderStatus.CANCELLED]: 'cancelled',
+      [OrderStatus.DISPUTED]: 'disputed',
+    };
+
+    // Notify client
+    await this.sendNotification(
+      order.clientId,
+      NotificationType.ORDER_STATUS_CHANGED,
+      `Order #${order.id.substring(0, 8)} status updated`,
+      `Your order "${order.title}" status has been updated to ${statusMessages[newStatus]}.`,
+      `/orders/${order.id}`,
+      {
+        orderId: order.id,
+        oldStatus: order.status,
+        newStatus,
+      },
+    );
+
+    // Notify contractor if assigned
+    if (order.contractorId) {
+      await this.sendNotification(
+        order.contractorId,
+        NotificationType.ORDER_STATUS_CHANGED,
+        `Order #${order.id.substring(0, 8)} status updated`,
+        `Order "${order.title}" status has been updated to ${statusMessages[newStatus]}.`,
+        `/orders/${order.id}`,
+        {
+          orderId: order.id,
+          oldStatus: order.status,
+          newStatus,
+        },
+      );
+    }
 
     // Audit log
     await this.auditService.log({

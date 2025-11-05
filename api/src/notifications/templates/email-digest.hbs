@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Summary - {{count}} notifications</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5;">
+  <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="text-align: center; margin-bottom: 30px;">
+      <h1 style="color: #007bff; margin: 0;">Hummii</h1>
+    </div>
+    
+    <h2 style="color: #333; margin-top: 0;">Daily Summary</h2>
+    
+    <p style="color: #666; line-height: 1.6;">Hi {{userName}},</p>
+    
+    <p style="color: #666; line-height: 1.6;">You have <strong>{{count}}</strong> {{#if (eq count 1)}}notification{{else}}notifications{{/if}} from the last 24 hours:</p>
+    
+    <div style="margin: 20px 0;">
+      {{#each notifications}}
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #007bff;">
+        <h3 style="margin: 0 0 5px 0; color: #333; font-size: 16px;">{{this.title}}</h3>
+        <p style="margin: 0; color: #666; font-size: 14px;">{{this.body}}</p>
+        <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">{{formatDate this.createdAt}}</p>
+        {{#if this.actionUrl}}
+        <a href="{{../baseUrl}}{{this.actionUrl}}" style="color: #007bff; text-decoration: none; font-size: 12px;">View Details →</a>
+        {{/if}}
+      </div>
+      {{/each}}
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{baseUrl}}/notifications" style="display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+        View All Notifications
+      </a>
+    </div>
+    
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #dee2e6;">
+    
+    <p style="font-size: 12px; color: #6c757d; line-height: 1.6;">
+      <a href="{{unsubscribeUrl}}" style="color: #6c757d;">Unsubscribe</a> from daily digest emails (you will still receive important notifications)
+    </p>
+    
+    <p style="font-size: 11px; color: #999; margin-top: 20px; text-align: center;">
+      © {{currentYear}} Hummii. All rights reserved.
+    </p>
+  </div>
+</body>
+</html>
+

@@ -146,6 +146,39 @@ enum EvidenceType {
   OTHER
 }
 
+enum NotificationType {
+  ORDER_STATUS_CHANGED
+  NEW_PROPOSAL
+  PROPOSAL_ACCEPTED
+  PROPOSAL_REJECTED
+  MESSAGE_RECEIVED
+  PAYMENT_RECEIVED
+  REVIEW_SUBMITTED
+  REVIEW_RESPONSE
+  DISPUTE_OPENED
+  DISPUTE_STATUS_CHANGED
+  DISPUTE_RESOLVED
+  VERIFICATION_STATUS
+  SECURITY_ALERT
+  SYSTEM_ANNOUNCEMENT
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_UPDATED
+  SUBSCRIPTION_CANCELED
+  PAYMENT_FAILED
+}
+
+enum NotificationPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
 // ============================================================================
 // USER MODELS
 // ============================================================================
@@ -197,7 +230,8 @@ model User {
   reviewsModerated  Review[]          @relation("ReviewsModerated")
   reportsGiven      ReviewReport[]    @relation("ReportsGiven")
   reportsReviewed   ReviewReport[]    @relation("ReportsReviewed")
-  notifications     Notification[]
+  notifications            Notification[]
+  notificationPreferences   NotificationPreferences?
   sessions          Session[]
   auditLogs         AuditLog[]        @relation("AuditLogs")
   ratingStats       UserRatingStats?
@@ -756,25 +790,82 @@ model DisputeMessage {
 // ============================================================================
 
 model Notification {
-  id String @id @default(uuid())
+  id          String             @id @default(uuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  priority    NotificationPriority @default(MEDIUM)
+  title       String             @db.VarChar(255)
+  body        String             @db.Text
+  actionUrl   String?            @db.VarChar(500) // Deep link for mobile
+  metadata    Json?              // Additional data
+  isRead      Boolean            @default(false)
+  readAt      DateTime?
+  channels    NotificationChannel[] // Channels through which notification was sent
+  sentAt      DateTime?          // When notification was sent
+  createdAt   DateTime           @default(now())
+  expiresAt   DateTime?         // For time-sensitive notifications
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  type    String // ORDER_UPDATE, NEW_PROPOSAL, MESSAGE, PAYMENT, REVIEW, etc.
-  title   String
-  message String @db.Text
-
-  // Data
-  relatedEntityId   String? // Order ID, Message ID, etc.
-  relatedEntityType String? // order, message, review, etc.
-
-  isRead Boolean   @default(false)
-  readAt DateTime?
-
-  createdAt DateTime @default(now())
-
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
   @@map("notifications")
+}
+
+model NotificationPreferences {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email settings
+  emailEnabled           Boolean  @default(true)
+  emailOrderUpdates      Boolean  @default(true)
+  emailNewProposals      Boolean  @default(true)
+  emailMessages          Boolean  @default(true)
+  emailPayments          Boolean  @default(true)
+  emailReviews           Boolean  @default(true)
+  emailDisputes          Boolean  @default(true)
+  emailSecurity          Boolean  @default(true) // Always true - cannot be disabled
+  emailMarketing         Boolean  @default(false)
+  emailDigest            Boolean  @default(true) // Daily digest
+  emailDigestTime        String   @default("09:00") // Time in HH:mm format
+
+  // Push settings
+  pushEnabled            Boolean  @default(true)
+  pushOrderUpdates       Boolean  @default(true)
+  pushNewProposals       Boolean  @default(true)
+  pushMessages           Boolean  @default(true)
+  pushPayments           Boolean  @default(true)
+  pushReviews            Boolean  @default(true)
+  pushDisputes           Boolean  @default(true)
+  pushSecurity           Boolean  @default(true) // Always true
+
+  // In-app settings
+  inAppEnabled           Boolean  @default(true)
+  inAppSound             Boolean  @default(true)
+  inAppVibration         Boolean  @default(true)
+
+  updatedAt              DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+model EmailLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  email       String   @db.VarChar(255)
+  subject     String   @db.VarChar(500)
+  template    String   @db.VarChar(100)
+  status      String   @db.VarChar(50) // sent, failed, bounced
+  provider    String   @default("onesignal") // onesignal, sendgrid, etc.
+  providerId  String?  @db.VarChar(255) // External provider message ID
+  error       String?  @db.Text
+  sentAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([email])
+  @@index([sentAt])
+  @@map("email_logs")
 }
 
 // ============================================================================
