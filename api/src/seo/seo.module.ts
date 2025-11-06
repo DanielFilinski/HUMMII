@@ -14,7 +14,6 @@ import { CategoriesModule } from '../categories/categories.module';
 import { ReviewsModule } from '../reviews/reviews.module';
 import { SitemapController } from './controllers/sitemap.controller';
 import { RedirectMiddleware } from './middleware/redirect.middleware';
-import { SeoAdminController } from './seo.controller';
 
 @Module({
   imports: [
@@ -24,7 +23,7 @@ import { SeoAdminController } from './seo.controller';
     CategoriesModule,
     ReviewsModule,
   ],
-  controllers: [SeoController, SeoAdminController, SitemapController],
+  controllers: [SeoController, SitemapController],
   providers: [
     SlugService,
     MetadataService,

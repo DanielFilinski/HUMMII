@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { DisputesController, AdminDisputesController } from './disputes.controller';
+import { DisputesController } from './disputes.controller';
 import { DisputesService } from './disputes.service';
 import { EvidenceService } from './services/evidence.service';
 import { DisputeMessagesService } from './services/dispute-messages.service';
@@ -16,12 +16,12 @@ import { NotificationsModule } from '../notifications/notifications.module';
   imports: [
     PrismaModule,
     AuditModule,
-    AdminModule,
+    forwardRef(() => AdminModule),
     UploadModule,
     ChatModule, // For ContentModerationService (optional)
     forwardRef(() => NotificationsModule),
   ],
-  controllers: [DisputesController, AdminDisputesController],
+  controllers: [DisputesController],
   providers: [
     DisputesService,
     EvidenceService,

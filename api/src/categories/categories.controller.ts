@@ -210,24 +210,3 @@ export class CategoriesController {
   }
 }
 
-@ApiTags('Admin - Categories')
-@Controller('admin/categories')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
-@ApiBearerAuth()
-export class AdminCategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
-
-  @Get('analytics')
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 req/min
-  @ApiOperation({
-    summary: 'Get category analytics (admin only)',
-    description: 'Get comprehensive category analytics including usage statistics.',
-  })
-  @ApiResponse({ status: 200, description: 'Category analytics retrieved' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin only' })
-  async getAnalytics() {
-    return this.categoriesService.getCategoryAnalytics();
-  }
-}
-

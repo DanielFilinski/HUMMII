@@ -24,6 +24,14 @@ import { NotificationType, NotificationPriority, NotificationChannel } from '@pr
 import { UpdateSettingsDto, BulkUpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateFeatureFlagDto, UpdateFeatureFlagDto } from './dto/feature-flags.dto';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { DisputesService } from '../disputes/disputes.service';
+import { ResolutionService } from '../disputes/services/resolution.service';
+import { DisputeQueryDto } from '../disputes/dto/dispute-query.dto';
+import { ResolveDisputeDto } from '../disputes/dto/resolve-dispute.dto';
+import { UpdateDisputeStatusDto } from '../disputes/dto/update-dispute-status.dto';
+import { CategoriesService } from '../categories/categories.service';
+import { SitemapService } from '../seo/services/sitemap.service';
+import { IsrService } from '../seo/services/isr.service';
 
 @Injectable()
 export class AdminService {
@@ -37,6 +45,11 @@ export class AdminService {
     private readonly reviewsService: ReviewsService,
     private readonly moderationService: ModerationService,
     private readonly notificationsService: NotificationsService,
+    private readonly disputesService: DisputesService,
+    private readonly resolutionService: ResolutionService,
+    private readonly categoriesService: CategoriesService,
+    private readonly sitemapService: SitemapService,
+    private readonly isrService: IsrService,
   ) {}
 
   // ==================== USER MANAGEMENT ====================
@@ -3006,5 +3019,162 @@ export class AdminService {
     }
 
     return setting.value.toLowerCase() === 'true';
+  }
+
+  // ==================== DISPUTE MANAGEMENT ====================
+
+  /**
+   * Get disputes queue (admin view with filtering and pagination)
+   */
+  async getDisputesQueue(query: DisputeQueryDto) {
+    const { page = 1, limit = 20, status, priority } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (priority) {
+      where.priority = priority;
+    }
+
+    const [disputes, total] = await Promise.all([
+      this.prisma.dispute.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [
+          { priority: 'desc' },
+          { createdAt: 'asc' },
+        ],
+        include: {
+          order: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+            },
+          },
+          initiatedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          respondent: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              evidence: true,
+              messages: true,
+            },
+          },
+        },
+      }),
+      this.prisma.dispute.count({ where }),
+    ]);
+
+    return {
+      disputes,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get dispute details (admin view with full access)
+   */
+  async getDisputeById(disputeId: string) {
+    return this.disputesService.getDisputeById(disputeId, '', UserRole.ADMIN);
+  }
+
+  /**
+   * Resolve dispute (admin only)
+   */
+  async resolveDispute(disputeId: string, dto: ResolveDisputeDto, adminId: string) {
+    return this.resolutionService.resolveDispute(disputeId, dto, adminId);
+  }
+
+  /**
+   * Update dispute status (admin override)
+   */
+  async updateDisputeStatus(disputeId: string, dto: UpdateDisputeStatusDto, adminId: string) {
+    return this.disputesService.updateStatus(disputeId, dto, adminId);
+  }
+
+  /**
+   * Get dispute statistics
+   */
+  async getDisputeStats() {
+    const [total, byStatus, byPriority] = await Promise.all([
+      this.prisma.dispute.count(),
+      this.prisma.dispute.groupBy({
+        by: ['status'],
+        _count: true,
+      }),
+      this.prisma.dispute.groupBy({
+        by: ['priority'],
+        _count: true,
+      }),
+    ]);
+
+    return {
+      total,
+      byStatus: byStatus.reduce((acc, item) => {
+        acc[item.status] = item._count;
+        return acc;
+      }, {} as Record<string, number>),
+      byPriority: byPriority.reduce((acc, item) => {
+        acc[item.priority] = item._count;
+        return acc;
+      }, {} as Record<string, number>),
+    };
+  }
+
+  // ==================== CATEGORY MANAGEMENT ====================
+
+  /**
+   * Get category analytics (admin only)
+   */
+  async getCategoryAnalytics() {
+    return this.categoriesService.getCategoryAnalytics();
+  }
+
+  // ==================== SEO MANAGEMENT ====================
+
+  /**
+   * Refresh sitemap cache (admin only)
+   */
+  async refreshSitemap() {
+    await this.sitemapService.invalidateCache();
+    return { message: 'Sitemap cache invalidated. Will be regenerated on next request.' };
+  }
+
+  /**
+   * Revalidate contractor cache (admin only)
+   */
+  async revalidateContractor(contractorId: string) {
+    await this.isrService.revalidateContractor(contractorId);
+    return { message: 'Contractor cache revalidated successfully' };
+  }
+
+  /**
+   * Warm cache for popular profiles (admin only)
+   */
+  async warmCache() {
+    await this.isrService.warmCache(100);
+    return { message: 'Cache warmed for top 100 contractors' };
   }
 }

@@ -43,7 +43,11 @@ import { SendBulkNotificationDto } from './dto/send-bulk-notification.dto';
 import { NotificationStatsQueryDto } from './dto/notification-stats.dto';
 import { UpdateSettingsDto, BulkUpdateSettingsDto } from './dto/update-settings.dto';
 import { CreateFeatureFlagDto, UpdateFeatureFlagDto } from './dto/feature-flags.dto';
+import { DisputeQueryDto } from '../disputes/dto/dispute-query.dto';
+import { ResolveDisputeDto } from '../disputes/dto/resolve-dispute.dto';
+import { UpdateDisputeStatusDto } from '../disputes/dto/update-dispute-status.dto';
 import { Throttle } from '@nestjs/throttler';
+import { ParseUUIDPipe } from '@nestjs/common';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -802,5 +806,135 @@ export class AdminController {
     @CurrentUser() admin: any,
   ) {
     return this.adminService.deleteFeatureFlag(name, admin.userId);
+  }
+
+  // ==================== DISPUTE MANAGEMENT ====================
+
+  @Get('disputes')
+  @Throttle({ default: { limit: 60, ttl: 60000 } }) // 60 req/min
+  @ApiOperation({
+    summary: 'Get disputes queue (Admin only)',
+    description: 'Get all disputes for admin review with filtering and pagination.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disputes queue retrieved successfully',
+  })
+  async getDisputesQueue(@Query() query: DisputeQueryDto) {
+    return this.adminService.getDisputesQueue(query);
+  }
+
+  @Get('disputes/:id')
+  @Throttle({ default: { limit: 60, ttl: 60000 } }) // 60 req/min
+  @ApiOperation({
+    summary: 'Get dispute details (Admin view)',
+    description: 'Get full dispute details with all evidence and messages (including internal).',
+  })
+  @ApiParam({ name: 'id', description: 'Dispute UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dispute retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Dispute not found' })
+  async getDisputeById(@Param('id', ParseUUIDPipe) disputeId: string) {
+    return this.adminService.getDisputeById(disputeId);
+  }
+
+  @Post('disputes/:id/resolve')
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 req/min
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Resolve dispute (Admin only)',
+    description: 'Resolve dispute with resolution action (block user, suspend account, close order, warn user, no action).',
+  })
+  @ApiParam({ name: 'id', description: 'Dispute UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dispute resolved successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid resolution or dispute status' })
+  @ApiResponse({ status: 404, description: 'Dispute not found' })
+  async resolveDispute(
+    @CurrentUser() admin: any,
+    @Param('id', ParseUUIDPipe) disputeId: string,
+    @Body() dto: ResolveDisputeDto,
+  ) {
+    return this.adminService.resolveDispute(disputeId, dto, admin.userId);
+  }
+
+  @Patch('disputes/:id/status')
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 req/min
+  @ApiOperation({
+    summary: 'Update dispute status (Admin only)',
+    description: 'Update dispute status and priority. Admin can move to any valid status.',
+  })
+  @ApiParam({ name: 'id', description: 'Dispute UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dispute status updated successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid status transition' })
+  @ApiResponse({ status: 404, description: 'Dispute not found' })
+  async updateDisputeStatus(
+    @CurrentUser() admin: any,
+    @Param('id', ParseUUIDPipe) disputeId: string,
+    @Body() dto: UpdateDisputeStatusDto,
+  ) {
+    return this.adminService.updateDisputeStatus(disputeId, dto, admin.userId);
+  }
+
+  @Get('disputes/stats')
+  @Throttle({ default: { limit: 60, ttl: 60000 } }) // 60 req/min
+  @ApiOperation({
+    summary: 'Get dispute statistics (Admin only)',
+    description: 'Get dispute statistics for admin dashboard.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistics retrieved successfully',
+  })
+  async getDisputeStats() {
+    return this.adminService.getDisputeStats();
+  }
+
+  // ==================== CATEGORY MANAGEMENT ====================
+
+  @Get('categories/analytics')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 req/min
+  @ApiOperation({
+    summary: 'Get category analytics (Admin only)',
+    description: 'Get comprehensive category analytics including usage statistics.',
+  })
+  @ApiResponse({ status: 200, description: 'Category analytics retrieved successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - admin only' })
+  async getCategoryAnalytics() {
+    return this.adminService.getCategoryAnalytics();
+  }
+
+  // ==================== SEO MANAGEMENT ====================
+
+  @Post('seo/refresh-sitemap')
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 req/min
+  @ApiOperation({ summary: 'Force refresh sitemap (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Sitemap refreshed successfully' })
+  async refreshSitemap() {
+    return this.adminService.refreshSitemap();
+  }
+
+  @Post('seo/revalidate/:contractorId')
+  @Throttle({ default: { limit: 20, ttl: 60000 } }) // 20 req/min
+  @ApiOperation({ summary: 'Force revalidation for contractor (Admin only)' })
+  @ApiParam({ name: 'contractorId', description: 'Contractor ID' })
+  @ApiResponse({ status: 200, description: 'Cache revalidated successfully' })
+  async revalidateContractor(@Param('contractorId') contractorId: string) {
+    return this.adminService.revalidateContractor(contractorId);
+  }
+
+  @Post('seo/warm-cache')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 req/min
+  @ApiOperation({ summary: 'Warm cache for popular profiles (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Cache warmed successfully' })
+  async warmCache() {
+    return this.adminService.warmCache();
   }
 }

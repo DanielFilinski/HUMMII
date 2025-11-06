@@ -27,8 +27,6 @@ import { MetadataService } from './services/metadata.service';
 import { RedirectService } from './services/redirect.service';
 import { OpengraphService } from './services/opengraph.service';
 import { StructuredDataService } from './services/structured-data.service';
-import { SitemapService } from './services/sitemap.service';
-import { IsrService } from './services/isr.service';
 import { GenerateSlugDto } from './dto/generate-slug.dto';
 import { UpdateSlugDto } from './dto/update-slug.dto';
 import { MetadataDto } from './dto/metadata.dto';
@@ -122,43 +120,6 @@ export class SeoController {
   @ApiResponse({ status: 200, description: 'Redirect history' })
   async getRedirects(@CurrentUser() user: { id: string }) {
     return this.redirectService.getRedirectsForContractor(user.id);
-  }
-}
-
-@ApiTags('SEO Admin')
-@Controller('v1/admin/seo')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
-@ApiBearerAuth()
-export class SeoAdminController {
-  constructor(
-    private readonly sitemapService: SitemapService,
-    private readonly isrService: IsrService,
-  ) {}
-
-  @Post('refresh-sitemap')
-  @ApiOperation({ summary: 'Force refresh sitemap (admin only)' })
-  @ApiResponse({ status: 200, description: 'Sitemap refreshed successfully' })
-  async refreshSitemap() {
-    await this.sitemapService.invalidateCache();
-    return { message: 'Sitemap cache invalidated. Will be regenerated on next request.' };
-  }
-
-  @Post('revalidate/:contractorId')
-  @ApiOperation({ summary: 'Force revalidation for contractor (admin only)' })
-  @ApiParam({ name: 'contractorId', description: 'Contractor ID' })
-  @ApiResponse({ status: 200, description: 'Cache revalidated successfully' })
-  async revalidateContractor(@Param('contractorId') contractorId: string) {
-    await this.isrService.revalidateContractor(contractorId);
-    return { message: 'Contractor cache revalidated successfully' };
-  }
-
-  @Post('warm-cache')
-  @ApiOperation({ summary: 'Warm cache for popular profiles (admin only)' })
-  @ApiResponse({ status: 200, description: 'Cache warmed successfully' })
-  async warmCache() {
-    await this.isrService.warmCache(100);
-    return { message: 'Cache warmed for top 100 contractors' };
   }
 }
 

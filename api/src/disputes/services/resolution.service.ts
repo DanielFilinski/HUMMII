@@ -36,6 +36,7 @@ export class ResolutionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    @Inject(forwardRef(() => AdminService))
     private readonly adminService: AdminService,
     @Optional() @Inject(forwardRef(() => NotificationsService))
     private readonly notificationsService?: NotificationsService,
