@@ -34,7 +34,7 @@ export class AuthService {
    * Register a new user
    */
   async register(registerDto: RegisterDto) {
-    const { email, password, name, phone } = registerDto;
+    const { email, password, name, phone, role } = registerDto;
 
     // Check if user exists
     const existingUser = await this.prisma.user.findUnique({
@@ -45,6 +45,11 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
+    // Validate role (only CLIENT or CONTRACTOR allowed for registration)
+    if (role && role !== UserRole.CLIENT && role !== UserRole.CONTRACTOR) {
+      throw new BadRequestException('Role must be either CLIENT or CONTRACTOR');
+    }
+
     // Hash password with bcrypt cost 12
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -53,6 +58,10 @@ export class AuthService {
     const verificationTokenExpiry = new Date();
     verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24); // 24 hours
 
+    // Determine user role (default to CLIENT if not specified)
+    const userRole = role || UserRole.CLIENT;
+    const roles = [userRole];
+
     // Create user
     const user = await this.prisma.user.create({
       data: {
@@ -60,11 +69,21 @@ export class AuthService {
         password: hashedPassword,
         name,
         phone,
+        roles,
         verificationToken,
         verificationTokenExpiry,
         isVerified: false,
       },
     });
+
+    // Create contractor profile if user registered as CONTRACTOR
+    if (userRole === UserRole.CONTRACTOR) {
+      await this.prisma.contractor.create({
+        data: {
+          userId: user.id,
+        },
+      });
+    }
 
     // Audit log: User registration
     await this.auditService.log({
@@ -76,6 +95,8 @@ export class AuthService {
         email: user.email,
         name: user.name,
         hasPhone: !!phone,
+        role: userRole,
+        roles: roles,
       },
     });
 

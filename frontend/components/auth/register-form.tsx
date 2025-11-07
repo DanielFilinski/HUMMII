@@ -39,6 +39,7 @@ export function RegisterForm() {
       email: '',
       password: '',
       phone: '',
+      role: 'CLIENT',
     },
   });
 
@@ -68,6 +69,7 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
         phone: data.phone || undefined,
+        role: data.role,
       });
 
       // Store email for verification page
@@ -107,6 +109,87 @@ export function RegisterForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Role Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            I am looking to <span className="text-red-500">*</span>
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <label
+              className={`
+                flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-colors
+                ${
+                  watch('role') === 'CLIENT'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }
+              `}
+            >
+              <input
+                type="radio"
+                value="CLIENT"
+                {...registerField('role')}
+                className="sr-only"
+              />
+              <div className="flex items-center gap-2 mb-1">
+                <div
+                  className={`w-4 h-4 rounded-full border-2 ${
+                    watch('role') === 'CLIENT'
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-300'
+                  }`}
+                >
+                  {watch('role') === 'CLIENT' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50" />
+                  )}
+                </div>
+                <span className="font-medium text-gray-900">Need Services</span>
+              </div>
+              <p className="text-xs text-gray-500 ml-6">
+                Find and hire contractors
+              </p>
+            </label>
+
+            <label
+              className={`
+                flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-colors
+                ${
+                  watch('role') === 'CONTRACTOR'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }
+              `}
+            >
+              <input
+                type="radio"
+                value="CONTRACTOR"
+                {...registerField('role')}
+                className="sr-only"
+              />
+              <div className="flex items-center gap-2 mb-1">
+                <div
+                  className={`w-4 h-4 rounded-full border-2 ${
+                    watch('role') === 'CONTRACTOR'
+                      ? 'border-green-500 bg-green-500'
+                      : 'border-gray-300'
+                  }`}
+                >
+                  {watch('role') === 'CONTRACTOR' && (
+                    <div className="w-full h-full rounded-full bg-white scale-50" />
+                  )}
+                </div>
+                <span className="font-medium text-gray-900">Offer Services</span>
+              </div>
+              <p className="text-xs text-gray-500 ml-6">
+                Provide services to clients
+              </p>
+            </label>
+          </div>
+          {errors.role && (
+            <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
+          )}
+        </div>
+
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

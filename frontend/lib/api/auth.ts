@@ -11,6 +11,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   phone?: string;
+  role?: 'CLIENT' | 'CONTRACTOR';
 }
 
 export interface RegisterResponse {

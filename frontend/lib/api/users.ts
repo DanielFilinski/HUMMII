@@ -32,3 +32,15 @@ export async function getCurrentUser(): Promise<{
   return apiClient.get('/users/me');
 }
 
+/**
+ * Switch user role (add CLIENT or CONTRACTOR role)
+ * POST /users/me/switch-role
+ */
+export async function switchUserRole(
+  role: 'CLIENT' | 'CONTRACTOR'
+): Promise<{ message: string; roles: string[] }> {
+  return apiClient.post<{ message: string; roles: string[] }>('/users/me/switch-role', {
+    role,
+  });
+}
+

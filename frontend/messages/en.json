@@ -13,6 +13,11 @@
     "register": {
       "title": "Create Account",
       "subtitle": "Join Hummii to find trusted service providers",
+      "roleLabel": "I am looking to",
+      "roleClient": "Need Services",
+      "roleClientDescription": "Find and hire contractors",
+      "roleContractor": "Offer Services",
+      "roleContractorDescription": "Provide services to clients",
       "nameLabel": "Full Name",
       "emailLabel": "Email Address",
       "passwordLabel": "Password",
@@ -23,6 +28,19 @@
       "alreadyHaveAccount": "Already have an account?",
       "signIn": "Sign In",
       "terms": "By signing up, you agree to our Terms of Service and Privacy Policy"
+    },
+    "roles": {
+      "switchToClient": "Switch to Client",
+      "switchToContractor": "Switch to Contractor",
+      "switchTo": "Switch to",
+      "clientMode": "Client Mode",
+      "contractorMode": "Contractor Mode",
+      "adminMode": "Admin Mode",
+      "clientDescription": "Create orders, hire contractors",
+      "contractorDescription": "Respond to orders, offer services",
+      "adminDescription": "Platform management",
+      "switchMode": "Switch Mode",
+      "active": "Active"
     },
     "verifyEmailSent": {
       "title": "Check your email",

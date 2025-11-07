@@ -9,6 +9,60 @@
     "notFoundDescription": "Impossible de trouver la ressource demandée",
     "returnHome": "Retour à l'accueil"
   },
+  "auth": {
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Hummii pour trouver des prestataires de services de confiance",
+      "roleLabel": "Je cherche à",
+      "roleClient": "Besoin de services",
+      "roleClientDescription": "Trouver et embaucher des entrepreneurs",
+      "roleContractor": "Offrir des services",
+      "roleContractorDescription": "Fournir des services aux clients",
+      "nameLabel": "Nom complet",
+      "emailLabel": "Adresse e-mail",
+      "passwordLabel": "Mot de passe",
+      "phoneLabel": "Numéro de téléphone",
+      "phoneOptional": "(Optionnel)",
+      "submit": "S'inscrire",
+      "submitting": "Création du compte...",
+      "alreadyHaveAccount": "Vous avez déjà un compte?",
+      "signIn": "Se connecter",
+      "terms": "En vous inscrivant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité"
+    },
+    "roles": {
+      "switchToClient": "Passer en mode Client",
+      "switchToContractor": "Passer en mode Entrepreneur",
+      "switchTo": "Passer à",
+      "clientMode": "Mode Client",
+      "contractorMode": "Mode Entrepreneur",
+      "adminMode": "Mode Admin",
+      "clientDescription": "Créer des commandes, embaucher des entrepreneurs",
+      "contractorDescription": "Répondre aux commandes, offrir des services",
+      "adminDescription": "Gestion de la plateforme",
+      "switchMode": "Changer de mode",
+      "active": "Actif"
+    },
+    "verifyEmailSent": {
+      "title": "Vérifiez votre e-mail",
+      "subtitle": "Nous avons envoyé un lien de vérification à:",
+      "instructions": "Cliquez sur le lien dans l'e-mail pour vérifier votre compte.",
+      "expiry": "Le lien expirera dans 24 heures.",
+      "openEmail": "Ouvrir l'application e-mail",
+      "resend": "Vous n'avez pas reçu l'e-mail? Renvoyer",
+      "wrongEmail": "Mauvais e-mail? Retour"
+    },
+    "verifyEmail": {
+      "loading": "Vérification de votre e-mail...",
+      "loadingMessage": "Veuillez patienter pendant que nous vérifions votre adresse e-mail.",
+      "success": "E-mail vérifié!",
+      "successMessage": "Votre compte a été vérifié avec succès. Vous pouvez maintenant vous connecter à votre compte.",
+      "redirecting": "Redirection vers la connexion dans 3 secondes...",
+      "error": "Lien de vérification invalide",
+      "errorMessage": "Ce lien de vérification est invalide ou a expiré. Le lien expire 24 heures après l'inscription.",
+      "resend": "Renvoyer l'e-mail de vérification",
+      "backHome": "Retour à l'accueil"
+    }
+  },
   "cookieConsent": {
     "title": "Préférences des Cookies",
     "description": "Nous utilisons des cookies pour améliorer votre expérience sur notre plateforme. Vous pouvez personnaliser vos préférences ci-dessous.",

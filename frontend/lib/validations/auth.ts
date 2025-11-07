@@ -26,6 +26,12 @@ export const registerSchema = z.object({
     .regex(/^\+1\d{10}$/, 'Phone must be a valid Canadian number (+1XXXXXXXXXX)')
     .optional()
     .or(z.literal('')),
+  role: z
+    .enum(['CLIENT', 'CONTRACTOR'], {
+      errorMap: () => ({ message: 'Role must be either CLIENT or CONTRACTOR' }),
+    })
+    .optional()
+    .default('CLIENT'),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
