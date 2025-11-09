@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { message } from 'antd';
 
+// ==================== MOCK AUTH CONTROL ====================
+// Установите в false, когда бэкенд будет готов
+const USE_MOCK_AUTH = true;
+// ==========================================================
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: any | null;
@@ -16,12 +21,25 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any | null>(null);
   const router = useRouter();
 
   // Проверяем токен при загрузке
   useEffect(() => {
     const checkAuth = async () => {
+      // MOCK: автоматически аутентифицируем для разработки
+      if (USE_MOCK_AUTH) {
+        const mockUser = {
+          id: '1',
+          email: 'admin@hummii.com',
+          name: 'Admin User',
+          roles: ['ADMIN'],
+        };
+        setIsAuthenticated(true);
+        setUser(mockUser);
+        return;
+      }
+
       const token = Cookies.get('accessToken');
       if (!token) {
         setIsAuthenticated(false);

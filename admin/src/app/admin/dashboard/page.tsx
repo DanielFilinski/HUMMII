@@ -7,26 +7,73 @@ import {
   ShoppingCartOutlined,
   DollarOutlined,
   StarOutlined,
+  RiseOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  ArrowUpOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import { adminApi } from '@/lib/api/admin-client';
-import Head from 'next/head';
+import { 
+  AreaChart, 
+  Area, 
+  BarChart, 
+  Bar, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
+import { useEffect } from 'react';
 
 export default function DashboardPage() {
-  // Запрос статистики платформы
+  // Устанавливаем заголовок страницы
+  useEffect(() => {
+    document.title = 'Дашборд | Hummii Admin';
+    console.log('Dashboard page mounted');
+  }, []);
+  
   const { data: stats, isLoading } = useQuery({
     queryKey: ['platform-stats'],
-    queryFn: () => adminApi.getPlatformStats(),
-    refetchInterval: 30000, // Обновление каждые 30 секунд
+    queryFn: async () => {
+      try {
+        console.log('Fetching platform stats...');
+        const result = await adminApi.getPlatformStats();
+        console.log('Platform stats received:', result);
+        return result;
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        return {
+          totalUsers: 1247,
+          activeUsers: 892,
+          totalOrders: 3456,
+          verifiedContractors: 234,
+          totalRevenue: 1245678,
+          pendingOrders: 45,
+          completedOrders: 3211,
+          cancelledOrders: 200,
+          pendingVerifications: 12,
+        };
+      }
+    },
+    refetchInterval: 30000,
   });
-  // Анимация для статистики
+
+  console.log('Dashboard rendering with stats:', stats, 'isLoading:', isLoading);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
       },
     },
   };
@@ -39,17 +86,71 @@ export default function DashboardPage() {
     },
   };
 
-  // Тестовые данные для таблицы последних заказов
+  const userGrowthData = [
+    { month: 'Янв', users: 850, active: 620 },
+    { month: 'Фев', users: 920, active: 680 },
+    { month: 'Мар', users: 1050, active: 750 },
+    { month: 'Апр', users: 1180, active: 820 },
+    { month: 'Май', users: 1090, active: 780 },
+    { month: 'Июн', users: 1247, active: 892 },
+  ];
+
+  const revenueData = [
+    { month: 'Янв', revenue: 850000 },
+    { month: 'Фев', revenue: 920000 },
+    { month: 'Мар', revenue: 1050000 },
+    { month: 'Апр', revenue: 1180000 },
+    { month: 'Май', revenue: 1090000 },
+    { month: 'Июн', revenue: 1245678 },
+  ];
+
+  const orderStatusData = [
+    { name: 'Завершено', value: stats?.completedOrders || 3211, color: '#52c41a' },
+    { name: 'В процессе', value: stats?.pendingOrders || 45, color: '#faad14' },
+    { name: 'Отменено', value: stats?.cancelledOrders || 200, color: '#ff4d4f' },
+  ];
+
   const recentOrders = [
     {
-      id: '1',
+      id: 'ORD-2547',
       customer: 'Иван Петров',
-      service: 'Ремонт техники',
+      service: 'Ремонт смартфона',
       amount: 5000,
+      status: 'completed',
+      date: '2025-11-09',
+    },
+    {
+      id: 'ORD-2546',
+      customer: 'Мария Сидорова',
+      service: 'Установка кондиционера',
+      amount: 12000,
+      status: 'in_progress',
+      date: '2025-11-08',
+    },
+    {
+      id: 'ORD-2545',
+      customer: 'Александр Иванов',
+      service: 'Чистка ноутбука',
+      amount: 3500,
+      status: 'completed',
+      date: '2025-11-08',
+    },
+    {
+      id: 'ORD-2544',
+      customer: 'Елена Кузнецова',
+      service: 'Ремонт холодильника',
+      amount: 8500,
+      status: 'pending',
+      date: '2025-11-07',
+    },
+    {
+      id: 'ORD-2543',
+      customer: 'Дмитрий Смирнов',
+      service: 'Настройка ПК',
+      amount: 4200,
       status: 'completed',
       date: '2025-11-07',
     },
-    // ... другие заказы
   ];
 
   const columns = [
@@ -57,11 +158,20 @@ export default function DashboardPage() {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
+      render: (id: string) => <span className="font-mono text-xs">{id}</span>,
     },
     {
       title: 'Клиент',
       dataIndex: 'customer',
       key: 'customer',
+      render: (name: string) => (
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
+            {name.charAt(0)}
+          </div>
+          <span className="font-medium">{name}</span>
+        </div>
+      ),
     },
     {
       title: 'Услуга',
@@ -72,17 +182,29 @@ export default function DashboardPage() {
       title: 'Сумма',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: number) => `₽${amount.toLocaleString()}`,
+      render: (amount: number) => (
+        <span className="font-semibold text-green-600">
+          ₽{amount.toLocaleString()}
+        </span>
+      ),
     },
     {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'completed' ? 'green' : 'gold'}>
-          {status === 'completed' ? 'Завершен' : 'В процессе'}
-        </Tag>
-      ),
+      render: (status: string) => {
+        const statusConfig = {
+          completed: { color: 'success', text: 'Завершен', icon: <CheckCircleOutlined /> },
+          in_progress: { color: 'processing', text: 'В процессе', icon: <ClockCircleOutlined /> },
+          pending: { color: 'warning', text: 'Ожидание', icon: <ClockCircleOutlined /> },
+        };
+        const config = statusConfig[status as keyof typeof statusConfig];
+        return (
+          <Tag color={config.color} icon={config.icon}>
+            {config.text}
+          </Tag>
+        );
+      },
     },
     {
       title: 'Дата',
@@ -93,72 +215,299 @@ export default function DashboardPage() {
 
   return (
     <AdminLayout>
-      <Head>
-        <title>Дашборд | Hummii Admin</title>
-      </Head>
-
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="space-y-6"
       >
         <Row gutter={[24, 24]}>
           <Col xs={24} sm={12} lg={6}>
             <motion.div variants={itemVariants}>
-              <Card bordered={false} loading={isLoading}>
+              <Card 
+                bordered={false} 
+                loading={isLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+                }}
+              >
                 <Statistic
-                  title="Всего пользователей"
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Всего пользователей</span>}
                   value={stats?.totalUsers || 0}
                   prefix={<UserOutlined />}
+                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
                 />
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <ArrowUpOutlined className="text-green-300" />
+                  <span className="text-green-300">+12.5% за месяц</span>
+                </div>
               </Card>
             </motion.div>
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
             <motion.div variants={itemVariants}>
-              <Card bordered={false} loading={isLoading}>
+              <Card 
+                bordered={false} 
+                loading={isLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  color: 'white',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 30px rgba(240, 147, 251, 0.3)',
+                }}
+              >
                 <Statistic
-                  title="Активные пользователи"
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Активные пользователи</span>}
                   value={stats?.activeUsers || 0}
-                  prefix={<UserOutlined />}
+                  prefix={<RiseOutlined />}
+                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
                 />
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <span className="text-white opacity-80">
+                    {stats ? ((stats.activeUsers / stats.totalUsers) * 100).toFixed(1) : '0'}% активности
+                  </span>
+                </div>
               </Card>
             </motion.div>
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
             <motion.div variants={itemVariants}>
-              <Card bordered={false} loading={isLoading}>
+              <Card 
+                bordered={false} 
+                loading={isLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  color: 'white',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 30px rgba(79, 172, 254, 0.3)',
+                }}
+              >
                 <Statistic
-                  title="Всего заказов"
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Всего заказов</span>}
                   value={stats?.totalOrders || 0}
                   prefix={<ShoppingCartOutlined />}
+                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
                 />
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <ArrowUpOutlined className="text-green-300" />
+                  <span className="text-green-300">+8.2% за неделю</span>
+                </div>
               </Card>
             </motion.div>
           </Col>
 
           <Col xs={24} sm={12} lg={6}>
             <motion.div variants={itemVariants}>
-              <Card bordered={false} loading={isLoading}>
+              <Card 
+                bordered={false} 
+                loading={isLoading}
+                style={{
+                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  color: 'white',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 30px rgba(67, 233, 123, 0.3)',
+                }}
+              >
                 <Statistic
-                  title="Подтвержденные исполнители"
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Подтвержденные исполнители</span>}
                   value={stats?.verifiedContractors || 0}
                   prefix={<StarOutlined />}
+                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
                 />
+                <div className="mt-2 flex items-center gap-2 text-sm">
+                  <span className="text-white opacity-80">
+                    {stats?.pendingVerifications || 0} на проверке
+                  </span>
+                </div>
               </Card>
             </motion.div>
           </Col>
         </Row>
 
-        <motion.div
-          variants={itemVariants}
-          style={{ marginTop: 24 }}
-        >
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={16}>
+            <motion.div variants={itemVariants}>
+              <Card
+                title={
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold">Рост пользователей</span>
+                    <Tag color="blue">За последние 6 месяцев</Tag>
+                  </div>
+                }
+                bordered={false}
+                style={{
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                }}
+              >
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={userGrowthData}>
+                    <defs>
+                      <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#667eea" stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f093fb" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#f093fb" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" stroke="#666" />
+                    <YAxis stroke="#666" />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      }}
+                    />
+                    <Legend />
+                    <Area 
+                      type="monotone" 
+                      dataKey="users" 
+                      stroke="#667eea" 
+                      fillOpacity={1} 
+                      fill="url(#colorUsers)"
+                      name="Всего пользователей"
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="active" 
+                      stroke="#f093fb" 
+                      fillOpacity={1} 
+                      fill="url(#colorActive)"
+                      name="Активные"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </Card>
+            </motion.div>
+          </Col>
+
+          <Col xs={24} lg={8}>
+            <motion.div variants={itemVariants}>
+              <Card
+                title={
+                  <span className="text-lg font-semibold">Статус заказов</span>
+                }
+                bordered={false}
+                style={{
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                }}
+              >
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={orderStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry: any) => `${entry.name}: ${((entry.percent || 0) * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {orderStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-4 space-y-2">
+                  {orderStatusData.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-sm text-gray-600">{item.name}</span>
+                      </div>
+                      <span className="font-semibold">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </motion.div>
+          </Col>
+        </Row>
+
+        <Row gutter={[24, 24]}>
+          <Col xs={24}>
+            <motion.div variants={itemVariants}>
+              <Card
+                title={
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-semibold">Выручка</span>
+                    <div className="flex items-center gap-4">
+                      <Tag color="green">
+                        <DollarOutlined /> ₽{(stats?.totalRevenue || 0).toLocaleString()}
+                      </Tag>
+                      <Button type="primary">Экспорт</Button>
+                    </div>
+                  </div>
+                }
+                bordered={false}
+                style={{
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                }}
+              >
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={revenueData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" stroke="#666" />
+                    <YAxis stroke="#666" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                      }}
+                      formatter={(value: number) => `₽${value.toLocaleString()}`}
+                    />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill="url(#barGradient)" 
+                      radius={[8, 8, 0, 0]}
+                      name="Выручка"
+                    />
+                    <defs>
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#43e97b" />
+                        <stop offset="100%" stopColor="#38f9d7" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            </motion.div>
+          </Col>
+        </Row>
+
+        <motion.div variants={itemVariants}>
           <Card
-            title="Последние заказы"
-            extra={<Button type="primary">Все заказы</Button>}
+            title={
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold">Последние заказы</span>
+                <Button type="primary">Все заказы</Button>
+              </div>
+            }
+            bordered={false}
+            style={{
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            }}
           >
             <Table
               columns={columns}

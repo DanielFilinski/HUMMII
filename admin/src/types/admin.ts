@@ -63,6 +63,9 @@ export interface PlatformStats {
   activeUsers: number;
   verifiedContractors: number;
   pendingVerifications: number;
+  pendingOrders?: number;
+  completedOrders?: number;
+  cancelledOrders?: number;
 }
 
 export interface ContractorVerification {
