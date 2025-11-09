@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Проверяем токен при загрузке
   useEffect(() => {
     const checkAuth = async () => {
-      const token = Cookies.get('admin_token');
+      const token = Cookies.get('accessToken');
       if (!token) {
         setIsAuthenticated(false);
         setUser(null);
@@ -30,10 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       try {
-        const response = await fetch('/api/admin/verify-token', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await fetch('/api/auth/profile', {
           credentials: 'include',
         });
 
@@ -45,7 +42,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           throw new Error('Token invalid');
         }
       } catch (error) {
-        Cookies.remove('admin_token');
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
         setIsAuthenticated(false);
         setUser(null);
         router.push('/admin/login');
@@ -57,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (credentials: { email: string; password: string; code?: string }) => {
     try {
-      const response = await fetch('/api/admin/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +65,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Authentication failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Authentication failed');
       }
 
       const data = await response.json();
@@ -78,19 +77,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.push('/admin/dashboard');
       message.success('Успешный вход в систему');
     } catch (error) {
-      message.error('Ошибка аутентификации');
+      message.error(error instanceof Error ? error.message : 'Ошибка аутентификации');
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await fetch('/api/admin/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
     } finally {
-      Cookies.remove('admin_token');
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
       setIsAuthenticated(false);
       setUser(null);
       router.push('/admin/login');

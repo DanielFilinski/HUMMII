@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/providers/AuthProvider';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Head from 'next/head';
@@ -23,11 +23,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      code: '',
+    },
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -71,10 +76,17 @@ export default function LoginPage() {
                 validateStatus={errors.email ? 'error' : ''}
                 help={errors.email?.message}
               >
-                <Input 
-                  {...register('email')}
-                  size="large"
-                  disabled={showTwoFactor}
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field }) => (
+                    <Input 
+                      {...field}
+                      size="large"
+                      disabled={showTwoFactor}
+                      placeholder="Введите email"
+                    />
+                  )}
                 />
               </Form.Item>
 
@@ -83,10 +95,17 @@ export default function LoginPage() {
                 validateStatus={errors.password ? 'error' : ''}
                 help={errors.password?.message}
               >
-                <Input.Password 
-                  {...register('password')}
-                  size="large"
-                  disabled={showTwoFactor}
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <Input.Password 
+                      {...field}
+                      size="large"
+                      disabled={showTwoFactor}
+                      placeholder="Введите пароль"
+                    />
+                  )}
                 />
               </Form.Item>
 
@@ -101,11 +120,17 @@ export default function LoginPage() {
                     validateStatus={errors.code ? 'error' : ''}
                     help={errors.code?.message}
                   >
-                    <Input 
-                      {...register('code')}
-                      size="large"
-                      maxLength={6}
-                      placeholder="Введите код из приложения"
+                    <Controller
+                      name="code"
+                      control={control}
+                      render={({ field }) => (
+                        <Input 
+                          {...field}
+                          size="large"
+                          maxLength={6}
+                          placeholder="Введите код из приложения"
+                        />
+                      )}
                     />
                   </Form.Item>
                 </motion.div>

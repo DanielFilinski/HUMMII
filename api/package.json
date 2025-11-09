@@ -30,7 +30,8 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "migration:generate": "prisma migrate dev --create-only",
     "migration:run": "prisma migrate deploy",
-    "export-swagger": "ts-node scripts/export-swagger.ts"
+    "export-swagger": "ts-node scripts/export-swagger.ts",
+    "create-admin": "ts-node scripts/create-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.922.0",
@@ -97,6 +98,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.2",
+    "dotenv": "^16.4.5",
     "jest": "^29.7.0",
     "prettier": "^3.1.1",
     "prisma": "^6.18.0",

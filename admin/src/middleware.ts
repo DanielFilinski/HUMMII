@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Получаем токен из куки
-  const token = request.cookies.get('admin_token');
+  // Получаем токен из куки (имя cookie: accessToken, как в API)
+  const token = request.cookies.get('accessToken');
   
   // Проверяем, является ли путь защищенным
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/admin') && 
@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'same-origin');
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
   );
 
   return response;
