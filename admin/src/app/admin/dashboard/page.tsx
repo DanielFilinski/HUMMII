@@ -158,18 +158,30 @@ export default function DashboardPage() {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      render: (id: string) => <span className="font-mono text-xs">{id}</span>,
+      width: 120,
+      render: (id: string) => <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#666' }}>{id}</span>,
     },
     {
       title: 'Клиент',
       dataIndex: 'customer',
       key: 'customer',
       render: (name: string) => (
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '600',
+          }}>
             {name.charAt(0)}
           </div>
-          <span className="font-medium">{name}</span>
+          <span style={{ fontWeight: '500' }}>{name}</span>
         </div>
       ),
     },
@@ -182,8 +194,9 @@ export default function DashboardPage() {
       title: 'Сумма',
       dataIndex: 'amount',
       key: 'amount',
+      width: 120,
       render: (amount: number) => (
-        <span className="font-semibold text-green-600">
+        <span style={{ fontWeight: '600', color: '#52c41a' }}>
           ₽{amount.toLocaleString()}
         </span>
       ),
@@ -219,9 +232,9 @@ export default function DashboardPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
       >
-        <Row gutter={[24, 24]}>
+        {/* Статистические карточки */}
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={12} lg={6}>
             <motion.div variants={itemVariants}>
               <Card 
@@ -230,19 +243,20 @@ export default function DashboardPage() {
                 style={{
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   color: 'white',
-                  borderRadius: '16px',
-                  boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)',
                 }}
+                bodyStyle={{ padding: '20px' }}
               >
                 <Statistic
-                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Всего пользователей</span>}
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Всего пользователей</span>}
                   value={stats?.totalUsers || 0}
                   prefix={<UserOutlined />}
-                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
+                  valueStyle={{ color: 'white', fontWeight: 'bold', fontSize: '28px' }}
                 />
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <ArrowUpOutlined className="text-green-300" />
-                  <span className="text-green-300">+12.5% за месяц</span>
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                  <ArrowUpOutlined style={{ color: '#a7f3d0' }} />
+                  <span style={{ color: '#a7f3d0' }}>+12.5% за месяц</span>
                 </div>
               </Card>
             </motion.div>
@@ -256,18 +270,19 @@ export default function DashboardPage() {
                 style={{
                   background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                   color: 'white',
-                  borderRadius: '16px',
-                  boxShadow: '0 10px 30px rgba(240, 147, 251, 0.3)',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(240, 147, 251, 0.25)',
                 }}
+                bodyStyle={{ padding: '20px' }}
               >
                 <Statistic
-                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Активные пользователи</span>}
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Активные пользователи</span>}
                   value={stats?.activeUsers || 0}
                   prefix={<RiseOutlined />}
-                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
+                  valueStyle={{ color: 'white', fontWeight: 'bold', fontSize: '28px' }}
                 />
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <span className="text-white opacity-80">
+                <div style={{ marginTop: '12px', fontSize: '13px' }}>
+                  <span style={{ color: 'white', opacity: 0.9 }}>
                     {stats ? ((stats.activeUsers / stats.totalUsers) * 100).toFixed(1) : '0'}% активности
                   </span>
                 </div>
@@ -283,19 +298,20 @@ export default function DashboardPage() {
                 style={{
                   background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                   color: 'white',
-                  borderRadius: '16px',
-                  boxShadow: '0 10px 30px rgba(79, 172, 254, 0.3)',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(79, 172, 254, 0.25)',
                 }}
+                bodyStyle={{ padding: '20px' }}
               >
                 <Statistic
-                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Всего заказов</span>}
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Всего заказов</span>}
                   value={stats?.totalOrders || 0}
                   prefix={<ShoppingCartOutlined />}
-                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
+                  valueStyle={{ color: 'white', fontWeight: 'bold', fontSize: '28px' }}
                 />
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <ArrowUpOutlined className="text-green-300" />
-                  <span className="text-green-300">+8.2% за неделю</span>
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                  <ArrowUpOutlined style={{ color: '#a7f3d0' }} />
+                  <span style={{ color: '#a7f3d0' }}>+8.2% за неделю</span>
                 </div>
               </Card>
             </motion.div>
@@ -309,18 +325,19 @@ export default function DashboardPage() {
                 style={{
                   background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
                   color: 'white',
-                  borderRadius: '16px',
-                  boxShadow: '0 10px 30px rgba(67, 233, 123, 0.3)',
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 12px rgba(67, 233, 123, 0.25)',
                 }}
+                bodyStyle={{ padding: '20px' }}
               >
                 <Statistic
-                  title={<span style={{ color: 'rgba(255,255,255,0.9)' }}>Подтвержденные исполнители</span>}
+                  title={<span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '14px' }}>Подтвержденные исполнители</span>}
                   value={stats?.verifiedContractors || 0}
                   prefix={<StarOutlined />}
-                  valueStyle={{ color: 'white', fontWeight: 'bold' }}
+                  valueStyle={{ color: 'white', fontWeight: 'bold', fontSize: '28px' }}
                 />
-                <div className="mt-2 flex items-center gap-2 text-sm">
-                  <span className="text-white opacity-80">
+                <div style={{ marginTop: '12px', fontSize: '13px' }}>
+                  <span style={{ color: 'white', opacity: 0.9 }}>
                     {stats?.pendingVerifications || 0} на проверке
                   </span>
                 </div>
@@ -329,20 +346,21 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
-        <Row gutter={[24, 24]}>
+        {/* Графики */}
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
           <Col xs={24} lg={16}>
             <motion.div variants={itemVariants}>
               <Card
                 title={
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">Рост пользователей</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '600' }}>Рост пользователей</span>
                     <Tag color="blue">За последние 6 месяцев</Tag>
                   </div>
                 }
                 bordered={false}
                 style={{
-                  borderRadius: '16px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
                 <ResponsiveContainer width="100%" height={300}>
@@ -395,12 +413,12 @@ export default function DashboardPage() {
             <motion.div variants={itemVariants}>
               <Card
                 title={
-                  <span className="text-lg font-semibold">Статус заказов</span>
+                  <span style={{ fontSize: '16px', fontWeight: '600' }}>Статус заказов</span>
                 }
                 bordered={false}
                 style={{
-                  borderRadius: '16px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
                 <ResponsiveContainer width="100%" height={300}>
@@ -422,17 +440,21 @@ export default function DashboardPage() {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="mt-4 space-y-2">
+                <div style={{ marginTop: '16px' }}>
                   {orderStatusData.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                    <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: item.color }}
+                          style={{ 
+                            width: '12px', 
+                            height: '12px', 
+                            borderRadius: '50%',
+                            backgroundColor: item.color 
+                          }}
                         />
-                        <span className="text-sm text-gray-600">{item.name}</span>
+                        <span style={{ fontSize: '14px', color: '#595959' }}>{item.name}</span>
                       </div>
-                      <span className="font-semibold">{item.value}</span>
+                      <span style={{ fontWeight: '600', fontSize: '14px' }}>{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -441,25 +463,26 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
-        <Row gutter={[24, 24]}>
+        {/* График выручки */}
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
           <Col xs={24}>
             <motion.div variants={itemVariants}>
               <Card
                 title={
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">Выручка</span>
-                    <div className="flex items-center gap-4">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '600' }}>Выручка</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                       <Tag color="green">
                         <DollarOutlined /> ₽{(stats?.totalRevenue || 0).toLocaleString()}
                       </Tag>
-                      <Button type="primary">Экспорт</Button>
+                      <Button type="primary" size="small">Экспорт</Button>
                     </div>
                   </div>
                 }
                 bordered={false}
                 style={{
-                  borderRadius: '16px',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                 }}
               >
                 <ResponsiveContainer width="100%" height={300}>
@@ -495,18 +518,19 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
+        {/* Таблица последних заказов */}
         <motion.div variants={itemVariants}>
           <Card
             title={
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">Последние заказы</span>
-                <Button type="primary">Все заказы</Button>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                <span style={{ fontSize: '16px', fontWeight: '600' }}>Последние заказы</span>
+                <Button type="primary" size="small">Все заказы</Button>
               </div>
             }
             bordered={false}
             style={{
-              borderRadius: '16px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             }}
           >
             <Table
@@ -514,6 +538,7 @@ export default function DashboardPage() {
               dataSource={recentOrders}
               rowKey="id"
               pagination={{ pageSize: 5 }}
+              scroll={{ x: 800 }}
             />
           </Card>
         </motion.div>
