@@ -13,7 +13,7 @@
     "@ant-design/nextjs-registry": "^1.0.1",
     "@hookform/resolvers": "^5.2.2",
     "@microlink/react-json-view": "^1.27.0",
-    "@refinedev/antd": "^5.43.0",
+    "@refinedev/antd": "^6.0.3",
     "@refinedev/core": "^4.54.0",
     "@refinedev/nextjs-router": "^6.2.0",
     "@refinedev/simple-rest": "^5.0.8",
