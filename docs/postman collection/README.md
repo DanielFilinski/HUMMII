@@ -7,12 +7,14 @@ Complete Postman collections for testing Hummii API endpoints.
 ### 🎯 Коллекции
 
 - **Hummii-API-with-Scenarios.postman_collection.json** ⭐ **РЕКОМЕНДУЕТСЯ** - Коллекция с 10 автоматизированными тестовыми сценариями
+- **Hummii-WebSocket.postman_collection.json** 🔌 **НОВОЕ** - WebSocket endpoints для real-time функционала
 - **Hummii-API.postman_collection.json** - Оригинальная коллекция со всеми 185+ endpoints
 - **Hummii-API-Environment.postman_environment.json** - Environment variables для локальной разработки
 
 ### 📚 Документация
 
 - **[POSTMAN_SCENARIOS_GUIDE.md](./POSTMAN_SCENARIOS_GUIDE.md)** - Подробное руководство по использованию тестовых сценариев
+- **[WEBSOCKET_TESTING_GUIDE.md](./WEBSOCKET_TESTING_GUIDE.md)** - Руководство по тестированию WebSocket
 
 ---
 
@@ -54,6 +56,67 @@ Complete Postman collections for testing Hummii API endpoints.
 ```
 
 **Полная документация:** [POSTMAN_SCENARIOS_GUIDE.md](./POSTMAN_SCENARIOS_GUIDE.md)
+
+---
+
+## 🔌 WebSocket Testing (НОВОЕ!)
+
+### ✨ WebSocket Endpoints
+
+Hummii API использует **Socket.IO** для real-time коммуникации:
+
+#### 💬 Chat WebSocket
+- **URL:** `ws://localhost:3000/chat`
+- **Функции:** 
+  - Мгновенные сообщения
+  - Typing indicators (печатает...)
+  - Read receipts (прочитано)
+  - Online presence
+  - Message editing
+
+#### 🔔 Notifications WebSocket
+- **URL:** `ws://localhost:3000/notifications`
+- **Функции:**
+  - Real-time уведомления
+  - Unread count tracking
+  - Mark as read
+  - Instant delivery (<200ms)
+
+### 🚀 Быстрый Старт WebSocket
+
+```
+1. Импортируйте Hummii-WebSocket.postman_collection.json
+2. Требуется Postman Desktop v10.18+ (WebSocket support)
+3. Получите JWT token через HTTP login
+4. Откройте WebSocket request
+5. URL: ws://localhost:3000/chat?token={{access_token}}
+6. Click "Connect"
+7. Отправляйте JSON события и получайте ответы!
+```
+
+### 📝 Пример WebSocket События
+
+```json
+{
+  "event": "send_message",
+  "data": {
+    "orderId": "order-uuid",
+    "content": "Hello!",
+    "type": "TEXT"
+  }
+}
+```
+
+### 🧪 Методы Тестирования WebSocket
+
+| Метод | Удобство | Автоматизация | Использование |
+|-------|----------|---------------|---------------|
+| **Postman Desktop** | ⭐⭐⭐⭐⭐ | ⭐⭐ | Ручное тестирование |
+| **Browser Console** | ⭐⭐⭐⭐ | ⭐ | Разработка |
+| **wscat CLI** | ⭐⭐ | ⭐⭐⭐ | Быстрые тесты |
+| **Jest Tests** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | CI/CD |
+
+**Полное руководство:** [WEBSOCKET_TESTING_GUIDE.md](./WEBSOCKET_TESTING_GUIDE.md)
 
 ---
 

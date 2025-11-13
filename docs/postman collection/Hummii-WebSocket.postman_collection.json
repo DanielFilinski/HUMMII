@@ -1,0 +1,473 @@
+{
+	"info": {
+		"_postman_id": "websocket-collection-uuid-12345",
+		"name": "Hummii WebSocket API",
+		"description": "WebSocket endpoints for real-time functionality in Hummii API.\n\n## 🔌 WebSocket Namespaces\n\n### /chat\nReal-time chat messaging with typing indicators and read receipts.\n\n### /notifications\nReal-time notifications delivery system.\n\n## 🔑 Authentication\n\nAll WebSocket connections require JWT authentication:\n- Pass token in connection query: `?token={{access_token}}`\n- Or in auth header during handshake\n\n## 📝 Usage Instructions\n\n### Postman Desktop (v10.18+)\n\n1. Open WebSocket request (not HTTP)\n2. Enter URL: `ws://localhost:3000/chat?token={{access_token}}`\n3. Click \"Connect\"\n4. Send JSON messages with event name and data\n\n### Message Format\n\n```json\n{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"uuid\",\n    \"content\": \"Hello!\",\n    \"type\": \"TEXT\"\n  }\n}\n```\n\n## 🧪 Testing Workflow\n\n1. Get JWT token from HTTP Auth endpoints\n2. Connect to WebSocket namespace\n3. Join rooms/subscribe\n4. Send events and listen for responses\n5. Verify real-time updates\n\n## 📚 Documentation\n\nSee: `WEBSOCKET_TESTING_GUIDE.md` for detailed instructions.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345"
+	},
+	"item": [
+		{
+			"name": "💬 Chat WebSocket",
+			"item": [
+				{
+					"name": "Connect to Chat",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat?token={{access_token}}",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"description": "JWT access token for authentication"
+								}
+							]
+						},
+						"description": "## Connect to Chat WebSocket\n\n### Authentication\n\nRequires valid JWT token in query parameter.\n\n### Expected Response\n\n```json\n{\n  \"event\": \"connect\",\n  \"data\": {\n    \"socketId\": \"abc123\"\n  }\n}\n```\n\n### Error Response\n\n```json\n{\n  \"event\": \"error\",\n  \"data\": {\n    \"message\": \"Unauthorized\",\n    \"statusCode\": 401\n  }\n}\n```\n\n### Next Steps\n\n1. After connecting, join an order chat room\n2. Start sending messages\n3. Listen for incoming messages and typing indicators"
+					},
+					"response": []
+				},
+				{
+					"name": "Join Order Chat",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"join_order_chat\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Join Order Chat Room\n\n### Event: `join_order_chat`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\"\n}\n```\n\n### Server Response\n\n```json\n{\n  \"event\": \"joined\",\n  \"data\": {\n    \"room\": \"order:uuid\",\n    \"participants\": [\n      {\n        \"id\": \"user-id\",\n        \"name\": \"John Doe\",\n        \"online\": true\n      }\n    ]\n  }\n}\n```\n\n### Error Responses\n\n- **403**: User is not authorized to join this order chat\n- **404**: Order not found\n\n### Next Steps\n\nAfter joining, you can:\n- Send messages\n- See typing indicators\n- Receive real-time messages from other participants"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\",\n    \"content\": \"Hello! This is a test message from Postman WebSocket.\",\n    \"type\": \"TEXT\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Send Chat Message\n\n### Event: `send_message`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\",\n  \"content\": \"Your message here\",\n  \"type\": \"TEXT\"\n}\n```\n\n### Message Types\n\n- `TEXT` - Plain text message\n- `IMAGE` - Image attachment\n- `FILE` - File attachment\n\n### Server Responses\n\n#### Success\n\n```json\n{\n  \"event\": \"message_sent\",\n  \"data\": {\n    \"id\": \"message-uuid\",\n    \"orderId\": \"order-uuid\",\n    \"senderId\": \"user-uuid\",\n    \"content\": \"Your message\",\n    \"type\": \"TEXT\",\n    \"createdAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n#### Broadcast to Other Users\n\n```json\n{\n  \"event\": \"new_message\",\n  \"data\": {\n    \"id\": \"message-uuid\",\n    \"orderId\": \"order-uuid\",\n    \"sender\": {\n      \"id\": \"user-uuid\",\n      \"name\": \"John Doe\",\n      \"avatar\": \"url\"\n    },\n    \"content\": \"Your message\",\n    \"type\": \"TEXT\",\n    \"createdAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Rate Limiting\n\n- **Limit**: 20 messages per minute\n- **Error**: `429 Too Many Requests`\n\n### Content Moderation\n\nMessages are automatically checked for:\n- Profanity\n- Spam\n- Personal information (emails, phones)\n\nModerated messages receive a warning flag."
+					},
+					"response": []
+				},
+				{
+					"name": "Send Image Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\",\n    \"content\": \"https://example.com/image.jpg\",\n    \"type\": \"IMAGE\",\n    \"metadata\": {\n      \"fileName\": \"screenshot.jpg\",\n      \"fileSize\": 245678,\n      \"mimeType\": \"image/jpeg\"\n    }\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Send Image Message\n\n### Event: `send_message`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\",\n  \"content\": \"https://cdn.example.com/image.jpg\",\n  \"type\": \"IMAGE\",\n  \"metadata\": {\n    \"fileName\": \"image.jpg\",\n    \"fileSize\": 123456,\n    \"mimeType\": \"image/jpeg\",\n    \"width\": 1920,\n    \"height\": 1080\n  }\n}\n```\n\n### Notes\n\n- Upload image first using `/files/upload` endpoint\n- Use returned URL as message content\n- Include metadata for better UX\n\n### Supported Formats\n\n- JPG/JPEG\n- PNG\n- GIF\n- WebP\n\n### Size Limits\n\n- Max file size: 5MB\n- Max dimensions: 4096x4096"
+					},
+					"response": []
+				},
+				{
+					"name": "Start Typing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"typing\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Start Typing Indicator\n\n### Event: `typing`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\"\n}\n```\n\n### Server Broadcast (to other users)\n\n```json\n{\n  \"event\": \"user_typing\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"user\": {\n      \"id\": \"user-uuid\",\n      \"name\": \"John Doe\"\n    }\n  }\n}\n```\n\n### Usage Pattern\n\n1. Emit `typing` when user starts typing\n2. Auto-stop after 3-5 seconds of inactivity\n3. Or manually emit `stop_typing`\n\n### Best Practices\n\n- Debounce typing events (wait 500ms before sending)\n- Don't spam - send max once per second\n- Always send `stop_typing` when done"
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Typing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"stop_typing\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Stop Typing Indicator\n\n### Event: `stop_typing`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\"\n}\n```\n\n### Server Broadcast (to other users)\n\n```json\n{\n  \"event\": \"user_stopped_typing\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"userId\": \"user-uuid\"\n  }\n}\n```\n\n### When to Use\n\n- User stopped typing (no input for 3 seconds)\n- User sent message (typing automatically stops)\n- User left input field\n- User closed chat window"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Messages as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"mark_as_read\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\",\n    \"messageIds\": [\n      \"{{message_id_1}}\",\n      \"{{message_id_2}}\"\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Mark Messages as Read\n\n### Event: `mark_as_read`\n\n### Request Payload\n\n```json\n{\n  \"orderId\": \"uuid\",\n  \"messageIds\": [\"msg-uuid-1\", \"msg-uuid-2\"]\n}\n```\n\n### Server Response\n\n```json\n{\n  \"event\": \"messages_read\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"messageIds\": [\"msg-uuid-1\", \"msg-uuid-2\"],\n    \"readBy\": \"user-uuid\",\n    \"readAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Broadcast to Message Senders\n\n```json\n{\n  \"event\": \"messages_read\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"messageIds\": [\"msg-uuid-1\", \"msg-uuid-2\"],\n    \"reader\": {\n      \"id\": \"user-uuid\",\n      \"name\": \"Jane Doe\"\n    },\n    \"readAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Usage\n\n- Mark messages as read when user views them\n- Bulk mark multiple messages at once\n- Updates unread count for sender"
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"edit_message\",\n  \"data\": {\n    \"messageId\": \"{{message_id}}\",\n    \"content\": \"Updated message content\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							]
+						},
+						"description": "## Edit Message\n\n### Event: `edit_message`\n\n### Request Payload\n\n```json\n{\n  \"messageId\": \"uuid\",\n  \"content\": \"Updated content\"\n}\n```\n\n### Server Response\n\n```json\n{\n  \"event\": \"message_edited\",\n  \"data\": {\n    \"id\": \"message-uuid\",\n    \"content\": \"Updated content\",\n    \"edited\": true,\n    \"editedAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Restrictions\n\n- Can only edit own messages\n- Can only edit within 15 minutes of sending\n- Cannot edit IMAGE or FILE type messages\n- Edit history is preserved in database\n\n### Error Responses\n\n- **403**: Not your message\n- **403**: Edit window expired (>15 minutes)\n- **400**: Cannot edit this message type"
+					},
+					"response": []
+				}
+			],
+			"description": "## 💬 Chat WebSocket Namespace\n\n### Connection URL\n\n```\nws://localhost:3000/chat?token={{access_token}}\n```\n\n### Features\n\n- Real-time messaging\n- Typing indicators\n- Read receipts\n- Message editing\n- Online presence\n- Rate limiting (20 msg/min)\n- Content moderation\n\n### Client → Server Events\n\n| Event | Description |\n|-------|-------------|\n| `join_order_chat` | Join a specific order chat room |\n| `send_message` | Send a message |\n| `typing` | Start typing indicator |\n| `stop_typing` | Stop typing indicator |\n| `mark_as_read` | Mark messages as read |\n| `edit_message` | Edit a message |\n\n### Server → Client Events\n\n| Event | Description |\n|-------|-------------|\n| `message_sent` | Confirmation of sent message |\n| `new_message` | New message from other user |\n| `user_typing` | Someone is typing |\n| `user_stopped_typing` | Someone stopped typing |\n| `messages_read` | Messages were read |\n| `message_edited` | Message was edited |\n| `user_online` | User came online |\n| `user_offline` | User went offline |\n| `error` | Error occurred |\n\n### Authentication\n\nRequired: JWT token in query parameter `?token=YOUR_TOKEN`\n\n### Testing Tips\n\n1. First, get JWT token from `/auth/login` endpoint\n2. Connect to WebSocket with token\n3. Join an order chat room\n4. Send messages and observe real-time updates\n5. Test typing indicators\n6. Test read receipts"
+		},
+		{
+			"name": "🔔 Notifications WebSocket",
+			"item": [
+				{
+					"name": "Connect to Notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/notifications?token={{access_token}}",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"description": "JWT access token for authentication"
+								}
+							]
+						},
+						"description": "## Connect to Notifications WebSocket\n\n### Authentication\n\nRequires valid JWT token in query parameter.\n\n### Auto-Subscription\n\nUpon connection, you are automatically subscribed to your user's notifications.\n\n### Expected Response\n\n```json\n{\n  \"event\": \"connect\",\n  \"data\": {\n    \"socketId\": \"abc123\",\n    \"userId\": \"user-uuid\"\n  }\n}\n```\n\n### Initial Unread Count\n\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": {\n    \"count\": 5\n  }\n}\n```\n\n### Next Steps\n\n1. Listen for real-time notifications\n2. Mark notifications as read\n3. Monitor unread count updates"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"notification:mark-read\",\n  \"data\": {\n    \"notificationId\": \"{{notification_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "ws://{{base_url_ws}}/notifications",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"notifications"
+							]
+						},
+						"description": "## Mark Notification as Read\n\n### Event: `notification:mark-read`\n\n### Request Payload\n\n```json\n{\n  \"notificationId\": \"uuid\"\n}\n```\n\n### Server Response\n\n```json\n{\n  \"event\": \"notification:marked-read\",\n  \"data\": {\n    \"notificationId\": \"uuid\",\n    \"readAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Updated Unread Count\n\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": {\n    \"count\": 4\n  }\n}\n```\n\n### Alternative\n\nYou can also use HTTP endpoint:\n```\nPATCH /api/v1/notifications/:id/read\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "Receive New Notification (Listen)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/notifications",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"notifications"
+							]
+						},
+						"description": "## Receive Real-time Notifications\n\n### Server Event: `notification:new`\n\nAutomatically pushed when a new notification is created for you.\n\n### Example Payload\n\n```json\n{\n  \"event\": \"notification:new\",\n  \"data\": {\n    \"id\": \"notif-uuid\",\n    \"type\": \"ORDER_STATUS_CHANGED\",\n    \"title\": \"Order Status Updated\",\n    \"message\": \"Your order #1234 status changed to IN_PROGRESS\",\n    \"data\": {\n      \"orderId\": \"order-uuid\",\n      \"newStatus\": \"IN_PROGRESS\"\n    },\n    \"read\": false,\n    \"createdAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n### Notification Types\n\n- `ORDER_STATUS_CHANGED` - Order status update\n- `NEW_PROPOSAL` - New proposal received\n- `PROPOSAL_ACCEPTED` - Your proposal was accepted\n- `PROPOSAL_REJECTED` - Your proposal was rejected\n- `NEW_MESSAGE` - New chat message\n- `REVIEW_RECEIVED` - New review\n- `DISPUTE_CREATED` - Dispute opened\n- `DISPUTE_RESOLVED` - Dispute resolved\n- `PAYMENT_RECEIVED` - Payment processed\n- `SUBSCRIPTION_EXPIRING` - Subscription expiring soon\n- `SUBSCRIPTION_EXPIRED` - Subscription expired\n\n### Updated Unread Count\n\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": {\n    \"count\": 6\n  }\n}\n```\n\n### Client-Side Handling\n\n```javascript\nsocket.on('notification:new', (notification) => {\n  // Show toast/banner\n  showNotificationBanner(notification);\n  \n  // Play sound\n  playNotificationSound();\n  \n  // Update UI badge\n  updateUnreadBadge(notification.unreadCount);\n});\n```"
+					},
+					"response": []
+				}
+			],
+			"description": "## 🔔 Notifications WebSocket Namespace\n\n### Connection URL\n\n```\nws://localhost:3000/notifications?token={{access_token}}\n```\n\n### Features\n\n- Real-time notification delivery\n- Unread count tracking\n- Mark as read functionality\n- Rate limiting (100 events/min)\n- Auto-subscription on connect\n\n### Client → Server Events\n\n| Event | Description |\n|-------|-------------|\n| `notification:mark-read` | Mark notification as read |\n\n### Server → Client Events\n\n| Event | Description |\n|-------|-------------|\n| `notification:new` | New notification received |\n| `notification:unread-count` | Updated unread count |\n| `notification:marked-read` | Notification marked as read |\n| `error` | Error occurred |\n\n### Authentication\n\nRequired: JWT token in query parameter `?token=YOUR_TOKEN`\n\n### Auto-Subscription\n\nUpon successful connection:\n1. User is automatically subscribed to their notification room\n2. Current unread count is sent\n3. Any new notifications are pushed immediately\n\n### Testing Tips\n\n1. Connect with valid JWT token\n2. Trigger notifications via HTTP endpoints (create order, send message, etc.)\n3. Observe real-time delivery\n4. Test mark as read\n5. Verify unread count updates\n\n### Notification Triggers\n\nNotifications are sent via WebSocket when:\n- Order status changes\n- New proposal received\n- New chat message (if user offline)\n- Review received\n- Dispute created/resolved\n- Payment processed\n- Subscription events"
+		},
+		{
+			"name": "🧪 WebSocket Testing Scenarios",
+			"item": [
+				{
+					"name": "Scenario 1: Complete Chat Flow",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat?token={{access_token}}",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"description": "## Complete Chat Testing Scenario\n\n### Step-by-Step Testing\n\n#### 1. Connect (Use this request)\n```\nURL: ws://localhost:3000/chat?token={{access_token}}\n```\n\n#### 2. Join Order Chat\n```json\n{\n  \"event\": \"join_order_chat\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}\n```\n\n#### 3. Start Typing\n```json\n{\n  \"event\": \"typing\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}\n```\n\n#### 4. Send Message\n```json\n{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\",\n    \"content\": \"Hello! Testing complete flow.\",\n    \"type\": \"TEXT\"\n  }\n}\n```\n\n#### 5. Stop Typing (automatic after send)\n```json\n{\n  \"event\": \"stop_typing\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\"\n  }\n}\n```\n\n#### 6. Mark as Read (when other user responds)\n```json\n{\n  \"event\": \"mark_as_read\",\n  \"data\": {\n    \"orderId\": \"{{test_order_id}}\",\n    \"messageIds\": [\"msg-id\"]\n  }\n}\n```\n\n### Expected Timeline\n\n```\n[00:00] Connected\n[00:01] Joined room: order:uuid\n[00:02] user_typing emitted\n[00:03] message_sent received\n[00:03] stop_typing emitted\n[00:10] new_message received (from other user)\n[00:11] mark_as_read emitted\n[00:11] messages_read received\n```\n\n### Success Criteria\n\n- ✅ Connection established\n- ✅ Joined room successfully\n- ✅ Message sent and received\n- ✅ Typing indicators working\n- ✅ Read receipts working\n- ✅ No errors or disconnections"
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 2: Two Users Chatting",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/chat?token={{access_token}}",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"chat"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"description": "## Two Users Chatting Scenario\n\n### Setup\n\nOpen two Postman windows or use Browser + Postman:\n\n**User A (Client):**\n```\nToken: {{client_access_token}}\nConnection: ws://localhost:3000/chat?token={{client_access_token}}\n```\n\n**User B (Contractor):**\n```\nToken: {{contractor_access_token}}\nConnection: ws://localhost:3000/chat?token={{contractor_access_token}}\n```\n\n### Test Flow\n\n#### Both Users: Join Same Order\n```json\n{\n  \"event\": \"join_order_chat\",\n  \"data\": {\n    \"orderId\": \"same-order-uuid\"\n  }\n}\n```\n\n#### User A: Start Typing\n```json\n{\n  \"event\": \"typing\",\n  \"data\": { \"orderId\": \"order-uuid\" }\n}\n```\n\n**User B should see:**\n```json\n{\n  \"event\": \"user_typing\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"user\": { \"id\": \"user-a-id\", \"name\": \"User A\" }\n  }\n}\n```\n\n#### User A: Send Message\n```json\n{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"content\": \"Hi! How's the project going?\",\n    \"type\": \"TEXT\"\n  }\n}\n```\n\n**User A receives:**\n```json\n{\n  \"event\": \"message_sent\",\n  \"data\": { /* message data */ }\n}\n```\n\n**User B receives:**\n```json\n{\n  \"event\": \"new_message\",\n  \"data\": { /* message data */ }\n}\n```\n\n#### User B: Mark as Read\n```json\n{\n  \"event\": \"mark_as_read\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"messageIds\": [\"msg-id\"]\n  }\n}\n```\n\n**User A receives:**\n```json\n{\n  \"event\": \"messages_read\",\n  \"data\": {\n    \"messageIds\": [\"msg-id\"],\n    \"reader\": { \"id\": \"user-b-id\", \"name\": \"User B\" },\n    \"readAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n#### User B: Reply\n```json\n{\n  \"event\": \"send_message\",\n  \"data\": {\n    \"orderId\": \"order-uuid\",\n    \"content\": \"Going great! Almost done.\",\n    \"type\": \"TEXT\"\n  }\n}\n```\n\n### Success Criteria\n\n- ✅ Both users connected\n- ✅ Both users in same room\n- ✅ Typing indicators visible to other user\n- ✅ Messages received in real-time\n- ✅ Read receipts working\n- ✅ Bidirectional communication\n- ✅ No message delays or losses"
+					},
+					"response": []
+				},
+				{
+					"name": "Scenario 3: Notification Flow",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "ws://{{base_url_ws}}/notifications?token={{access_token}}",
+							"protocol": "ws",
+							"host": [
+								"{{base_url_ws}}"
+							],
+							"path": [
+								"notifications"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{access_token}}"
+								}
+							]
+						},
+						"description": "## Complete Notification Testing Scenario\n\n### Step 1: Connect to Notifications\n\n```\nURL: ws://localhost:3000/notifications?token={{access_token}}\n```\n\n**Expected Response:**\n```json\n{\n  \"event\": \"connect\",\n  \"data\": { \"socketId\": \"abc123\", \"userId\": \"user-uuid\" }\n}\n```\n\n**Initial Unread Count:**\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": { \"count\": 3 }\n}\n```\n\n### Step 2: Trigger Notification\n\nIn another Postman tab, perform action that creates notification:\n\n**Option A: Create Order (as another user)**\n```http\nPOST /api/v1/orders\n```\n\n**Option B: Send Message (as another user)**\n```http\nPOST /api/v1/chat/messages\n```\n\n**Option C: Change Order Status (as contractor)**\n```http\nPATCH /api/v1/orders/:id/status\n```\n\n### Step 3: Receive Real-time Notification\n\n**WebSocket receives:**\n```json\n{\n  \"event\": \"notification:new\",\n  \"data\": {\n    \"id\": \"notif-uuid\",\n    \"type\": \"ORDER_STATUS_CHANGED\",\n    \"title\": \"Order Status Updated\",\n    \"message\": \"Your order #1234 is now IN_PROGRESS\",\n    \"data\": {\n      \"orderId\": \"order-uuid\",\n      \"newStatus\": \"IN_PROGRESS\"\n    },\n    \"read\": false,\n    \"createdAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n**Updated Unread Count:**\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": { \"count\": 4 }\n}\n```\n\n### Step 4: Mark as Read\n\n```json\n{\n  \"event\": \"notification:mark-read\",\n  \"data\": {\n    \"notificationId\": \"notif-uuid\"\n  }\n}\n```\n\n**Response:**\n```json\n{\n  \"event\": \"notification:marked-read\",\n  \"data\": {\n    \"notificationId\": \"notif-uuid\",\n    \"readAt\": \"2025-11-13T12:00:00Z\"\n  }\n}\n```\n\n**Updated Count:**\n```json\n{\n  \"event\": \"notification:unread-count\",\n  \"data\": { \"count\": 3 }\n}\n```\n\n### Success Criteria\n\n- ✅ Connected successfully\n- ✅ Received initial unread count\n- ✅ Real-time notification delivered instantly\n- ✅ Unread count incremented\n- ✅ Mark as read working\n- ✅ Unread count decremented\n- ✅ No delays in delivery"
+					},
+					"response": []
+				}
+			],
+			"description": "## 🧪 WebSocket Testing Scenarios\n\nComplete end-to-end testing scenarios for WebSocket functionality.\n\n### Prerequisites\n\n1. ✅ API server running\n2. ✅ Valid JWT tokens (client + contractor)\n3. ✅ Test order created\n4. ✅ Postman Desktop v10.18+ (for WebSocket support)\n\n### Scenarios Included\n\n1. **Complete Chat Flow** - Single user sending messages\n2. **Two Users Chatting** - Bidirectional communication\n3. **Notification Flow** - Real-time notifications\n\n### Testing Tools\n\n#### Option 1: Postman Desktop (Recommended)\n- Native WebSocket support\n- Easy to use\n- Visual interface\n\n#### Option 2: Browser Console\n```javascript\nconst socket = io('http://localhost:3000/chat', {\n  auth: { token: 'YOUR_TOKEN' },\n  transports: ['websocket']\n});\n```\n\n#### Option 3: wscat CLI\n```bash\nwscat -c \"ws://localhost:3000/chat?token=YOUR_TOKEN\"\n```\n\n#### Option 4: Automated Tests\nSee: `api/test/websocket/` for Jest tests\n\n### Success Metrics\n\n- ✅ Connection success rate: 100%\n- ✅ Message delivery: < 100ms\n- ✅ Typing indicator latency: < 50ms\n- ✅ Notification delivery: < 200ms\n- ✅ No lost messages\n- ✅ Proper error handling\n- ✅ Reconnection works\n\n### Common Issues\n\n| Issue | Solution |\n|-------|----------|\n| Connection refused | Check API is running |\n| Unauthorized | Check JWT token validity |\n| Events not received | Check event name spelling |\n| Disconnects randomly | Check rate limiting |\n| CORS error | Check WebSocket CORS config |"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// WebSocket Pre-request Script",
+					"console.log('🔌 WebSocket Request Preparation');",
+					"console.log('Token:', pm.environment.get('access_token') ? '✅ Set' : '❌ Missing');",
+					"console.log('Base URL:', pm.environment.get('base_url_ws') || 'localhost:3000');"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// WebSocket Test Script",
+					"console.log('🧪 WebSocket Test Results');",
+					"",
+					"// Note: WebSocket tests work differently than HTTP",
+					"// You need to manually verify responses in the WebSocket panel"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url_ws",
+			"value": "localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "test_order_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "message_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "message_id_1",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "message_id_2",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "conversation_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "notification_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "client_access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "contractor_access_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
