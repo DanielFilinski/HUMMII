@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "hummii-api-collection-scenarios-2025",
 		"name": "Hummii API - With Test Scenarios",
-		"description": "Complete API collection for Hummii platform with automated test scenarios\n\nFeatures:\n- 🎯 **Test Scenarios** - Run complete user flows in one click\n- 🔄 Automated variable management\n- ✅ Built-in test assertions\n- 📊 Comprehensive coverage\n\n**Quick Start:**\n1. Select environment: 'Hummii API - Local'\n2. Go to 'Test Scenarios' folder\n3. Right-click any scenario → 'Run folder'\n4. Watch tests execute automatically\n\n**Available Scenarios:**\n- Complete User Journey (Registration → Verification → Login → Profile)\n- Order Lifecycle (Create → Publish → Proposal → Accept → Complete)\n- Contractor Setup (Profile → Portfolio → Subscription)\n- Subscription Management (Create → Upgrade → Downgrade → Cancel)\n- Review System (Order → Complete → Review → Response)\n- Dispute Flow (Create → Evidence → Messages → Resolution)\n\nAll existing individual endpoints are preserved in their original folders.",
+		"description": "Complete API collection for Hummii platform with automated test scenarios\n\nFeatures:\n- 🎯 **Test Scenarios** - Run complete user flows in one click\n- 🔄 Automated variable management\n- ✅ Built-in test assertions\n- 📊 Comprehensive coverage\n- 📧 Email verification testing\n\n**Quick Start:**\n1. Select environment: 'Hummii API - Local'\n2. Go to 'Test Scenarios' folder\n3. Right-click any scenario → 'Run folder'\n4. Watch tests execute automatically\n\n**Available Scenarios:**\n- Complete User Journey (Registration → Email Verification → Login → Profile)\n- Email Verification Flow (Register → Verify → Login)\n- Order Lifecycle (Create → Publish → Proposal → Accept → Complete)\n- Contractor Setup (Profile → Portfolio → Subscription)\n- Subscription Management (Create → Upgrade → Downgrade → Cancel)\n- Review System (Order → Complete → Review → Response)\n- Dispute Flow (Create → Evidence → Messages → Resolution)\n- Chat Flow (Send → Edit → Mark Read → Export)\n- Notifications Flow (Get → Mark Read → Preferences)\n- Security & Error Handling (Unauthorized, Validation, etc.)\n\n**Note on Email Verification:**\nFor email verification tests, you need to manually obtain the verification token from:\n1. Email inbox (if email service is configured)\n2. Database query: `SELECT verificationToken FROM users WHERE email = 'test@example.com'`\n3. API logs\n\nSet the `verification_token` environment variable before running verification steps.\n\nAll existing individual endpoints are preserved in their original folders.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "hummii-api-scenarios"
 	},
@@ -77,7 +77,7 @@
 				},
 				{
 					"name": "👤 Complete User Journey",
-					"description": "Full user registration → verification → login → profile update flow. Run this to test the complete authentication cycle.",
+					"description": "Full user registration → email verification → login → profile update flow. Run this to test the complete authentication cycle.",
 					"item": [
 						{
 							"name": "1. Register New User",
@@ -91,13 +91,15 @@
 											"    const jsonData = pm.response.json();",
 											"    pm.expect(jsonData).to.have.property('id');",
 											"    pm.expect(jsonData).to.have.property('email');",
+											"    pm.expect(jsonData.isVerified).to.eql(false);",
 											"    ",
 											"    // Save for next requests",
 											"    pm.environment.set('test_user_id', jsonData.id);",
 											"    pm.environment.set('test_user_email', jsonData.email);",
 											"});",
 											"",
-											"console.log('✅ Step 1: User Registration - PASSED');"
+											"console.log('✅ Step 1: User Registration - PASSED');",
+											"console.log('⚠️  Note: Check email for verification token or use test token');"
 										],
 										"type": "text/javascript"
 									}
@@ -138,7 +140,59 @@
 							}
 						},
 						{
-							"name": "2. Login User",
+							"name": "2. Verify Email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Email verified successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"});",
+											"",
+											"console.log('✅ Step 2: Email Verification - PASSED');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// In real scenario, you would get this token from email",
+											"// For testing, you need to either:",
+											"// 1. Check your email inbox for the token",
+											"// 2. Get token from database",
+											"// 3. Use a test/mock token if in dev environment",
+											"",
+											"console.log('📧 Note: Use verification token from email or database');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/auth/verify-email?token={{verification_token}}",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "verify-email"],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{verification_token}}",
+											"description": "Verification token from email"
+										}
+									]
+								},
+								"description": "Verify email using token sent to user's email. In testing, you need to manually set the verification_token variable with the token from email or database."
+							}
+						},
+						{
+							"name": "3. Login User",
 							"event": [
 								{
 									"listen": "test",
@@ -155,7 +209,7 @@
 											"    pm.environment.set('refresh_token', jsonData.refreshToken);",
 											"});",
 											"",
-											"console.log('✅ Step 2: User Login - PASSED');"
+											"console.log('✅ Step 3: User Login - PASSED');"
 										],
 										"type": "text/javascript"
 									}
@@ -181,7 +235,7 @@
 							}
 						},
 						{
-							"name": "3. Get User Profile",
+							"name": "4. Get User Profile",
 							"event": [
 								{
 									"listen": "test",
@@ -191,9 +245,10 @@
 											"    pm.response.to.have.status(200);",
 											"    const jsonData = pm.response.json();",
 											"    pm.expect(jsonData.email).to.eql(pm.environment.get('test_email'));",
+											"    pm.expect(jsonData.isVerified).to.eql(true);",
 											"});",
 											"",
-											"console.log('✅ Step 3: Get Profile - PASSED');"
+											"console.log('✅ Step 4: Get Profile - PASSED');"
 										],
 										"type": "text/javascript"
 									}
@@ -215,7 +270,7 @@
 							}
 						},
 						{
-							"name": "4. Update Profile",
+							"name": "5. Update Profile",
 							"event": [
 								{
 									"listen": "test",
@@ -227,7 +282,7 @@
 											"    pm.expect(jsonData.bio).to.exist;",
 											"});",
 											"",
-											"console.log('✅ Step 4: Update Profile - PASSED');",
+											"console.log('✅ Step 5: Update Profile - PASSED');",
 											"console.log('🎉 Complete User Journey - ALL TESTS PASSED!');"
 										],
 										"type": "text/javascript"
@@ -260,7 +315,279 @@
 					]
 				},
 				{
-					"name": "📦 Order Lifecycle",
+					"name": "� Email Verification Flow",
+					"description": "Test email verification: Register → Get verification token → Verify → Login as verified user",
+					"item": [
+						{
+							"name": "1. Register User for Verification",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Generate unique email for testing",
+											"const timestamp = Date.now();",
+											"const testEmail = `verify.test.${timestamp}@example.com`;",
+											"pm.environment.set('verification_test_email', testEmail);",
+											"",
+											"console.log('🎬 Starting Email Verification Flow...');",
+											"console.log('📧 Generated test email:', testEmail);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User registered, verification required\", function () {",
+											"    pm.response.to.have.status(201);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('id');",
+											"    pm.expect(jsonData).to.have.property('email');",
+											"    pm.expect(jsonData.isVerified).to.eql(false);",
+											"    ",
+											"    pm.environment.set('verification_test_user_id', jsonData.id);",
+											"});",
+											"",
+											"console.log('✅ Step 1: User Registered - PASSED');",
+											"console.log('⚠️  Email verification required. Check email for token.');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Verification Test User\",\n  \"email\": \"{{verification_test_email}}\",\n  \"password\": \"TestPass123!\",\n  \"phone\": \"+15559876543\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "register"]
+								}
+							}
+						},
+						{
+							"name": "2. Try Login Before Verification",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Note: Depending on your API logic, this might succeed but with limited access",
+											"// or fail completely. Adjust the test based on your implementation.",
+											"pm.test(\"Login response received\", function () {",
+											"    // Check if login is blocked or allowed with limitations",
+											"    const statusCode = pm.response.code;",
+											"    pm.expect([200, 401, 403]).to.include(statusCode);",
+											"});",
+											"",
+											"console.log('✅ Step 2: Pre-verification login attempt - PASSED');",
+											"console.log('Status:', pm.response.code);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"{{verification_test_email}}\",\n  \"password\": \"TestPass123!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "login"]
+								},
+								"description": "Try to login before email verification. Behavior depends on API implementation."
+							}
+						},
+						{
+							"name": "3. Verify Email with Token",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// IMPORTANT: You need to manually set 'verification_token' variable",
+											"// Get the token from:",
+											"// 1. Email inbox (if email service is configured)",
+											"// 2. Database: SELECT verificationToken FROM users WHERE email = '...'",
+											"// 3. API logs",
+											"",
+											"console.log('📧 MANUAL STEP REQUIRED:');",
+											"console.log('   Set verification_token variable with token from email/database');",
+											"console.log('   Database query: SELECT verificationToken FROM users WHERE email = \"' + pm.environment.get('verification_test_email') + '\"');"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Email verified successfully\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"});",
+											"",
+											"console.log('✅ Step 3: Email Verified - PASSED');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/auth/verify-email?token={{verification_token}}",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "verify-email"],
+									"query": [
+										{
+											"key": "token",
+											"value": "{{verification_token}}",
+											"description": "Token from email - must be set manually"
+										}
+									]
+								},
+								"description": "Verify email using the token. You must manually set the 'verification_token' environment variable with the token from email or database."
+							}
+						},
+						{
+							"name": "4. Login After Verification",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Login successful after verification\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('accessToken');",
+											"    ",
+											"    pm.environment.set('verified_user_token', jsonData.accessToken);",
+											"});",
+											"",
+											"console.log('✅ Step 4: Post-verification login - PASSED');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"{{verification_test_email}}\",\n  \"password\": \"TestPass123!\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "login"]
+								}
+							}
+						},
+						{
+							"name": "5. Verify Profile Shows isVerified=true",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"User profile shows verified status\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData.email).to.eql(pm.environment.get('verification_test_email'));",
+											"    pm.expect(jsonData.isVerified).to.eql(true);",
+											"});",
+											"",
+											"console.log('✅ Step 5: Profile verification status - PASSED');",
+											"console.log('🎉 Email Verification Flow - ALL TESTS PASSED!');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{verified_user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/users/me",
+									"host": ["{{base_url}}"],
+									"path": ["users", "me"]
+								}
+							}
+						},
+						{
+							"name": "6. Try Invalid Token (Should Fail)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Invalid token rejected\", function () {",
+											"    pm.response.to.have.status(400);",
+											"    const jsonData = pm.response.json();",
+											"    pm.expect(jsonData).to.have.property('message');",
+											"});",
+											"",
+											"console.log('✅ Step 6: Invalid token rejection - PASSED');"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/auth/verify-email?token=invalid-token-123456",
+									"host": ["{{base_url}}"],
+									"path": ["auth", "verify-email"],
+									"query": [
+										{
+											"key": "token",
+											"value": "invalid-token-123456"
+										}
+									]
+								},
+								"description": "Test that invalid/expired tokens are properly rejected"
+							}
+						}
+					]
+				},
+				{
+					"name": "�📦 Order Lifecycle",
 					"description": "Complete order flow: Create → Publish → Proposal → Accept → Complete → Review",
 					"item": [
 						{
@@ -1764,6 +2091,27 @@
 		},
 		{
 			"key": "contractor_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "verification_token",
+			"value": "",
+			"type": "string",
+			"description": "Email verification token - get from email or database"
+		},
+		{
+			"key": "verification_test_email",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "verification_test_user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "verified_user_token",
 			"value": "",
 			"type": "string"
 		}
