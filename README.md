@@ -384,10 +384,16 @@ GitHub Actions automatically runs:
 - 📊 [Documentation Alignment Summary](docs/ALIGNMENT_SUMMARY.md) - Documentation consistency report
 - 📝 [CHANGELOG_TS.md](docs/CHANGELOG_TS.md) - Documentation change history
 
+### Setup & Configuration
+- ⚙️ [**Services Setup Guide**](docs/setup/SERVICES_SETUP_GUIDE.md) - **Complete guide for all external services** (1Password, Cloudflare, Stripe, SendGrid, etc.)
+- ✅ [Services Checklist](docs/setup/SERVICES_CHECKLIST.md) - Quick checklist for service configuration
+- 🏗️ [Services Architecture](docs/setup/SERVICES_ARCHITECTURE.md) - Visual architecture and data flows
+- 🚀 [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment guide
+- 🌍 [Environment Setup](ENV_SETUP.md) - Environment variables configuration
+
 ### Guides & References
 - 📋 [Project Plan](docs/plan.md) - Roadmap and milestones
 - 🔒 [Security](docs/security.md) - Security measures and PIPEDA compliance
-- 🚀 [Deployment](docs/DEPLOYMENT.md) - Production deployment guide
 - 🐙 [GitHub Setup](docs/GITHUB_SETUP.md) - Repository configuration
 
 ### Feature Documentation
