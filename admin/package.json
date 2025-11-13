@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@ant-design/nextjs-registry": "^1.0.1",
+    "@ant-design/nextjs-registry": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@microlink/react-json-view": "^1.27.0",
     "@refinedev/antd": "^5.43.0",
