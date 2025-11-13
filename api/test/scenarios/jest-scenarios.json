@@ -1,0 +1,51 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../",
+  "testRegex": ".scenario.spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "src/**/*.(t|j)s",
+    "!src/**/*.module.ts",
+    "!src/**/*.interface.ts",
+    "!src/**/*.dto.ts",
+    "!src/main.ts"
+  ],
+  "coverageDirectory": "../coverage/scenarios",
+  "testEnvironment": "node",
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
+  "setupFilesAfterEnv": ["<rootDir>/test/scenarios/setup.ts"],
+  "testTimeout": 30000,
+  "verbose": true,
+  "reporters": [
+    "default",
+    [
+      "jest-html-reporters",
+      {
+        "publicPath": "./test-reports/scenarios",
+        "filename": "scenario-tests-report.html",
+        "pageTitle": "Hummii API - Scenario Tests Report",
+        "expand": true,
+        "openReport": false,
+        "includeFailureMsg": true,
+        "includeConsoleLog": true,
+        "enableMergeData": true,
+        "dataMergeLevel": 2
+      }
+    ],
+    [
+      "jest-junit",
+      {
+        "outputDirectory": "./test-reports/scenarios",
+        "outputName": "junit-scenarios.xml",
+        "classNameTemplate": "{classname}",
+        "titleTemplate": "{title}",
+        "ancestorSeparator": " › ",
+        "usePathForSuiteName": true
+      }
+    ]
+  ]
+}
