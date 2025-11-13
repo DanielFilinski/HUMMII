@@ -50,6 +50,8 @@ describe('Contractors (E2E)', () => {
     const category1 = await prisma.category.create({
       data: {
         name: 'Plumbing',
+        nameEn: 'Plumbing',
+        nameFr: 'Plomberie',
         slug: 'plumbing',
         description: 'Plumbing services',
         isActive: true,
@@ -60,6 +62,8 @@ describe('Contractors (E2E)', () => {
     const category2 = await prisma.category.create({
       data: {
         name: 'Electrical',
+        nameEn: 'Electrical',
+        nameFr: 'Électricité',
         slug: 'electrical',
         description: 'Electrical services',
         isActive: true,
@@ -81,7 +85,7 @@ describe('Contractors (E2E)', () => {
     // Set contractor role
     await prisma.user.update({
       where: { id: contractorUserId },
-      data: { role: UserRole.CONTRACTOR },
+      data: { roles: [UserRole.CONTRACTOR] },
     });
 
     // Login contractor 1
@@ -108,7 +112,7 @@ describe('Contractors (E2E)', () => {
     // Set contractor role
     await prisma.user.update({
       where: { id: contractor2UserId },
-      data: { role: UserRole.CONTRACTOR },
+      data: { roles: [UserRole.CONTRACTOR] },
     });
 
     // Login contractor 2
@@ -400,8 +404,8 @@ describe('Contractors (E2E)', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       // Should include our test contractors
-      const foundContractor1 = response.body.find((c) => c.id === contractorId);
-      const foundContractor2 = response.body.find((c) => c.id === contractor2Id);
+      const foundContractor1 = response.body.find((c: any) => c.id === contractorId);
+      const foundContractor2 = response.body.find((c: any) => c.id === contractor2Id);
 
       expect(foundContractor1).toBeDefined();
       expect(foundContractor2).toBeDefined();
@@ -603,7 +607,7 @@ describe('Contractors (E2E)', () => {
         .expect(200);
 
       expect(portfolio.body.length).toBe(9); // One less
-      const deletedItem = portfolio.body.find((item) => item.id === portfolioItemId);
+      const deletedItem = portfolio.body.find((item: any) => item.id === portfolioItemId);
       expect(deletedItem).toBeUndefined();
     });
 
@@ -623,7 +627,7 @@ describe('Contractors (E2E)', () => {
         .set('Authorization', `Bearer ${contractorToken}`)
         .expect(200);
 
-      const itemIds = currentPortfolio.body.map((item) => item.id);
+      const itemIds = currentPortfolio.body.map((item: any) => item.id);
 
       // Reverse the order
       const reversedIds = [...itemIds].reverse();
@@ -700,6 +704,8 @@ describe('Contractors (E2E)', () => {
         const cat = await prisma.category.create({
           data: {
             name: `Category ${i}`,
+            nameEn: `Category ${i}`,
+            nameFr: `Catégorie ${i}`,
             slug: `category-${i}`,
             description: 'Test category',
             isActive: true,
@@ -749,7 +755,7 @@ describe('Contractors (E2E)', () => {
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(2); // We assigned 2 categories
 
-      const categoryIds = response.body.map((cat) => cat.id);
+      const categoryIds = response.body.map((cat: any) => cat.id);
       expect(categoryIds).toContain(testCategoryId1);
       expect(categoryIds).toContain(testCategoryId2);
     });
@@ -779,7 +785,7 @@ describe('Contractors (E2E)', () => {
         .expect(200);
 
       expect(categories.body.length).toBe(1); // One less
-      const categoryIds = categories.body.map((cat) => cat.id);
+      const categoryIds = categories.body.map((cat: any) => cat.id);
       expect(categoryIds).not.toContain(testCategoryId1);
     });
 
@@ -813,9 +819,11 @@ describe('Contractors (E2E)', () => {
         where: { email: 'contractor3@test.com' },
       });
 
+      if (!user) throw new Error('User not found');
+
       await prisma.user.update({
         where: { id: user.id },
-        data: { role: UserRole.CONTRACTOR },
+        data: { roles: [UserRole.CONTRACTOR] },
       });
 
       const login = await request(app.getHttpServer())

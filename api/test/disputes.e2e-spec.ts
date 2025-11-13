@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/shared/prisma/prisma.service';
 import { DisputeStatus, DisputeReason, OrderStatus, UserRole } from '@prisma/client';
@@ -78,6 +78,8 @@ describe('Disputes (e2e)', () => {
     const category = await prisma.category.create({
       data: {
         name: 'Test Category',
+        nameEn: 'Test Category',
+        nameFr: 'Catégorie Test',
         slug: 'test-category',
         isActive: true,
       },
@@ -201,7 +203,7 @@ describe('Disputes (e2e)', () => {
             description: 'Test order description',
             clientId,
             contractorId,
-            categoryId: (await prisma.category.findFirst()).id,
+            categoryId: (await prisma.category.findFirst())!.id,
             status: OrderStatus.IN_PROGRESS,
             address: '123 Test St',
             city: 'Toronto',

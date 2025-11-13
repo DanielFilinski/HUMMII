@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/shared/prisma/prisma.service';
 import { OrderStatus, OrderType, UserRole } from '@prisma/client';
@@ -110,6 +110,10 @@ describe('Chat E2E', () => {
         clientId,
         latitude: 43.6532,
         longitude: -79.3832,
+        address: '123 Test Street',
+        city: 'Toronto',
+        province: 'ON',
+        postalCode: 'M5H 2N2',
         budget: 500,
       },
     });
@@ -265,7 +269,8 @@ describe('Chat E2E', () => {
           content: 'Original message content',
           orderId,
           senderId: clientId,
-          chatRoomId: (
+          receiverId: contractorId,
+          roomId: (
             await prisma.chatRoom.findFirst({
               where: { orderId },
             })
@@ -319,7 +324,8 @@ describe('Chat E2E', () => {
           content: 'Message to mark as read',
           orderId,
           senderId: contractorId,
-          chatRoomId: chatRoom.id,
+          receiverId: clientId,
+          roomId: chatRoom.id,
         },
       });
       messageId = message.id;

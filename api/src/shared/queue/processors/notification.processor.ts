@@ -2,7 +2,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationType, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 /**
  * Notification Processor
@@ -79,8 +79,7 @@ export class NotificationProcessor {
 
       // Get notification config
       const { NOTIFICATION_CONFIG } = await import('../../../notifications/types/notification-types');
-      const notificationType = type as NotificationType;
-      const config = NOTIFICATION_CONFIG[notificationType];
+      const config = NOTIFICATION_CONFIG[type as keyof typeof NOTIFICATION_CONFIG];
       const template = config?.template || 'order-status-changed';
 
       // Load template service if not loaded
@@ -95,7 +94,7 @@ export class NotificationProcessor {
       const html = this.templateService.render(template, {
         title: notification.title,
         body: notification.body,
-        actionUrl: notification.actionUrl,
+        actionUrl: notification.actionUrl || '',
         ...metadata,
       });
 
@@ -169,7 +168,7 @@ export class NotificationProcessor {
         notification.title,
         notification.body,
         {
-          actionUrl: notification.actionUrl,
+          actionUrl: notification.actionUrl || '',
           notificationId: notification.id,
           ...metadata,
         },
@@ -266,9 +265,10 @@ export class NotificationProcessor {
     try {
       const result = await this.prisma.notification.deleteMany({
         where: {
-          expiresAt: {
-            lt: new Date(),
-          },
+          AND: [
+            { expiresAt: { not: null } },
+            { expiresAt: { lt: new Date() } },
+          ],
         },
       });
 

@@ -50,7 +50,7 @@ describe('Categories (E2E)', () => {
     // Set admin role manually
     await prisma.user.update({
       where: { id: adminRes.body.id },
-      data: { role: UserRole.ADMIN },
+      data: { roles: [UserRole.ADMIN] },
     });
 
     // Login as admin
@@ -185,14 +185,14 @@ describe('Categories (E2E)', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       // Find plumbing category
-      const plumbingCategory = response.body.find((cat) => cat.id === testCategoryId);
+      const plumbingCategory = response.body.find((cat: any) => cat.id === testCategoryId);
       expect(plumbingCategory).toBeDefined();
       expect(plumbingCategory.name).toBe('Plumbing');
 
       // Check if it has subcategories
       if (plumbingCategory.children) {
         const subcategory = plumbingCategory.children.find(
-          (sub) => sub.id === testSubcategoryId,
+          (sub: any) => sub.id === testSubcategoryId,
         );
         expect(subcategory).toBeDefined();
         expect(subcategory.name).toBe('Emergency Plumbing');
@@ -242,12 +242,12 @@ describe('Categories (E2E)', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       // All returned categories should be active
-      response.body.forEach((category) => {
+      response.body.forEach((category: any) => {
         expect(category.isActive).toBe(true);
       });
 
       // Should include our test category
-      const plumbingCategory = response.body.find((cat) => cat.id === testCategoryId);
+      const plumbingCategory = response.body.find((cat: any) => cat.id === testCategoryId);
       expect(plumbingCategory).toBeDefined();
     });
 
@@ -267,7 +267,7 @@ describe('Categories (E2E)', () => {
       expect(Array.isArray(response.body)).toBe(true);
 
       // Should include our subcategory
-      const subcategory = response.body.find((sub) => sub.id === testSubcategoryId);
+      const subcategory = response.body.find((sub: any) => sub.id === testSubcategoryId);
       expect(subcategory).toBeDefined();
       expect(subcategory.name).toBe('Emergency Plumbing');
       expect(subcategory.parentId).toBe(testCategoryId);
@@ -359,7 +359,7 @@ describe('Categories (E2E)', () => {
         .expect(200);
 
       expect(response.body.items.length).toBeGreaterThan(0);
-      const plumbingCategory = response.body.items.find((cat) => cat.id === testCategoryId);
+      const plumbingCategory = response.body.items.find((cat: any) => cat.id === testCategoryId);
       expect(plumbingCategory).toBeDefined();
     });
 

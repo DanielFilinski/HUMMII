@@ -57,7 +57,7 @@ describe('Proposals (E2E)', () => {
     // Set client role
     await prisma.user.update({
       where: { id: clientUserId },
-      data: { role: UserRole.CLIENT },
+      data: { roles: [UserRole.CLIENT] },
     });
 
     // Login client
@@ -84,7 +84,7 @@ describe('Proposals (E2E)', () => {
     // Set contractor role
     await prisma.user.update({
       where: { id: contractorUserId },
-      data: { role: UserRole.CONTRACTOR },
+      data: { roles: [UserRole.CONTRACTOR] },
     });
 
     // Login contractor
@@ -111,7 +111,7 @@ describe('Proposals (E2E)', () => {
     // Set contractor role
     await prisma.user.update({
       where: { id: contractor2UserId },
-      data: { role: UserRole.CONTRACTOR },
+      data: { roles: [UserRole.CONTRACTOR] },
     });
 
     // Login contractor 2
@@ -370,7 +370,7 @@ describe('Proposals (E2E)', () => {
 
       await prisma.user.update({
         where: { email: 'contractor3@test.com' },
-        data: { role: UserRole.CONTRACTOR },
+        data: { roles: [UserRole.CONTRACTOR] },
       });
 
       const login = await request(app.getHttpServer())
