@@ -151,57 +151,67 @@ export default function AuditLogsPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
-        <Card>
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold mb-4">Журнал аудита</h1>
+        {/* Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>
+            Журнал аудита
+          </h1>
+          <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
+            Просмотр всех действий администраторов и пользователей в системе
+          </p>
+        </div>
 
-            <Space className="mb-4" wrap>
-              <Search
-                placeholder="Поиск по User ID"
-                allowClear
-                style={{ width: 250 }}
-                onSearch={setUserId}
-                enterButton={<SearchOutlined />}
-              />
+        {/* Filters */}
+        <Card bordered={false} style={{ marginBottom: '16px' }}>
+          <Space size="middle" wrap>
+            <Search
+              placeholder="Поиск по User ID"
+              allowClear
+              style={{ width: 250 }}
+              onSearch={setUserId}
+              enterButton={<SearchOutlined />}
+            />
 
-              <Select
-                placeholder="Фильтр по действию"
-                style={{ width: 200 }}
-                allowClear
-                onChange={setAction}
-                options={[
-                  { label: 'Все действия', value: undefined },
-                  { label: 'Создание', value: 'CREATE' },
-                  { label: 'Обновление', value: 'UPDATE' },
-                  { label: 'Удаление', value: 'DELETE' },
-                  { label: 'Вход', value: 'LOGIN' },
-                  { label: 'Выход', value: 'LOGOUT' },
-                  { label: 'Подтверждение', value: 'VERIFY' },
-                  { label: 'Отклонение', value: 'REJECT' },
-                  { label: 'Блокировка', value: 'LOCK' },
-                  { label: 'Разблокировка', value: 'UNLOCK' },
-                ]}
-              />
+            <Select
+              placeholder="Фильтр по действию"
+              style={{ width: 200 }}
+              allowClear
+              onChange={setAction}
+              options={[
+                { label: 'Все действия', value: undefined },
+                { label: 'Создание', value: 'CREATE' },
+                { label: 'Обновление', value: 'UPDATE' },
+                { label: 'Удаление', value: 'DELETE' },
+                { label: 'Вход', value: 'LOGIN' },
+                { label: 'Выход', value: 'LOGOUT' },
+                { label: 'Подтверждение', value: 'VERIFY' },
+                { label: 'Отклонение', value: 'REJECT' },
+                { label: 'Блокировка', value: 'LOCK' },
+                { label: 'Разблокировка', value: 'UNLOCK' },
+              ]}
+            />
 
-              <Select
-                placeholder="Фильтр по типу ресурса"
-                style={{ width: 200 }}
-                allowClear
-                onChange={setResourceType}
-                options={[
-                  { label: 'Все типы', value: undefined },
-                  { label: 'Пользователь', value: 'USER' },
-                  { label: 'Заказ', value: 'ORDER' },
-                  { label: 'Контрактер', value: 'CONTRACTOR' },
-                  { label: 'Отзыв', value: 'REVIEW' },
-                  { label: 'Портфолио', value: 'PORTFOLIO' },
-                ]}
-              />
-            </Space>
-          </div>
+            <Select
+              placeholder="Фильтр по типу ресурса"
+              style={{ width: 200 }}
+              allowClear
+              onChange={setResourceType}
+              options={[
+                { label: 'Все типы', value: undefined },
+                { label: 'Пользователь', value: 'USER' },
+                { label: 'Заказ', value: 'ORDER' },
+                { label: 'Контрактер', value: 'CONTRACTOR' },
+                { label: 'Отзыв', value: 'REVIEW' },
+                { label: 'Портфолио', value: 'PORTFOLIO' },
+              ]}
+            />
+          </Space>
+        </Card>
 
+        {/* Table */}
+        <Card bordered={false}>
           <Table
             columns={columns}
             dataSource={data?.data || []}
@@ -212,7 +222,7 @@ export default function AuditLogsPage() {
               pageSize: limit,
               total: data?.pagination.total || 0,
               onChange: setPage,
-              showSizeChanger: false,
+              showSizeChanger: true,
               showTotal: (total) => `Всего: ${total} записей`,
             }}
             scroll={{ x: 1200 }}

@@ -140,12 +140,12 @@ export default function UsersPage() {
         <Space size={[0, 8]} wrap>
           {roles.map((role) => {
             const colors = {
-              ADMIN: 'red',
-              CONTRACTOR: 'blue',
-              CLIENT: 'green',
+              ADMIN: '#EF4444',
+              CONTRACTOR: '#5B7FFF',
+              CLIENT: '#10B981',
             };
             return (
-              <Tag key={role} color={colors[role]}>
+              <Tag key={role} color={colors[role]} style={{ borderRadius: '6px', fontWeight: '500' }}>
                 {role}
               </Tag>
             );
@@ -219,36 +219,46 @@ export default function UsersPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
-        <Card>
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold mb-4">Управление пользователями</h1>
-            
-            <Space className="mb-4" wrap>
-              <Search
-                placeholder="Поиск по имени или email"
-                allowClear
-                style={{ width: 300 }}
-                onSearch={setSearch}
-                enterButton={<SearchOutlined />}
-              />
-              
-              <Select
-                placeholder="Фильтр по роли"
-                style={{ width: 200 }}
-                allowClear
-                onChange={setRoleFilter}
-                options={[
-                  { label: 'Все роли', value: undefined },
-                  { label: 'Администраторы', value: UserRole.ADMIN },
-                  { label: 'Исполнители', value: UserRole.CONTRACTOR },
-                  { label: 'Клиенты', value: UserRole.CLIENT },
-                ]}
-              />
-            </Space>
-          </div>
+        {/* Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>
+            Управление пользователями
+          </h1>
+          <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
+            Просмотр и управление всеми пользователями платформы
+          </p>
+        </div>
 
+        {/* Filters */}
+        <Card bordered={false} style={{ marginBottom: '16px' }}>
+          <Space size="middle" wrap>
+            <Search
+              placeholder="Поиск по имени или email"
+              allowClear
+              style={{ width: 300 }}
+              onSearch={setSearch}
+              enterButton={<SearchOutlined />}
+            />
+
+            <Select
+              placeholder="Фильтр по роли"
+              style={{ width: 200 }}
+              allowClear
+              onChange={setRoleFilter}
+              options={[
+                { label: 'Все роли', value: undefined },
+                { label: 'Администраторы', value: UserRole.ADMIN },
+                { label: 'Исполнители', value: UserRole.CONTRACTOR },
+                { label: 'Клиенты', value: UserRole.CLIENT },
+              ]}
+            />
+          </Space>
+        </Card>
+
+        {/* Users Table */}
+        <Card bordered={false}>
           <Table
             columns={columns}
             dataSource={data?.data || []}
@@ -259,7 +269,7 @@ export default function UsersPage() {
               pageSize: limit,
               total: data?.pagination.total || 0,
               onChange: setPage,
-              showSizeChanger: false,
+              showSizeChanger: true,
               showTotal: (total) => `Всего: ${total} пользователей`,
             }}
           />

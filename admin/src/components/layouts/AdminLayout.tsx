@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Button, theme, Badge, Drawer } from 'antd';
 import { useAuth } from '@/providers/AuthProvider';
-import { motion } from 'framer-motion';
 import {
   DashboardOutlined,
   UserOutlined,
@@ -53,6 +52,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       onClick: () => handleMenuClick('/admin/users'),
     },
     {
+      key: 'orders',
+      icon: <ShoppingOutlined />,
+      label: 'Заказы',
+      onClick: () => handleMenuClick('/admin/orders'),
+    },
+    {
       key: 'moderation',
       icon: <FileProtectOutlined />,
       label: 'Модерация',
@@ -98,33 +103,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const sidebarContent = (
-    <motion.div
-      initial={{ x: -260, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-    >
-      <div style={{ 
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{
         padding: '24px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: '#5B7FFF',
         color: 'white',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
       }}>
-        <motion.h1 
-          style={{ 
-            fontSize: '24px', 
-            fontWeight: 'bold',
-            margin: 0,
-          }}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2 }}
-        >
+        <h1 style={{
+          fontSize: '24px',
+          fontWeight: '700',
+          margin: 0,
+          letterSpacing: '-0.5px',
+        }}>
           Hummii Admin
-        </motion.h1>
-        <p style={{ 
-          fontSize: '14px', 
-          opacity: 0.9, 
-          margin: '8px 0 0 0' 
+        </h1>
+        <p style={{
+          fontSize: '13px',
+          opacity: 0.85,
+          margin: '6px 0 0 0',
+          fontWeight: '400',
         }}>
           Панель управления
         </p>
@@ -133,15 +131,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         mode="inline"
         selectedKeys={[pathname?.split('/')[2] || 'dashboard']}
         items={menuItems}
-        style={{ 
-          border: 'none', 
+        style={{
+          border: 'none',
           background: 'transparent',
           marginTop: '16px',
           flex: 1,
         }}
         className="admin-menu"
       />
-    </motion.div>
+    </div>
   );
 
   return (
@@ -170,14 +168,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Drawer */}
       <Drawer
         title={
-          <div style={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          <div style={{
+            background: '#5B7FFF',
             color: 'white',
             margin: '-24px -24px 0',
             padding: '16px 24px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
           }}>
-            <h2 style={{ margin: 0, fontSize: '20px' }}>Hummii Admin</h2>
-            <p style={{ margin: '4px 0 0', fontSize: '12px', opacity: 0.9 }}>Панель управления</p>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>Hummii Admin</h2>
+            <p style={{ margin: '4px 0 0', fontSize: '12px', opacity: 0.85 }}>Панель управления</p>
           </div>
         }
         placement="left"
@@ -214,12 +213,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             height: '64px',
           }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Mobile Menu Button */}
             <Button
               type="text"
@@ -232,22 +226,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 height: '40px',
               }}
             />
-            <h2 style={{ 
-              fontSize: '18px', 
-              fontWeight: '600', 
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: '600',
               color: '#262626',
               margin: 0,
             }}>
               Добро пожаловать, {user?.name || 'Администратор'}!
             </h2>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-            style={{ display: 'flex', alignItems: 'center', gap: '16px' }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <Badge count={3} offset={[-5, 5]}>
               <Button 
                 type="text" 
@@ -277,10 +266,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   border: '1px solid #f0f0f0',
                 }}
               >
-                <Avatar 
-                  size={32} 
+                <Avatar
+                  size={32}
                   style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#5B7FFF',
+                    fontWeight: '600',
                   }}
                 >
                   {user?.name?.charAt(0) || 'A'}
@@ -288,23 +278,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span style={{ fontWeight: 500 }}>{user?.name || 'Администратор'}</span>
               </Button>
             </Dropdown>
-          </motion.div>
+          </div>
         </Header>
         
-        <Content style={{ 
+        <Content style={{
           margin: '24px',
           padding: '24px',
           background: '#f5f7fa',
           minHeight: 'calc(100vh - 112px)',
           borderRadius: '8px',
         }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-          >
-            {children}
-          </motion.div>
+          {children}
         </Content>
       </Layout>
     </Layout>

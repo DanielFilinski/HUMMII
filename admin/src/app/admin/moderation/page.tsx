@@ -185,11 +185,20 @@ export default function ModerationPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
-        <Card>
-          <h1 className="text-2xl font-bold mb-4">Модерация контрактеров</h1>
+        {/* Header */}
+        <div style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>
+            Модерация контрактеров
+          </h1>
+          <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
+            Проверка и подтверждение заявок на регистрацию исполнителей
+          </p>
+        </div>
 
+        {/* Table */}
+        <Card bordered={false}>
           <Table
             columns={columns}
             dataSource={data?.data || []}
@@ -200,7 +209,7 @@ export default function ModerationPage() {
               pageSize: limit,
               total: data?.pagination.total || 0,
               onChange: setPage,
-              showSizeChanger: false,
+              showSizeChanger: true,
               showTotal: (total) => `Всего: ${total} заявок`,
             }}
           />
