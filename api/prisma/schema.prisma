@@ -221,25 +221,29 @@ model User {
   deletedAt DateTime? // Soft delete for PIPEDA compliance
 
   // Relations
-  clientOrders      Order[]           @relation("ClientOrders")
-  contractorOrders  Order[]           @relation("ContractorOrders")
-  sentMessages      Message[]         @relation("SentMessages")
-  receivedMessages  Message[]         @relation("ReceivedMessages")
-  reviewsGiven      Review[]          @relation("ReviewsGiven")
-  reviewsReceived   Review[]          @relation("ReviewsReceived")
-  reviewsModerated  Review[]          @relation("ReviewsModerated")
-  reportsGiven      ReviewReport[]    @relation("ReportsGiven")
-  reportsReviewed   ReviewReport[]    @relation("ReportsReviewed")
-  notifications            Notification[]
-  notificationPreferences   NotificationPreferences?
-  sessions          Session[]
-  auditLogs         AuditLog[]        @relation("AuditLogs")
-  ratingStats       UserRatingStats?
-  disputesInitiated Dispute[]         @relation("DisputesInitiated")
-  disputesResponded Dispute[]         @relation("DisputesResponded")
-  disputesResolved  Dispute[]         @relation("DisputesResolved")
-  disputeEvidence   DisputeEvidence[]
-  disputeMessages   DisputeMessage[]
+  clientOrders            Order[]                  @relation("ClientOrders")
+  contractorOrders        Order[]                  @relation("ContractorOrders")
+  sentMessages            Message[]                @relation("SentMessages")
+  receivedMessages        Message[]                @relation("ReceivedMessages")
+  reviewsGiven            Review[]                 @relation("ReviewsGiven")
+  reviewsReceived         Review[]                 @relation("ReviewsReceived")
+  reviewsModerated        Review[]                 @relation("ReviewsModerated")
+  reportsGiven            ReviewReport[]           @relation("ReportsGiven")
+  reportsReviewed         ReviewReport[]           @relation("ReportsReviewed")
+  notifications           Notification[]
+  notificationPreferences NotificationPreferences?
+  sessions                Session[]
+  auditLogs               AuditLog[]               @relation("AuditLogs")
+  ratingStats             UserRatingStats?
+  disputesInitiated       Dispute[]                @relation("DisputesInitiated")
+  disputesResponded       Dispute[]                @relation("DisputesResponded")
+  disputesResolved        Dispute[]                @relation("DisputesResolved")
+  disputeEvidence         DisputeEvidence[]
+  disputeMessages         DisputeMessage[]
+
+  // Analytics relations
+  analytics           UserAnalytics?       @relation("UserAnalytics")
+  contractorAnalytics ContractorAnalytics? @relation("ContractorAnalytics")
 
   @@index([email])
   @@index([phone])
@@ -426,6 +430,9 @@ model Order {
   review    Review?
   payment   Payment?
   dispute   Dispute?
+
+  // Analytics
+  analytics OrderAnalytics? @relation("OrderAnalytics")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -791,21 +798,21 @@ model DisputeMessage {
 // ============================================================================
 
 model Notification {
-  id          String             @id @default(uuid())
-  userId      String
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        NotificationType
-  priority    NotificationPriority @default(MEDIUM)
-  title       String             @db.VarChar(255)
-  body        String             @db.Text
-  actionUrl   String?            @db.VarChar(500) // Deep link for mobile
-  metadata    Json?              // Additional data
-  isRead      Boolean            @default(false)
-  readAt      DateTime?
-  channels    NotificationChannel[] // Channels through which notification was sent
-  sentAt      DateTime?          // When notification was sent
-  createdAt   DateTime           @default(now())
-  expiresAt   DateTime?         // For time-sensitive notifications
+  id        String                @id @default(uuid())
+  userId    String
+  user      User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  priority  NotificationPriority  @default(MEDIUM)
+  title     String                @db.VarChar(255)
+  body      String                @db.Text
+  actionUrl String?               @db.VarChar(500) // Deep link for mobile
+  metadata  Json? // Additional data
+  isRead    Boolean               @default(false)
+  readAt    DateTime?
+  channels  NotificationChannel[] // Channels through which notification was sent
+  sentAt    DateTime? // When notification was sent
+  createdAt DateTime              @default(now())
+  expiresAt DateTime? // For time-sensitive notifications
 
   @@index([userId, isRead])
   @@index([userId, createdAt])
@@ -814,54 +821,54 @@ model Notification {
 }
 
 model NotificationPreferences {
-  id                    String   @id @default(uuid())
-  userId                String   @unique
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Email settings
-  emailEnabled           Boolean  @default(true)
-  emailOrderUpdates      Boolean  @default(true)
-  emailNewProposals      Boolean  @default(true)
-  emailMessages          Boolean  @default(true)
-  emailPayments          Boolean  @default(true)
-  emailReviews           Boolean  @default(true)
-  emailDisputes          Boolean  @default(true)
-  emailSecurity          Boolean  @default(true) // Always true - cannot be disabled
-  emailMarketing         Boolean  @default(false)
-  emailDigest            Boolean  @default(true) // Daily digest
-  emailDigestTime        String   @default("09:00") // Time in HH:mm format
+  emailEnabled      Boolean @default(true)
+  emailOrderUpdates Boolean @default(true)
+  emailNewProposals Boolean @default(true)
+  emailMessages     Boolean @default(true)
+  emailPayments     Boolean @default(true)
+  emailReviews      Boolean @default(true)
+  emailDisputes     Boolean @default(true)
+  emailSecurity     Boolean @default(true) // Always true - cannot be disabled
+  emailMarketing    Boolean @default(false)
+  emailDigest       Boolean @default(true) // Daily digest
+  emailDigestTime   String  @default("09:00") // Time in HH:mm format
 
   // Push settings
-  pushEnabled            Boolean  @default(true)
-  pushOrderUpdates       Boolean  @default(true)
-  pushNewProposals       Boolean  @default(true)
-  pushMessages           Boolean  @default(true)
-  pushPayments           Boolean  @default(true)
-  pushReviews            Boolean  @default(true)
-  pushDisputes           Boolean  @default(true)
-  pushSecurity           Boolean  @default(true) // Always true
+  pushEnabled      Boolean @default(true)
+  pushOrderUpdates Boolean @default(true)
+  pushNewProposals Boolean @default(true)
+  pushMessages     Boolean @default(true)
+  pushPayments     Boolean @default(true)
+  pushReviews      Boolean @default(true)
+  pushDisputes     Boolean @default(true)
+  pushSecurity     Boolean @default(true) // Always true
 
   // In-app settings
-  inAppEnabled           Boolean  @default(true)
-  inAppSound             Boolean  @default(true)
-  inAppVibration         Boolean  @default(true)
+  inAppEnabled   Boolean @default(true)
+  inAppSound     Boolean @default(true)
+  inAppVibration Boolean @default(true)
 
-  updatedAt              DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@map("notification_preferences")
 }
 
 model EmailLog {
-  id          String   @id @default(uuid())
-  userId      String?
-  email       String   @db.VarChar(255)
-  subject     String   @db.VarChar(500)
-  template    String   @db.VarChar(100)
-  status      String   @db.VarChar(50) // sent, failed, bounced
-  provider    String   @default("onesignal") // onesignal, sendgrid, etc.
-  providerId  String?  @db.VarChar(255) // External provider message ID
-  error       String?  @db.Text
-  sentAt      DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String?
+  email      String   @db.VarChar(255)
+  subject    String   @db.VarChar(500)
+  template   String   @db.VarChar(100)
+  status     String   @db.VarChar(50) // sent, failed, bounced
+  provider   String   @default("onesignal") // onesignal, sendgrid, etc.
+  providerId String?  @db.VarChar(255) // External provider message ID
+  error      String?  @db.Text
+  sentAt     DateTime @default(now())
 
   @@index([userId])
   @@index([email])
@@ -964,7 +971,8 @@ model Subscription {
   updatedAt DateTime @updatedAt
 
   // Relations
-  history SubscriptionHistory[]
+  history   SubscriptionHistory[]
+  analytics SubscriptionAnalytics? @relation("SubscriptionAnalytics")
 
   @@index([contractorId])
   @@index([stripeSubscriptionId])
@@ -1020,14 +1028,14 @@ model SystemSettings {
 }
 
 model FeatureFlag {
-  id               String   @id @default(uuid())
-  name             String   @unique
-  enabled          Boolean  @default(false)
-  rolloutPercentage Int    @default(0) // 0-100, percentage of users to enable for
-  description      String?  @db.Text
-  updatedBy        String?
-  updatedAt        DateTime @updatedAt
-  createdAt        DateTime @default(now())
+  id                String   @id @default(uuid())
+  name              String   @unique
+  enabled           Boolean  @default(false)
+  rolloutPercentage Int      @default(0) // 0-100, percentage of users to enable for
+  description       String?  @db.Text
+  updatedBy         String?
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
 
   @@index([name])
   @@index([enabled])
@@ -1039,14 +1047,14 @@ model FeatureFlag {
 // ============================================================================
 
 model ContractorSlug {
-  id          String   @id @default(cuid())
+  id           String   @id @default(cuid())
   contractorId String   @unique
-  slug        String   @unique
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug         String   @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  contractor  Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
+  contractor Contractor @relation(fields: [contractorId], references: [id], onDelete: Cascade)
 
   @@index([slug])
   @@index([isActive])
@@ -1054,11 +1062,11 @@ model ContractorSlug {
 }
 
 model UrlRedirect {
-  id          String   @id @default(cuid())
-  fromPath    String   @unique
-  toPath      String
-  statusCode  Int      @default(301)
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(301)
+  createdAt  DateTime @default(now())
 
   @@index([fromPath])
   @@index([toPath])
@@ -1070,14 +1078,14 @@ model UrlRedirect {
 // ============================================================================
 
 model AnalyticsEvent {
-  id         String   @id @default(cuid())
-  eventType  String   // 'profile_view', 'search', 'conversion', 'order_view'
-  sessionId  String   // Anonymous session (NOT user ID)
-  entityId   String?  // Contractor ID, Order ID (if relevant)
-  metadata   Json?    // Event-specific data (NO PII)
-  ipHash     String?  // Hashed IP (SHA-256) for geolocation only
-  userAgent  String?  // Browser info (anonymized)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  eventType String // 'profile_view', 'search', 'conversion', 'order_view'
+  sessionId String // Anonymous session (NOT user ID)
+  entityId  String? // Contractor ID, Order ID (if relevant)
+  metadata  Json? // Event-specific data (NO PII)
+  ipHash    String? // Hashed IP (SHA-256) for geolocation only
+  userAgent String? // Browser info (anonymized)
+  createdAt DateTime @default(now())
 
   @@index([eventType, createdAt])
   @@index([sessionId])
@@ -1088,15 +1096,243 @@ model AnalyticsEvent {
 
 model SearchAnalytics {
   id        String   @id @default(cuid())
-  query     String   // Search term (anonymized if PII detected)
+  query     String // Search term (anonymized if PII detected)
   category  String?
-  location  String?  // City/region only (NO full address)
-  results   Int      // Number of results
-  sessionId String   // Anonymous session
+  location  String? // City/region only (NO full address)
+  results   Int // Number of results
+  sessionId String // Anonymous session
   createdAt DateTime @default(now())
 
   @@index([createdAt])
   @@index([category])
   @@index([location])
   @@map("search_analytics")
+}
+
+// ============================================================================
+// USER LIFECYCLE ANALYTICS (PIPEDA-compliant)
+// ============================================================================
+
+model UserAnalytics {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation("UserAnalytics", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Registration tracking
+  registrationSource String? // organic, referral, paid, social, google_oauth
+  referralCode       String?
+  utmSource          String?
+  utmMedium          String?
+  utmCampaign        String?
+  utmContent         String?
+  utmTerm            String?
+
+  // Onboarding milestones
+  emailVerifiedAt       DateTime?
+  profileCompletedAt    DateTime?
+  firstOrderCreatedAt   DateTime?
+  firstProposalSentAt   DateTime?
+  firstOrderCompletedAt DateTime?
+
+  // Engagement metrics
+  lastActiveAt           DateTime?
+  totalSessions          Int       @default(0)
+  totalSessionDuration   Int       @default(0) // seconds
+  averageSessionDuration Float?
+
+  // Feature usage (anonymized counts)
+  featuresUsed Json? // { search: 20, chat: 5, profile_views: 10 }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([registrationSource])
+  @@index([createdAt])
+  @@map("user_analytics")
+}
+
+// ============================================================================
+// ORDER LIFECYCLE ANALYTICS
+// ============================================================================
+
+model OrderAnalytics {
+  id      String @id @default(uuid())
+  orderId String @unique
+  order   Order  @relation("OrderAnalytics", fields: [orderId], references: [id], onDelete: Cascade)
+
+  // Timing metrics (in seconds)
+  createdToDraftDuration Int?
+  draftToPublishDuration Int?
+  publishToFirstProposal Int?
+  publishToAcceptance    Int?
+  acceptanceToStart      Int?
+  startToCompletion      Int?
+  totalDuration          Int?
+
+  // Proposal statistics
+  totalProposals       Int      @default(0)
+  averageProposalPrice Decimal? @db.Decimal(10, 2)
+  lowestProposalPrice  Decimal? @db.Decimal(10, 2)
+  highestProposalPrice Decimal? @db.Decimal(10, 2)
+  acceptedProposalRank Int? // 1 = lowest price, etc.
+
+  // Engagement metrics
+  viewCount       Int @default(0)
+  uniqueViewCount Int @default(0)
+
+  // Outcome tracking
+  completionStatus   String? // completed, cancelled, disputed, expired
+  cancellationReason String?
+  disputeReason      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([completionStatus])
+  @@index([createdAt])
+  @@map("order_analytics")
+}
+
+// ============================================================================
+// CONTRACTOR PERFORMANCE ANALYTICS
+// ============================================================================
+
+model ContractorAnalytics {
+  id           String @id @default(uuid())
+  contractorId String @unique
+  contractor   User   @relation("ContractorAnalytics", fields: [contractorId], references: [id], onDelete: Cascade)
+
+  // Profile performance
+  profileViews         Int    @default(0)
+  profileViewsUnique   Int    @default(0)
+  profileToContactRate Float? // Click-through rate
+
+  // Proposal metrics
+  proposalsSubmitted     Int    @default(0)
+  proposalsAccepted      Int    @default(0)
+  proposalsRejected      Int    @default(0)
+  proposalAcceptanceRate Float? // Calculated: accepted / submitted
+  averageResponseTime    Int? // Average time to submit proposal (seconds)
+
+  // Order performance
+  ordersCompleted       Int    @default(0)
+  ordersOnTime          Int    @default(0)
+  ordersCancelled       Int    @default(0)
+  averageCompletionTime Int? // Average vs estimated time
+  onTimeDeliveryRate    Float? // Percentage
+
+  // Revenue tracking
+  totalRevenue      Decimal  @default(0) @db.Decimal(10, 2)
+  averageOrderValue Decimal? @db.Decimal(10, 2)
+
+  // Quality metrics
+  averageRating Float?
+  totalReviews  Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractorId])
+  @@index([proposalAcceptanceRate])
+  @@index([averageRating])
+  @@map("contractor_analytics")
+}
+
+// ============================================================================
+// SUBSCRIPTION ANALYTICS (Revenue tracking)
+// ============================================================================
+
+model SubscriptionAnalytics {
+  id             String       @id @default(uuid())
+  subscriptionId String       @unique
+  subscription   Subscription @relation("SubscriptionAnalytics", fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  // Trial conversion tracking
+  trialStartedAt      DateTime?
+  trialConvertedAt    DateTime?
+  trialDroppedAt      DateTime?
+  trialDurationDays   Int?
+  didConvertFromTrial Boolean   @default(false)
+
+  // Revenue metrics
+  lifetimeValue       Decimal  @default(0) @db.Decimal(10, 2)
+  monthsActive        Int      @default(0)
+  totalPaid           Decimal  @default(0) @db.Decimal(10, 2)
+  averageMonthlyValue Decimal? @db.Decimal(10, 2)
+
+  // Churn tracking
+  churnedAt         DateTime?
+  churnReason       String? // cancelled, payment_failed, downgraded_to_free
+  monthsBeforeChurn Int?
+  wasReactivated    Boolean   @default(false)
+  reactivationCount Int       @default(0)
+
+  // Tier changes
+  upgradeCount     Int       @default(0)
+  downgradeCount   Int       @default(0)
+  lastTierChangeAt DateTime?
+
+  // Payment health
+  paymentFailures      Int       @default(0)
+  lastPaymentFailureAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subscriptionId])
+  @@index([churnedAt])
+  @@index([didConvertFromTrial])
+  @@map("subscription_analytics")
+}
+
+// ============================================================================
+// DAILY REVENUE METRICS (Aggregated snapshots)
+// ============================================================================
+
+model RevenueMetrics {
+  id   String   @id @default(uuid())
+  date DateTime @unique @db.Date
+
+  // MRR/ARR calculations
+  mrr Decimal @default(0) @db.Decimal(10, 2) // Monthly Recurring Revenue
+  arr Decimal @default(0) @db.Decimal(10, 2) // Annual Recurring Revenue
+
+  // Subscription counts by tier
+  activeSubscriptions Int @default(0)
+  freeUsers           Int @default(0)
+  standardUsers       Int @default(0)
+  professionalUsers   Int @default(0)
+  advancedUsers       Int @default(0)
+
+  // Daily changes
+  newSubscriptions      Int @default(0)
+  canceledSubscriptions Int @default(0)
+  upgrades              Int @default(0)
+  downgrades            Int @default(0)
+
+  // Churn metrics
+  churnRate    Float   @default(0) // Percentage
+  revenueChurn Decimal @default(0) @db.Decimal(10, 2)
+
+  // Trial metrics
+  activeTrials        Int    @default(0)
+  trialConversions    Int    @default(0)
+  trialConversionRate Float? // Percentage
+
+  // User engagement
+  dailyActiveUsers   Int @default(0)
+  weeklyActiveUsers  Int @default(0)
+  monthlyActiveUsers Int @default(0)
+
+  // Order metrics
+  ordersCreated     Int      @default(0)
+  ordersCompleted   Int      @default(0)
+  averageOrderValue Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@map("revenue_metrics")
 }
