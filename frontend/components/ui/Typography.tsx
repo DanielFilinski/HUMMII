@@ -1,6 +1,6 @@
 import { type HTMLAttributes, type ElementType, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { typography } from '@/lib/design-tokens';
+import { typography } from './design-tokens';
 
 interface TypographyProps extends HTMLAttributes<HTMLElement> {
   /**
