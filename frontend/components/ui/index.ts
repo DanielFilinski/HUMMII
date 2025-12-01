@@ -1,11 +1,26 @@
-/**
- * Barrel export for UI components
- * Import components from this file for cleaner imports
- */
+// UI Components
+export { Avatar, AvatarGroup } from './Avatar';
+export { Badge } from './Badge';
+export { Button } from './Button';
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from './Card';
+export { Container } from './Container';
+export { Input } from './Input';
+export { Spinner } from './Spinner';
+export { Typography } from './Typography';
 
-export { Button, buttonVariants } from './button';
-export type { ButtonProps } from './button';
-
-export { Input } from './input';
-export type { InputProps } from './input';
-
+// Component Types
+export type { AvatarProps, AvatarGroupProps } from './Avatar';
+export type { BadgeProps } from './Badge';
+export type { ButtonProps } from './Button';
+export type { CardProps } from './Card';
+export type { ContainerProps } from './Container';
+export type { InputProps } from './Input';
+export type { SpinnerProps } from './Spinner';
+export type { TypographyProps } from './Typography';
