@@ -422,6 +422,19 @@ const config: Config = {
         'ease-out-smooth': 'cubic-bezier(0, 0, 0.2, 1)',
         'ease-in-smooth': 'cubic-bezier(0.4, 0, 1, 1)',
       },
+      /**
+       * LINE CLAMP
+       * Усечение текста с многоточием (поддержка для Typography компонента)
+       * Используйте: line-clamp-1, line-clamp-2, line-clamp-3 и т.д.
+       */
+      lineClamp: {
+        1: '1',
+        2: '2',
+        3: '3',
+        4: '4',
+        5: '5',
+        6: '6',
+      },
     },
   },
   plugins: [],

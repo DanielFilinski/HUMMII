@@ -19,7 +19,30 @@ export { Select } from './Select';
 export { Spinner } from './Spinner';
 export { Textarea } from './Textarea';
 export { Toggle } from './Toggle';
+
+// Typography System - основной компонент
 export { Typography } from './Typography';
+
+// Typography System - готовые компоненты-утилиты
+export {
+  Heading1,
+  Heading2,
+  Heading3,
+  Prose,
+  Link as TypographyLink,
+  Label,
+  ErrorText,
+  HelperText,
+  Badge as TypographyBadge,
+  Price,
+  Rating,
+  DateTime,
+  Status,
+  IconText,
+  EmptyState,
+  Counter,
+  Breadcrumbs,
+} from './typography-utils';
 
 // Component Types
 export type { AvatarProps, AvatarGroupProps } from './Avatar';
