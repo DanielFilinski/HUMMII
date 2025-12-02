@@ -65,11 +65,11 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
           
           // Состояния цвета
           'bg-accent-primary',
-          'hover:bg-accent-secondary',
-          'active:bg-accent-tertiary',
+          'hover:enabled:bg-accent-secondary',
+          'active:enabled:bg-accent-tertiary',
           
           // Состояние disabled
-          'disabled:opacity-40 disabled:cursor-not-allowed',
+          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent-primary',
           
           // Focus состояние (accessibility)
           'focus:outline-none',

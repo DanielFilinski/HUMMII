@@ -98,7 +98,7 @@ export function Header() {
               label={t('language')}
             />
 
-            <PrimaryButton isLoading/>
+            <PrimaryButton isLoading>Register</PrimaryButton>
 
             {/* Auth Buttons */}
             {isAuthenticated ? (
