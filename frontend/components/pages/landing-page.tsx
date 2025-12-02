@@ -394,6 +394,11 @@ export default function LandingPage() {
                   Become a Contractor
                 </Typography>
               </Link>
+              <Link href="/design-system" className="hover:text-accent-1 transition-colors">
+                <Typography variant="h3" color="secondary">
+                  Design System
+                </Typography>
+              </Link>
             </nav>
 
             {/* Right Side */}
