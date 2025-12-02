@@ -5,9 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { 
   Button, 
-  Input, 
   Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
+  CardFooter,
   Badge,
   Avatar,
   Typography,
@@ -65,55 +68,55 @@ const ContractorCard = ({
   tasksCompleted,
   avatar 
 }: ContractorCardProps) => (
-  <Card className="w-full bg-background-1 shadow-[0px_-4px_10px_0px_rgba(198,194,187,0.2)] rounded-[20px] overflow-hidden">
-    {/* Category Tag */}
+  <Card className="w-full shadow-[0px_-4px_10px_0px_rgba(198,194,187,0.2)] rounded-[20px] overflow-hidden" padding="none">
+    {/* Category Badge */}
     <div className="bg-accent-2 h-10 px-[30px] flex items-center justify-center">
-      <Typography variant="body" className="text-text-inverse">
+      <Typography variant="body" color="inverse">
         {category}
       </Typography>
     </div>
     
-    <CardContent className="flex flex-col items-center gap-2.5 pb-[15px] pt-0 px-0">
+    <CardContent className="flex flex-col items-center gap-2.5 pb-[15px] pt-0 px-5">
       {/* Avatar */}
-      <div className="w-[150px] h-[150px] relative rounded-full overflow-hidden">
-        <Image 
-          src={avatar}
-          alt={name}
-          fill
-          className="object-cover"
-        />
-      </div>
+      <Avatar 
+        src={avatar}
+        alt={name}
+        size="xl"
+        className="w-[150px] h-[150px] mt-4"
+      />
 
       {/* Info */}
-      <div className="flex flex-col items-center gap-1.5 w-full px-5">
-        <Typography variant="h3" className="text-text-primary text-center">
+      <CardHeader className="flex flex-col items-center gap-1.5 w-full">
+        <CardTitle className="text-center">
           {name}
-        </Typography>
+        </CardTitle>
         
         <div className="flex flex-col items-center gap-1.5 w-[197px]">
-          <Typography variant="bodySm" className="text-text-primary">
+          <Typography variant="bodySm" color="primary">
             {location}, {rate} $/Hr
           </Typography>
           
           <div className="flex items-center gap-2.5">
-            <Typography variant="tag" className="text-accent-1">
+            <Badge variant="success" size="sm">
               {rating}
-            </Typography>
+            </Badge>
             <StarRating rating={rating} />
           </div>
           
-          <Typography variant="bodySm" className="text-text-secondary">
+          <Typography variant="bodySm" color="secondary">
             {tasksCompleted} Tasks completed
           </Typography>
         </div>
-      </div>
+      </CardHeader>
 
       {/* View Profile Link */}
-      <button className="h-9 px-5 py-[11.25px] rounded-[750px] hover:bg-background-2 transition-colors">
-        <Typography variant="h3" className="text-accent-1">
-          View Profile
-        </Typography>
-      </button>
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        className="h-9 px-5 rounded-[750px] text-accent-1 hover:bg-background-2"
+      >
+        View Profile
+      </Button>
     </CardContent>
   </Card>
 );
@@ -129,23 +132,28 @@ const CategoryCard = ({ title, items, image }: CategoryCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="relative w-full sm:w-[305px] h-[305px] rounded-[20px] overflow-hidden bg-gradient-card">
+    <Card 
+      variant="gradient" 
+      className="relative w-full sm:w-[305px] h-[305px] rounded-[20px] overflow-hidden" 
+      padding="none"
+    >
       {/* Stacked Cards */}
       <div className="absolute top-5 left-[15.5px] right-[14.5px] space-y-0 z-10">
         {items.slice(0, 3).reverse().map((item, index) => (
-          <div 
+          <Card
             key={index}
             className={cn(
-              "bg-background-1 rounded-[10px] p-[15px] transition-all duration-300",
+              "rounded-[10px] p-[15px] transition-all duration-300",
               index === 0 && "shadow-none",
               index === 1 && "shadow-[0px_-10px_10px_0px_rgba(198,194,187,0.2)] -mt-[28.373px]",
               index === 2 && "shadow-[0px_-10px_10px_0px_rgba(198,194,187,0.2)] -mt-[29.212px]"
             )}
+            padding="none"
           >
-            <Typography variant="bodySm" className="text-text-primary">
+            <Typography variant="bodySm" color="primary">
               {item}
             </Typography>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -171,7 +179,7 @@ const CategoryCard = ({ title, items, image }: CategoryCardProps) => {
 
         {/* Title and Arrow */}
         <div className="absolute bottom-4 left-[15.5px] right-[14.5px] flex items-end justify-between">
-          <Typography variant="h2" className="text-text-primary">
+          <Typography variant="h2" color="primary">
             {title.split('/').map((line, i) => (
               <span key={i}>
                 {line}
@@ -183,6 +191,7 @@ const CategoryCard = ({ title, items, image }: CategoryCardProps) => {
           <button 
             className="w-8 h-8 flex items-center justify-center hover:bg-accent-1/10 rounded-full transition-colors"
             aria-label="View category"
+            onClick={() => setIsExpanded(!isExpanded)}
           >
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <path d="M23.04 10.72L16.544 17.216L10.048 10.72" stroke="#2A2A0F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" transform="rotate(180 16 16)"/>
@@ -190,7 +199,7 @@ const CategoryCard = ({ title, items, image }: CategoryCardProps) => {
           </button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -209,10 +218,10 @@ const AdvantageItem = ({ title, description }: AdvantageItemProps) => (
     </div>
     
     <div className="flex-1 space-y-2">
-      <Typography variant="h2" className="text-text-primary">
+      <Typography variant="h2" color="primary">
         {title}
       </Typography>
-      <Typography variant="body" className="text-text-primary">
+      <Typography variant="body" color="primary">
         {description}
       </Typography>
     </div>
@@ -361,26 +370,27 @@ export default function LandingPage() {
                 <span className="text-2xl font-bold text-accent-1">HUMMII</span>
               </div>
             </Link>
+            <Avatar  alt="User avatar" size='xs'  />
             
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-6">
               <Link href="#categories" className="hover:text-accent-1 transition-colors">
-                <Typography variant="h3" className="text-text-primary hover:text-accent-1">
+                <Typography variant="h3" color="primary">
                   Categories
                 </Typography>
               </Link>
               <Link href="#how-it-works" className="hover:text-accent-1 transition-colors">
-                <Typography variant="h3" className="text-text-primary hover:text-accent-1">
+                <Typography variant="h3" color="primary">
                   How It Works
                 </Typography>
               </Link>
               <Link href="#post-task" className="hover:text-accent-1 transition-colors">
-                <Typography variant="h3" className="text-text-primary hover:text-accent-1">
+                <Typography variant="h3" color="primary">
                   Post a Task
                 </Typography>
               </Link>
               <Link href="#become-contractor" className="hover:text-accent-1 transition-colors">
-                <Typography variant="h3" className="text-accent-1 hover:text-accent-2">
+                <Typography variant="h3" color="accent">
                   Become a Contractor
                 </Typography>
               </Link>
@@ -398,7 +408,7 @@ export default function LandingPage() {
               </button>
 
               {/* Sign In Button */}
-              <Button variant="primary" size="md" className="min-w-[200px]">
+              <Button variant="primary" size="lg" className="min-w-[200px] h-12">
                 Sign in/ Sign Up
               </Button>
 
@@ -439,24 +449,18 @@ export default function LandingPage() {
             >
               Find the Right Expert for Any Task
             </Typography>
-            <Input
-              placeholder="Search for any service..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
 
             {/* Search Bar */}
-            <Card className="bg-background-1 shadow-[0px_4px_15px_0px_rgba(0,0,0,0.15)] rounded-full overflow-hidden">
+            <div className="bg-background-1 shadow-[0px_4px_15px_0px_rgba(0,0,0,0.15)] rounded-full overflow-hidden">
               <div className="flex flex-col sm:flex-row items-stretch gap-0 h-[60px]">
-                <div className="flex-1 flex items-center px-4 gap-4">
+                <div className="flex-1 flex items-center px-6 gap-4">
                   <SearchIcon />
                   <input
                     type="text"
                     placeholder="Search for any service..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-primary/60 text-[20px] leading-8"
+                    className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-unfocused text-mobile-body md:text-tablet-body lg:text-desktop-body focus:ring-0"
                   />
                 </div>
                 <Button 
@@ -467,17 +471,19 @@ export default function LandingPage() {
                   View all services
                 </Button>
               </div>
-            </Card>
+            </div>
 
             {/* Popular Tags */}
             <div className="flex flex-wrap items-center justify-center gap-5 px-4">
               {popularTags.map((tag) => (
-                <button 
+                <Button
                   key={tag}
-                  className="h-[43px] px-[30px] rounded-full border border-accent-2 bg-transparent text-text-primary hover:bg-accent-2 hover:text-text-inverse transition-colors"
+                  variant="outline"
+                  size="md"
+                  className="h-[43px] px-[30px] rounded-full border border-accent-2 bg-transparent hover:bg-accent-2 hover:text-text-inverse"
                 >
-                  <Typography variant="bodySm">{tag}</Typography>
-                </button>
+                  {tag}
+                </Button>
               ))}
             </div>
           </div>
@@ -490,7 +496,7 @@ export default function LandingPage() {
       <section id="categories" className="py-12 md:py-16 lg:py-20">
         <Container>
           <div className="space-y-8">
-            <Typography variant="h1" className="text-text-primary">
+            <Typography variant="h1" color="primary">
               Categories
             </Typography>
 
@@ -530,18 +536,18 @@ export default function LandingPage() {
       {/* ============================================ */}
       <section id="post-task" className="py-12 md:py-16">
         <Container>
-          <div className="bg-gradient-banner rounded-[30px] overflow-hidden">
+          <Card variant="gradient" className="rounded-[30px] overflow-hidden bg-gradient-banner" padding="none">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr,750px] gap-8 lg:gap-10 p-6 md:p-8 lg:p-12 lg:pl-10">
               <div className="space-y-6 lg:space-y-12 flex flex-col justify-center order-2 lg:order-1">
                 <div className="space-y-8">
-                  <Typography variant="h1" className="text-text-primary leading-[1.2]">
+                  <Typography variant="h1" color="primary" className="leading-[1.2]">
                     Post a task - Get it done
                   </Typography>
                   <div className="space-y-0">
-                    <Typography variant="body" className="text-text-primary">
+                    <Typography variant="body" color="primary">
                       Submit your request for any service -
                     </Typography>
-                    <Typography variant="body" className="text-text-primary">
+                    <Typography variant="body" color="primary">
                       qualified specialists will respond directly.
                     </Typography>
                   </div>
@@ -561,7 +567,7 @@ export default function LandingPage() {
                 />
               </div>
             </div>
-          </div>
+          </Card>
         </Container>
       </section>
 
@@ -581,7 +587,7 @@ export default function LandingPage() {
 
         <Container className="relative">
           <div className="space-y-8">
-            <Typography variant="h1" className="text-text-primary">
+            <Typography variant="h1" color="primary">
               Top Contractors
             </Typography>
 
@@ -608,7 +614,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[972px,1fr] gap-12 lg:gap-16 items-center">
             {/* Left side - Advantages */}
             <div className="space-y-9 order-2 lg:order-1">
-              <Typography variant="h1" className="text-text-primary">
+              <Typography variant="h1" color="primary">
                 Why choose our Platform
               </Typography>
 
@@ -642,7 +648,7 @@ export default function LandingPage() {
       {/* ============================================ */}
       <section id="become-contractor" className="py-12 md:py-16">
         <Container>
-          <div className="bg-gradient-banner rounded-[30px] overflow-hidden">
+          <Card variant="gradient" className="rounded-[30px] overflow-hidden bg-gradient-banner" padding="none">
             <div className="grid grid-cols-1 lg:grid-cols-[750px,1fr] gap-8 lg:gap-10 p-6 md:p-8 lg:p-12 lg:pr-10">
               <div className="relative h-[300px] sm:h-[400px] lg:h-[450px] rounded-l-[10px] overflow-hidden">
                 <Image 
@@ -655,10 +661,10 @@ export default function LandingPage() {
 
               <div className="space-y-6 lg:space-y-12 flex flex-col justify-center">
                 <div className="space-y-8">
-                  <Typography variant="h1" className="text-text-primary leading-[1.2]">
+                  <Typography variant="h1" color="primary" className="leading-[1.2]">
                     Your Talent. Their Need. One Click Away.
                   </Typography>
-                  <Typography variant="body" className="text-text-primary">
+                  <Typography variant="body" color="primary">
                     Start offering your skills and connect with clients who need your expertise.
                   </Typography>
                 </div>
@@ -667,7 +673,7 @@ export default function LandingPage() {
                 </Button>
               </div>
             </div>
-          </div>
+          </Card>
         </Container>
       </section>
 
@@ -681,7 +687,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-12 lg:gap-[60px]">
               {/* Discover */}
               <div className="space-y-4 w-full sm:w-auto">
-                <Typography variant="h3" className="text-text-secondary">
+                <Typography variant="h3" color="secondary">
                   Discover
                 </Typography>
                 <nav className="space-y-4">
@@ -695,14 +701,14 @@ export default function LandingPage() {
                     <Typography variant="h3">Post a Task</Typography>
                   </Link>
                   <Link href="#" className="block text-accent-1 hover:text-accent-2 transition-colors">
-                    <Typography variant="h3">Become a Tasker</Typography>
+                    <Typography variant="h3" color="accent">Become a Tasker</Typography>
                   </Link>
                 </nav>
               </div>
 
               {/* Company */}
               <div className="space-y-4 w-full sm:w-auto">
-                <Typography variant="h3" className="text-text-secondary">
+                <Typography variant="h3" color="secondary">
                   Company
                 </Typography>
                 <nav className="space-y-4">
@@ -724,7 +730,7 @@ export default function LandingPage() {
               <div className="h-11 w-[200px] relative flex items-center justify-center">
                 <span className="text-2xl font-bold text-accent-1">HUMMII</span>
               </div>
-              <Typography variant="bodySm" align="center" className="text-text-primary">
+              <Typography variant="bodySm" align="center" color="primary">
                 © 2025 All rights reserved.
               </Typography>
             </div>
@@ -735,7 +741,7 @@ export default function LandingPage() {
               <div className="space-y-4">
                 {/* Follow Us */}
                 <div className="space-y-4">
-                  <Typography variant="h3" className="text-text-secondary">
+                  <Typography variant="h3" color="secondary">
                     Follow Us
                   </Typography>
                   <div className="flex gap-4">
@@ -761,7 +767,7 @@ export default function LandingPage() {
 
                 {/* Language */}
                 <div className="space-y-4">
-                  <Typography variant="h3" className="text-text-secondary">
+                  <Typography variant="h3" color="secondary">
                     Language
                   </Typography>
                   <button className="flex items-center gap-1.5 text-text-primary hover:text-accent-1 transition-colors">
@@ -776,7 +782,7 @@ export default function LandingPage() {
 
               {/* Support */}
               <div className="space-y-4 flex flex-col items-end">
-                <Typography variant="h3" className="text-text-secondary">
+                <Typography variant="h3" color="secondary">
                   Need Help?
                 </Typography>
                 <Button variant="primary" size="md">

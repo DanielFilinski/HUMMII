@@ -1,0 +1,12 @@
+
+Test Suites: 19 failed, 7 passed, 26 total
+Tests:       48 failed, 4 skipped, 138 passed, 190 total
+Snapshots:   0 total
+Time:        24.14 s
+Ran all test suites.
+Exit code: 1
+
+Errors observed:
+1. supertest import issues in multiple files (e.g., user-profile.integration.spec.ts)
+2. Health check failed (404 Not Found on /health)
+3. ReviewsService duplicate review rejection logic mismatch

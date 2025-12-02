@@ -9,7 +9,7 @@ import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { login } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { GoogleIcon } from '@/components/ui/google-icon';
 
 export function LoginForm() {

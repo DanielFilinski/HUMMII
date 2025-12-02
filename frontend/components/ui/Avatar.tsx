@@ -21,7 +21,7 @@ interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
    * Size of the avatar
    * @default 'md'
    */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   
   /**
    * Shape of the avatar
@@ -33,6 +33,18 @@ interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
    * Show online status indicator
    */
   online?: boolean;
+  
+  /**
+   * Show border around avatar
+   * @default true
+   */
+  showBorder?: boolean;
+  
+  /**
+   * Variant for different states (affects border color)
+   * @default 'default'
+   */
+  variant?: 'default' | 'pressed' | 'filled';
 }
 
 const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
@@ -45,22 +57,39 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       size = 'md',
       shape = 'circle',
       online,
+      showBorder = true,
+      variant = 'default',
       ...props
     },
     ref
   ) => {
+    // Размеры аватара и внутреннего изображения Person.png
     const sizeClasses = {
-      xs: 'h-6 w-6 text-[10px]',
-      sm: 'h-8 w-8 text-xs',
-      md: 'h-10 w-10 text-sm',
-      lg: 'h-12 w-12 text-base',
-      xl: 'h-16 w-16 text-lg',
-      '2xl': 'h-24 w-24 text-2xl',
+      xs: 'h-9 w-9',  // 36px (24px для Person.png)
+      sm: 'h-[60px] w-[60px]',  // 60px (32px для Person.png)
+      md: 'h-20 w-20',  // 80px (40px для Person.png)
+      lg: 'h-[150px] w-[150px]',  // 150px
+      xl: 'h-[180px] w-[180px]',  // 180px (77px для Person.png)
+    };
+
+    // Размеры Person.png в зависимости от размера аватара
+    const personIconSizes = {
+      xs: 'w-6 h-6',  // 24px
+      sm: 'w-8 h-8',  // 32px
+      md: 'w-10 h-10',  // 40px
+      lg: 'w-[60px] h-[60px]',  // примерно 40% от 150px
+      xl: 'w-[77px] h-[77px]',  // 77px
     };
 
     const shapeClasses = {
       circle: 'rounded-full',
       square: 'rounded-lg',
+    };
+    
+    const borderClasses = {
+      default: 'border-2 border-[#E0E0E0]',
+      pressed: 'border-2 border-accent-1',
+      filled: 'border-2 border-transparent',
     };
 
     const statusSizeClasses = {
@@ -69,7 +98,6 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
       md: 'h-2.5 w-2.5',
       lg: 'h-3 w-3',
       xl: 'h-4 w-4',
-      '2xl': 'h-5 w-5',
     };
 
     return (
@@ -79,6 +107,7 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
           'relative inline-flex items-center justify-center overflow-hidden bg-background-2',
           sizeClasses[size],
           shapeClasses[shape],
+          showBorder && borderClasses[variant],
           className
         )}
         {...props}
@@ -89,14 +118,16 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
             alt={alt}
             className="h-full w-full object-cover"
             onError={(e) => {
-              // Fallback to initials if image fails to load
-              e.currentTarget.style.display = 'none';
+              // Fallback to default icon if image fails to load
+              e.currentTarget.src = '/images/icons/Person.png';
             }}
           />
         ) : (
-          <span className="font-semibold text-text-primary">
-            {fallback || alt.charAt(0).toUpperCase()}
-          </span>
+          <img
+            src="/images/icons/Person.png"
+            alt={alt}
+            className={cn('object-contain', personIconSizes[size])}
+          />
         )}
         
         {online !== undefined && (
@@ -128,7 +159,7 @@ interface AvatarGroupProps extends HTMLAttributes<HTMLDivElement> {
    * Size of avatars in the group
    * @default 'md'
    */
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(

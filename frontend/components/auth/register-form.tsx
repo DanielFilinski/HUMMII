@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { register } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 
 export function RegisterForm() {
   const router = useRouter();
