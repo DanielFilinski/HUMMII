@@ -13,6 +13,7 @@ import { LanguageSelector } from './LanguageSelector';
 import { UserMenu } from './UserMenu';
 import { MobileMenu } from './MobileMenu';
 import { Menu, X } from 'lucide-react';
+import {PrimaryButton} from '@/components/ui/button/PrimaryButton';
 
 export function Header() {
   const t = useTranslations('landing.header');
@@ -97,6 +98,8 @@ export function Header() {
               label={t('language')}
             />
 
+            <PrimaryButton isLoading/>
+
             {/* Auth Buttons */}
             {isAuthenticated ? (
               <UserMenu
@@ -119,6 +122,7 @@ export function Header() {
             {/* Auth Button - Always visible */}
             {!isAuthenticated && (
               <Link href={`/${locale}/auth/login`}>
+                
                 <Button variant="primary" size="sm">
                   {t('signInSignUp')}
                 </Button>
