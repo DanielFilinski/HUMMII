@@ -218,14 +218,6 @@ const config: Config = {
         'gradient-banner': 'var(--gradient-banner)',
       },
       /**
-       * ГРАДИЕНТЫ
-       */
-      backgroundImage: {
-        'gradient-main': 'var(--gradient-main)',
-        'gradient-card': 'var(--gradient-card)',
-        'gradient-banner': 'var(--gradient-banner)',
-      },
-      /**
        * ТИПОГРАФИКА
        */
       fontFamily: {
@@ -328,20 +320,6 @@ const config: Config = {
         'mobile-body-sm': ['14px', { lineHeight: '18px', fontWeight: '400' }],
         'mobile-tag': ['14px', { lineHeight: '18px', fontWeight: '800' }],
         'mobile-note': ['12px', { lineHeight: '16px', fontWeight: '400' }],
-      },
-      /**
-       * ВЕСА ШРИФТОВ
-       */
-      fontWeight: {
-        thin: '100',
-        extralight: '200',
-        light: '300',
-        regular: '400',
-        medium: '500',
-        semibold: '600',
-        bold: '700',
-        extrabold: '800',
-        black: '900',
       },
       /**
        * ВЕСА ШРИФТОВ
