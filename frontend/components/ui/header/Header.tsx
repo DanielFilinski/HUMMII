@@ -125,8 +125,21 @@ export function Header() {
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-desktop-body-sm font-medium text-text-primary transition-colors hover:bg-background-2"
                 aria-label={t('language')}
               >
-                <Globe className="h-5 w-5" />
+                <Image
+                  src="/images/icons/Property 1=Language.svg"
+                  alt="Language" 
+                  width={20}
+                  height={20}                 
+                  className="h-5 w-5"
+                />
                 <span className="uppercase">{locale}</span>
+                <Image
+                  src="/images/icons/Property 1=Arrow-down.svg"
+                  alt="Language" 
+                  width={20}
+                  height={20}                 
+                  className="h-5 w-5"
+                />
               </button>
 
               {/* Language Dropdown */}

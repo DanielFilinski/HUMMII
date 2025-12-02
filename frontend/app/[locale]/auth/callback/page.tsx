@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
       // Fetch user data from backend (tokens are in cookies)
       apiClient
         .get('/users/me')
-        .then((response) => {
+        .then((response: any) => {
           setUser(response.data);
           
           // Redirect to saved path or home

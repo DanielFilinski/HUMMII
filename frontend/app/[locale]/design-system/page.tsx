@@ -24,6 +24,7 @@ import {
   Typography,
 } from '@/components/ui';
 import { colors, gradients } from '@/lib/design-tokens';
+import { Header } from '@/components/ui/header/Header';
 
 export default function DesignSystemShowcase() {
   const [searchValue, setSearchValue] = useState('');
@@ -70,76 +71,8 @@ export default function DesignSystemShowcase() {
         <div className="space-y-16">
           {/* Header Variants Section */}
           <section>
-            <Typography as="h2" variant="h2" className="mb-6">
-              Header
-            </Typography>
-            <div className="space-y-4">
-              {/* Header Variant 1 */}
-              <Card padding="lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <Typography variant="h3" className="text-accent-1">
-                      HUMMII
-                    </Typography>
-                    <nav className="hidden md:flex gap-4">
-                      <Button variant="ghost" size="sm">
-                        Категории
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Как это работает
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Разместить заказ
-                      </Button>
-                    </nav>
-                  </div>
-                  <Button size="sm">Зарегистрируйся</Button>
-                </div>
-              </Card>
 
-              {/* Header Variant 2 */}
-              <Card padding="lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <Typography variant="h3" className="text-accent-1">
-                      HUMMII
-                    </Typography>
-                    <nav className="hidden md:flex gap-4">
-                      <Button variant="ghost" size="sm">
-                        Заказы
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        Как это работает
-                      </Button>
-                    </nav>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Button size="sm">Разместить заказ</Button>
-                    <Avatar size="sm" fallback="ИП" />
-                  </div>
-                </div>
-              </Card>
-
-              {/* Header Variant 3 */}
-              <Card padding="lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6">
-                    <Typography variant="h3" className="text-accent-1">
-                      HUMMII
-                    </Typography>
-                    <nav className="hidden md:flex gap-4">
-                      <Button variant="ghost" size="sm">
-                        Поиск заказов
-                      </Button>
-                    </nav>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="success">Профиль</Badge>
-                    <Avatar size="sm" fallback="ИП" online />
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <Header/>
           </section>
 
           {/* Colors Section */}

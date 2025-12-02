@@ -119,12 +119,12 @@ const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
             className="h-full w-full object-cover"
             onError={(e) => {
               // Fallback to default icon if image fails to load
-              e.currentTarget.src = '/images/icons/Person.png';
+              e.currentTarget.src = '/images/icons/Person.svg';
             }}
           />
         ) : (
           <img
-            src="/images/icons/Person.png"
+            src="/images/icons/Person.svg"
             alt={alt}
             className={cn('object-contain', personIconSizes[size])}
           />

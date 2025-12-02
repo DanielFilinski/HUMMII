@@ -36,7 +36,10 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: 'var(--background)',
+        background: {
+          DEFAULT: 'var(--background)',
+          2: '#f1f5f9',  // Light gray background
+        },
         foreground: 'var(--foreground)',
         accent: {
           1: '#16a34a',  // Primary green (Figma design)
@@ -45,6 +48,15 @@ const config: Config = {
         text: {
           primary: '#0f172a',     // Dark blue-black (Figma design)
           secondary: '#a0aac1',   // Gray (Figma design)
+          disabled: '#cbd5e1',    // Disabled text
+          unfocused: '#94a3b8',   // Unfocused text
+          inverse: '#ffffff',     // White text for dark backgrounds
+        },
+        feedback: {
+          error: '#dc2626',       // Error red
+          success: '#16a34a',     // Success green
+          warning: '#f59e0b',     // Warning yellow
+          info: '#3b82f6',        // Info blue
         },
       },
       // Responsive spacing scale
@@ -85,6 +97,13 @@ const config: Config = {
         '7xl': ['4.5rem', { lineHeight: '1' }],        // 72px
         '8xl': ['6rem', { lineHeight: '1' }],          // 96px
         '9xl': ['8rem', { lineHeight: '1' }],          // 128px
+        // Responsive body text
+        'mobile-body': ['0.875rem', { lineHeight: '1.25rem' }],    // 14px mobile
+        'mobile-body-sm': ['0.75rem', { lineHeight: '1rem' }],     // 12px mobile small
+        'tablet-body': ['0.9375rem', { lineHeight: '1.375rem' }],  // 15px tablet
+        'tablet-body-sm': ['0.8125rem', { lineHeight: '1.125rem' }], // 13px tablet small
+        'desktop-body': ['1rem', { lineHeight: '1.5rem' }],        // 16px desktop
+        'desktop-body-sm': ['0.875rem', { lineHeight: '1.25rem' }], // 14px desktop small
       },
       keyframes: {
         slideIn: {
