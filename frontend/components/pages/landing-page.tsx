@@ -10,7 +10,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
+  Input,
   Badge,
   Avatar,
   Typography,
@@ -427,10 +427,13 @@ export default function LandingPage() {
         </Container>
       </header>
 
+
+
       {/* ============================================ */}
       {/* HERO SECTION */}
       {/* ============================================ */}
       <section className="relative bg-gradient-main overflow-hidden">
+        <Input/>
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
           <div className="w-full h-full bg-repeat" style={{ 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { updateCookiePreferences } from '@/lib/api/users';
 import { CookiePreferences } from '@/types';
 import { useAuthStore } from '@/lib/store/auth-store';
