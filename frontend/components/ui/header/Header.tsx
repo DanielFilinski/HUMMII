@@ -73,15 +73,19 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between lg:h-20">
-          {/* Logo */}
-          <Logo locale={locale} />
+      <div className="mx-auto px-10">
+        <div className="flex h-[60px] items-center justify-between py-[18px]">
+          
+          <div className="flex items-center gap-8">
+            {/* Logo */}
+            <Logo locale={locale} />
 
-          {/* Desktop Navigation */}
-          <div className="hidden desktop:flex">
-            <Navigation items={navItems} pathname={pathname} />
+            {/* Desktop Navigation */}
+            <div className="hidden desktop:flex">
+              <Navigation items={navItems} pathname={pathname} />
+            </div>
           </div>
+          
 
           {/* Desktop Actions */}
           <div className="hidden items-center gap-4 desktop:flex">
@@ -110,37 +114,49 @@ export function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="desktop:hidden rounded-lg p-2 text-text-primary transition-colors hover:bg-background-2"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
+          {/* Mobile Actions - Always show Register button */}
+          <div className="flex items-center gap-3 desktop:hidden">
+            {/* Auth Button - Always visible */}
+            {!isAuthenticated && (
+              <Link href={`/${locale}/auth/login`}>
+                <Button variant="primary" size="sm">
+                  {t('signInSignUp')}
+                </Button>
+              </Link>
             )}
-          </button>
-        </div>
 
-        {/* Mobile Menu */}
-        <MobileMenu
-          isOpen={isMobileMenuOpen}
-          navItems={navItems}
-          pathname={pathname}
-          locale={locale}
-          availableLocales={availableLocales}
-          isAuthenticated={isAuthenticated}
-          user={user}
-          activeRole={activeRole}
-          onClose={() => setIsMobileMenuOpen(false)}
-          onLocaleChange={switchLocale}
-          onLogout={handleLogout}
-          languageLabel={t('language')}
-          signInLabel={t('signInSignUp')}
-        />
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="rounded-lg p-2 text-text-primary transition-colors hover:bg-background-2"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        navItems={navItems}
+        pathname={pathname}
+        locale={locale}
+        availableLocales={availableLocales}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        activeRole={activeRole}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onLocaleChange={switchLocale}
+        onLogout={handleLogout}
+        languageLabel={t('language')}
+        signInLabel={t('signInSignUp')}
+      />
     </header>
   );
 }

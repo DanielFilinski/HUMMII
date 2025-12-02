@@ -1,0 +1,49 @@
+---
+applyTo: '**'
+---
+# Project Context - Hummii
+
+## Critical Information
+
+**⚠️ CRITICAL: This project operates in Canada with strict privacy laws.**
+
+### Canadian Market Requirements
+- **PIPEDA** (Personal Information Protection and Electronic Documents Act) compliance is **MANDATORY**
+- **Data protection** - maximum security required
+- **Privacy laws** - strict regulations on personal data
+- **Bilingual support** - English + French required
+- **CAD currency** - Canadian dollar handling
+
+### Security Priorities
+
+**ALWAYS ensure:**
+1. Maximum security for user data interaction
+2. PIPEDA compliance for all personal data handling
+3. Secure data storage on servers
+4. Proper encryption (at rest and in transit)
+5. User privacy rights implementation (access, rectification, erasure, portability)
+
+### Project Overview
+
+**Hummii** - Service marketplace platform for finding and hiring contractors in Canada.
+
+**Key stakeholders:**
+- **CLIENT** - Service buyers
+- **CONTRACTOR** - Verified service providers
+- **ADMIN** - Platform moderators and managers
+- **PARTNER** - Retail partners (discount program)
+
+**Tech Stack:**
+- **Backend:** NestJS + TypeScript + Prisma + PostgreSQL
+- **Frontend:** Next.js 14 (App Router) + React 18 + Tailwind CSS
+- **Real-time:** Socket.io
+- **Payments:** Stripe
+- **Storage:** AWS S3
+- **Cache:** Redis
+
+
+---
+
+**For detailed security requirements, see:** `core-security.mdc`
+**For project structure, see:** `.claude/core/project-context.md`
+

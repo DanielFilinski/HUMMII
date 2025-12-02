@@ -70,11 +70,10 @@ export default function DesignSystemShowcase() {
 
         <div className="space-y-16">
           {/* Header Variants Section */}
-          <section>
-
+          
             <Header/>
           
-          </section>
+         
 
           {/* Colors Section */}
           <section>

@@ -1,0 +1,307 @@
+---
+applyTo: '**'
+---
+# Critical Rules - Hummii Project
+
+> **⚠️ MANDATORY - Read before any work**
+> **Priority:** MAXIMUM | **Version:** 1.0
+
+## Language Rules
+
+| Context | Language | Examples |
+|---------|----------|----------|
+| **Code** | English | Variables, functions, classes, code comments |
+| **Documentation** | Russian | `.md`, `.txt`, plans, specifications |
+| **Chat/Communication** | Russian | All messages with user, questions, answers |
+| **Internet Search** | 2025 data | Always search for fresh information |
+
+### Examples
+
+```typescript
+// ✅ CORRECT - code in English
+export class UserService {
+  /**
+   * Creates a new user with validated data
+   */
+  async createUser(data: CreateUserDto): Promise<User> {
+    // Implementation
+  }
+}
+
+// ❌ INCORRECT - code in Russian
+export class СервисПользователей {
+  async создатьПользователя(данные: any) {
+    // Реализация
+  }
+}
+```
+
+```markdown
+<!-- ✅ CORRECT - documentation in Russian -->
+# Руководство по разработке
+
+Этот документ описывает процесс разработки...
+
+<!-- ❌ INCORRECT - documentation in English -->
+# Development Guide
+
+This document describes the development process...
+```
+
+### Before Every Command
+
+**MANDATORY:**
+- Describe what the command will do
+- Indicate what will be affected/changed
+- Warn about potential risks
+
+## TypeScript Strict Rules
+
+### NEVER use `any`
+
+```typescript
+// ❌ NEVER
+function processData(data: any): any {
+  return data;
+}
+
+// ✅ CORRECT - use specific types
+function processData(data: UserData): ProcessedUserData {
+  return {
+    id: data.id,
+    name: data.name,
+  };
+}
+
+// ✅ CORRECT - use unknown for unknown types
+function processUnknownData(data: unknown): string {
+  if (typeof data === 'string') {
+    return data.toUpperCase();
+  }
+  throw new Error('Invalid data type');
+}
+```
+
+### Always declare types
+
+```typescript
+// ❌ BAD - implicit types
+const users = await fetchUsers(); // Type unknown
+let count; // Type any
+
+// ✅ GOOD - explicit types
+const users: User[] = await fetchUsers();
+let count: number = 0;
+
+// ✅ GOOD - inference where obvious
+const userName = 'John'; // Type string (inference)
+const userAge = 25; // Type number (inference)
+```
+
+## Security & PIPEDA Compliance (CRITICAL)
+
+**⚠️ This project operates in Canada with strict privacy laws:**
+- **PIPEDA** - Personal Information Protection and Electronic Documents Act
+- **Data protection** - mandatory
+- **Security requirements** - maximum
+- **Data storage and processing** - strictly regulated
+
+### NEVER Store in Plain Text
+
+- Passwords
+- API keys
+- Tokens
+- Credit card numbers
+- Social Insurance Numbers (SIN)
+
+### Always Validate
+
+- User input (client AND server)
+- File uploads
+- URL parameters
+- Query strings
+
+### Always Use
+
+- Parameterized queries (Prisma ORM)
+- HTTP-only cookies for tokens
+- HTTPS for all communications
+- Password hashing (bcrypt cost 12+ or Argon2)
+
+### Pre-Commit Checklist
+
+- [ ] No hardcoded secrets in code
+- [ ] All user inputs validated
+- [ ] Passwords hashed (bcrypt/Argon2)
+- [ ] Tokens in HTTP-only cookies
+- [ ] Parameterized queries (Prisma ORM)
+- [ ] HTTPS for all API requests
+- [ ] PII data encrypted or masked in logs
+- [ ] Rate limiting applied to endpoints
+
+## Code Quality Standards
+
+### Basic Principles
+
+1. **Security First**
+   - Priority #1 - security
+   - Project handles payments and personal data
+   - PIPEDA compliance mandatory
+   - All decisions made with security in mind
+
+2. **Performance Matters**
+   - Optimize database queries (indexes, no N+1)
+   - Use caching (Redis)
+   - Lazy loading and code splitting (frontend)
+   - Minimize bundle sizes
+   - Use async/await properly
+
+3. **Code Quality**
+   - **DRY** (Don't Repeat Yourself)
+   - **SOLID** principles
+   - Clean, readable, maintainable code
+   - Meaningful variable and function names
+   - Error handling and logging
+   - Modular, reusable components
+
+### Naming Conventions
+
+```typescript
+// Classes: PascalCase
+class UserService {}
+class OrderController {}
+
+// Variables/functions: camelCase
+const userName = 'John';
+function getUserById(id: string) {}
+
+// Constants: UPPER_SNAKE_CASE
+const MAX_UPLOAD_SIZE = 5 * 1024 * 1024; // 5MB
+const API_BASE_URL = 'https://api.hummii.ca';
+
+// Boolean: starts with verb
+const isLoading = true;
+const hasError = false;
+const canDelete = user.role === 'admin';
+
+// Files/directories: kebab-case
+user-profile.tsx
+order-service.ts
+
+// Interfaces: PascalCase
+interface IUser {}
+interface UserProfile {}
+```
+
+### Function Guidelines
+
+```typescript
+// ✅ GOOD - short functions with single responsibility
+async function getUserById(id: string): Promise<User> {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+  return user;
+}
+
+// ✅ GOOD - early returns to avoid nesting
+function processOrder(order: Order): ProcessResult {
+  if (!order.isValid) {
+    return { success: false, error: 'Invalid order' };
+  }
+  if (order.isPaid) {
+    return { success: false, error: 'Already paid' };
+  }
+  return { success: true };
+}
+```
+
+### Size Limits
+
+- **Functions:** < 20-30 lines (single responsibility)
+- **Classes:** < 200-300 lines, < 10 methods
+- **Files:** < 500 lines (split into modules)
+
+## Documentation
+
+```typescript
+// ✅ GOOD - JSDoc for public methods
+/**
+ * Creates a new user with validated data.
+ * Sends welcome email upon successful creation.
+ *
+ * @param data - User creation data (validated DTO)
+ * @returns Created user without password field
+ * @throws BadRequestException if email already exists
+ */
+async createUser(data: CreateUserDto): Promise<User> {
+  // Implementation
+}
+
+// ✅ GOOD - comments explain "WHY", not "WHAT"
+// We use bcrypt with cost 12 (not 10) for PIPEDA compliance
+const hashedPassword = await bcrypt.hash(password, 12);
+```
+
+### Documentation Strategy
+
+**NEVER create separate documentation files for routine tasks.**
+
+Instead, update existing tracking files:
+
+#### For Backend Tasks:
+- **`docs/plans/backend/tasks/COMPLETED.md`** - Add completed task with brief description
+- **`docs/plans/backend/tasks/TASKS_ANALYSIS.md`** - Update progress percentage if needed
+
+#### Only Create New Documentation For:
+1. **Major architecture changes** (new microservices, significant refactoring)
+2. **New major features** (entirely new modules like Payment, Chat, etc.)
+3. **API documentation** (OpenAPI/Swagger specs)
+4. **Deployment guides** (new infrastructure setup)
+
+#### Task Completion Format:
+At the end of each task, provide:
+1. **Commit message** (conventional commits format in English)
+2. **Brief update entry for COMPLETED.md**
+
+**Example:**
+```markdown
+✅ File upload система (S3 интеграция для аватаров)
+  - Implemented multipart/form-data upload endpoint
+  - S3 bucket configuration with proper IAM permissions
+  - Image optimization (resize to max 1024x1024, compress)
+  - Added MIME type validation and virus scanning
+```
+
+## Before Starting Work
+
+### Checklist
+
+- [ ] Read critical rules (this file)
+- [ ] Understand project context
+- [ ] Know which module I'm working on (Backend/Frontend/Ops)
+- [ ] Check security requirements for my task
+- [ ] Understand PIPEDA compliance requirements (if working with PII)
+- [ ] Ready to write code in English, documentation in Russian
+- [ ] Know how to test my changes
+
+### Before Commit
+
+- [ ] `pnpm run lint` - no errors
+- [ ] `pnpm run format` - code formatted
+- [ ] `pnpm run type-check` - TypeScript no errors
+- [ ] `pnpm run test` - tests pass
+- [ ] No `console.log` statements
+- [ ] No commented-out code
+- [ ] No `any` types
+- [ ] No hardcoded secrets
+- [ ] Security checklist passed
+- [ ] **COMPLETED.md updated** with task entry (for feature work)
+- [ ] Commit message prepared (conventional commits format)
+
+---
+
+**Last updated:** November 2, 2025
+**Priority:** CRITICAL
+**Status:** MANDATORY TO FOLLOW

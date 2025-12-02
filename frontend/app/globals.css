@@ -1,28 +1,429 @@
+/**
+ * ГЛОБАЛЬНЫЕ СТИЛИ И CSS-ПЕРЕМЕННЫЕ
+ * 
+ * Этот файл содержит CSS-переменные для цветовых палитр.
+ * Переменные автоматически переключаются при смене темы (класс .dark на <html>).
+ * 
+ * ВАЖНО: Не используйте прямые цвета в компонентах!
+ * Всегда используйте переменные или Tailwind-классы.
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * ===================================
+ * СВЕТЛАЯ ТЕМА (по умолчанию)
+ * ===================================
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Фоны */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #E1F7DB;
+  --color-background-tertiary: #F6FBF7;
+  --color-background-card: #FFFFFF;
+  --color-background-overlay: rgba(22, 22, 14, 0.7);
+  
+  /* Градиенты */
+  --gradient-main: linear-gradient(to top, #CDF2C2, #FCFFFD);
+  --gradient-card: linear-gradient(to bottom, #DDF8D4, #F9D5B7);
+  --gradient-banner: linear-gradient(to bottom, #FFFDE9, #D7FAD6);
+  
+  /* Текст */
+  --color-text-primary: #2A2A0F;
+  --color-text-secondary: #819082;
+  --color-text-tertiary: #96A996;
+  --color-text-inverse: #FFFFFF;
+  --color-text-disabled: #DBDBDB;
+  --color-text-link: #3A971E;
+  
+  /* Акценты */
+  --color-accent-primary: #3A971E;
+  --color-accent-secondary: #67AD51;
+  --color-accent-tertiary: #AAC89A;
+  --color-accent-hover: #2d7516;
+  --color-accent-active: #245d0f;
+  
+  /* Обратная связь */
+  --color-feedback-error: #B52F2F;
+  --color-feedback-success: #3A971E;
+  --color-feedback-warning: #F59E0B;
+  --color-feedback-info: #3B82F6;
+  --color-feedback-attention: #F13A0C;
+  
+  /* Границы */
+  --color-border-primary: #E5E7EB;
+  --color-border-secondary: #D1D5DB;
+  --color-border-focus: #3A971E;
+  --color-border-error: #B52F2F;
+  
+  /* Поверхности */
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-sunken: #F9FAFB;
+  --color-surface-hover: #F3F4F6;
+  --color-surface-pressed: #E5E7EB;
+  
+  /* Тени */
+  --shadow-card: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-elevated: 0px 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(58, 151, 30, 0.3);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/**
+ * ===================================
+ * ТЁМНАЯ ТЕМА
+ * ===================================
+ * Активируется добавлением класса .dark на элемент <html>
+ * Пример: <html class="dark">
+ */
+.dark {
+  /* Фоны */
+  --color-background-primary: #0F1419;
+  --color-background-secondary: #1A2028;
+  --color-background-tertiary: #232B36;
+  --color-background-card: #1A2028;
+  --color-background-overlay: rgba(15, 20, 25, 0.85);
+  
+  /* Градиенты */
+  --gradient-main: linear-gradient(to top, #1A2028, #0F1419);
+  --gradient-card: linear-gradient(to bottom, #232B36, #1A2028);
+  --gradient-banner: linear-gradient(to bottom, #2A3441, #1A2028);
+  
+  /* Текст */
+  --color-text-primary: #F9FAFB;
+  --color-text-secondary: #9CA3AF;
+  --color-text-tertiary: #6B7280;
+  --color-text-inverse: #0F1419;
+  --color-text-disabled: #4B5563;
+  --color-text-link: #67AD51;
+  
+  /* Акценты */
+  --color-accent-primary: #67AD51;
+  --color-accent-secondary: #86C06E;
+  --color-accent-tertiary: #5A8D47;
+  --color-accent-hover: #7DBD62;
+  --color-accent-active: #8FCC78;
+  
+  /* Обратная связь */
+  --color-feedback-error: #EF4444;
+  --color-feedback-success: #67AD51;
+  --color-feedback-warning: #FBBF24;
+  --color-feedback-info: #60A5FA;
+  --color-feedback-attention: #FB923C;
+  
+  /* Границы */
+  --color-border-primary: #374151;
+  --color-border-secondary: #4B5563;
+  --color-border-focus: #67AD51;
+  --color-border-error: #EF4444;
+  
+  /* Поверхности */
+  --color-surface-elevated: #232B36;
+  --color-surface-sunken: #0F1419;
+  --color-surface-hover: #2A3441;
+  --color-surface-pressed: #1F2937;
+  
+  /* Тени */
+  --shadow-card: 0px 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-elevated: 0px 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-focus: 0 0 0 3px rgba(103, 173, 81, 0.4);
+}
+
+/**
+ * ===================================
+ * БАЗОВЫЕ СТИЛИ
+ * ===================================
+ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  
+  body {
+    @apply bg-background text-text-primary;
+    font-family: var(--font-roboto), system-ui, -apple-system, sans-serif;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Убираем дефолтные стили для ссылок */
+  a {
+    @apply text-text-link no-underline;
+    transition: color 150ms ease-in-out;
+  }
+  
+  a:hover {
+    @apply text-accent-hover;
+  }
+  
+  /* Стили для фокуса (accessibility) */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-primary ring-offset-2 ring-offset-background;
+  }
+  
+  /* Отключаем outline для мыши, но оставляем для клавиатуры */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  /* Адаптивная типографика */
+  h1 {
+    @apply text-mobile-h1 tablet:text-tablet-h1 desktop:text-desktop-h1;
+    @apply font-bold text-text-primary;
+  }
+  
+  h2 {
+    @apply text-mobile-h2 tablet:text-tablet-h2 desktop:text-desktop-h2;
+    @apply font-semibold text-text-primary;
+  }
+  
+  h3 {
+    @apply text-mobile-h3 tablet:text-tablet-h3 desktop:text-desktop-h3;
+    @apply font-medium text-text-primary;
+  }
+  
+  p {
+    @apply text-mobile-body tablet:text-tablet-body desktop:text-desktop-body;
+    @apply text-text-primary;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/**
+ * ===================================
+ * КОМПОНЕНТЫ (базовые стили)
+ * ===================================
+ */
+@layer components {
+  /* Кнопка Primary */
+  .btn-primary {
+    @apply bg-accent-primary text-text-inverse px-6 py-3 rounded-lg font-semibold;
+    @apply hover:bg-accent-hover active:bg-accent-active;
+    @apply transition-colors duration-200 ease-in-out;
+    @apply focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2;
+    @apply disabled:bg-accent-tertiary disabled:cursor-not-allowed;
+  }
+  
+  /* Кнопка Secondary */
+  .btn-secondary {
+    @apply bg-transparent text-accent-primary border-2 border-accent-primary px-6 py-3 rounded-lg font-semibold;
+    @apply hover:bg-accent-primary hover:text-text-inverse;
+    @apply transition-all duration-200 ease-in-out;
+    @apply focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2;
+    @apply disabled:border-accent-tertiary disabled:text-accent-tertiary disabled:cursor-not-allowed;
+  }
+  
+  /* Карточка */
+  .card {
+    @apply bg-background-card border border-border-primary rounded-xl p-6;
+    @apply shadow-card hover:shadow-elevated;
+    @apply transition-shadow duration-200 ease-in-out;
+  }
+  
+  /* Инпут */
+  .input {
+    @apply w-full px-4 py-3 bg-background border border-border-primary rounded-lg;
+    @apply text-text-primary placeholder:text-text-tertiary;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent;
+    @apply disabled:bg-surface-sunken disabled:text-text-disabled disabled:cursor-not-allowed;
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  /* Инпут с ошибкой */
+  .input-error {
+    @apply border-border-error focus:ring-feedback-error;
+  }
+  
+  /* Текст ошибки */
+  .error-text {
+    @apply text-feedback-error text-sm mt-1;
+  }
+  
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-success {
+    @apply bg-feedback-success/10 text-feedback-success;
+  }
+  
+  .badge-error {
+    @apply bg-feedback-error/10 text-feedback-error;
+  }
+  
+  .badge-warning {
+    @apply bg-feedback-warning/10 text-feedback-warning;
+  }
+  
+  .badge-info {
+    @apply bg-feedback-info/10 text-feedback-info;
+  }
 }
 
+/**
+ * ===================================
+ * УТИЛИТЫ
+ * ===================================
+ */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  /* Текстовые градиенты */
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #3A971E, #67AD51);
+  }
+  
+  /* Анимация появления */
+  .animate-in {
+    animation: slideIn 0.2s ease-out;
+  }
+  
+  /* Плавный переход для темы */
+  .theme-transition {
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out, border-color 300ms ease-in-out;
+  }
+  
+  /* Скрытие скроллбара */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Кастомный скроллбар для светлой темы */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-background-secondary rounded-lg;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-accent-tertiary rounded-lg;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent-secondary;
+  }
+  
+  /* Тёмная тема для скроллбара */
+  .dark .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-background-tertiary;
+  }
+  
+  .dark .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-border-secondary;
+  }
+  
+  .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    @apply bg-border-primary;
+  }
+  
+  /* Усечение текста */
+  .truncate-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Glassmorphism эффект */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .glass {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+/**
+ * ===================================
+ * ПОДДЕРЖКА PREFERS-COLOR-SCHEME
+ * ===================================
+ * Автоматическое определение темы на основе системных настроек
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --color-background-primary: #0F1419;
+    --color-background-secondary: #1A2028;
+    --color-background-tertiary: #232B36;
+    --color-background-card: #1A2028;
+    --color-background-overlay: rgba(15, 20, 25, 0.85);
+    
+    --gradient-main: linear-gradient(to top, #1A2028, #0F1419);
+    --gradient-card: linear-gradient(to bottom, #232B36, #1A2028);
+    --gradient-banner: linear-gradient(to bottom, #2A3441, #1A2028);
+    
+    --color-text-primary: #F9FAFB;
+    --color-text-secondary: #9CA3AF;
+    --color-text-tertiary: #6B7280;
+    --color-text-inverse: #0F1419;
+    --color-text-disabled: #4B5563;
+    --color-text-link: #67AD51;
+    
+    --color-accent-primary: #67AD51;
+    --color-accent-secondary: #86C06E;
+    --color-accent-tertiary: #5A8D47;
+    --color-accent-hover: #7DBD62;
+    --color-accent-active: #8FCC78;
+    
+    --color-feedback-error: #EF4444;
+    --color-feedback-success: #67AD51;
+    --color-feedback-warning: #FBBF24;
+    --color-feedback-info: #60A5FA;
+    --color-feedback-attention: #FB923C;
+    
+    --color-border-primary: #374151;
+    --color-border-secondary: #4B5563;
+    --color-border-focus: #67AD51;
+    --color-border-error: #EF4444;
+    
+    --color-surface-elevated: #232B36;
+    --color-surface-sunken: #0F1419;
+    --color-surface-hover: #2A3441;
+    --color-surface-pressed: #1F2937;
+    
+    --shadow-card: 0px 2px 8px rgba(0, 0, 0, 0.5);
+    --shadow-elevated: 0px 4px 16px rgba(0, 0, 0, 0.6);
+    --shadow-focus: 0 0 0 3px rgba(103, 173, 81, 0.4);
   }
 }
 
