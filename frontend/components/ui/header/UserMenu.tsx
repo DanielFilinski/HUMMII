@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button/Button';
 import { User, LogOut, Briefcase, ShoppingBag } from 'lucide-react';
 
 interface UserMenuProps {

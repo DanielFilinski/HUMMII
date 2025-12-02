@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button/Button';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useRole } from '@/hooks/use-role';
 import { Logo } from './Logo';

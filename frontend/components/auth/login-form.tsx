@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { login } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/auth-store';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button/Button';
 import { Input } from '@/components/ui/Input';
 import { GoogleIcon } from '@/components/ui/google-icon';
 

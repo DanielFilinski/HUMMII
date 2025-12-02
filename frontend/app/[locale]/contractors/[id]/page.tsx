@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/landing/header';
 import { Footer } from '@/components/landing/footer';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button/Button';
 import { contractors } from '@/lib/mock-data';
 
 interface PageProps {
