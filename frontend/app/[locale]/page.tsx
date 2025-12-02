@@ -6,18 +6,19 @@ import { TopContractorsSection } from '@/components/landing/top-contractors-sect
 import { WhyChooseSection } from '@/components/landing/why-choose-section';
 import { BecomeContractorCTA } from '@/components/landing/become-contractor-cta';
 import { Footer } from '@/components/landing/footer';
-
+import LandingPage from '@/components/pages/landing-page';
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-white">
-      <Header />
+      <LandingPage />
+      {/* <Header />
       <HeroSection />
       <CategoriesSection />
       <PostTaskCTA />
       <TopContractorsSection />
       <WhyChooseSection />
       <BecomeContractorCTA />
-      <Footer />
+      <Footer /> */}
     </main>
   );
 }

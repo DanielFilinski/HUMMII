@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { CategoryCard } from './category-card';
 import { categories } from '@/lib/mock-data';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export function CategoriesSection() {
   const pathname = usePathname();

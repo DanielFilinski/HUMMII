@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System - Скачать файлы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom, #E1F7DB, #F6FBF7);
+            color: #2A2A0F;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.12);
+        }
+        
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2A2A0F;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #819082;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #3A971E;
+            border-bottom: 2px solid #E1F7DB;
+            padding-bottom: 10px;
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .file-card {
+            background: #F6FBF7;
+            border: 2px solid #E1F7DB;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .file-card:hover {
+            border-color: #3A971E;
+            transform: translateY(-2px);
+            box-shadow: 0px 4px 12px rgba(58, 151, 30, 0.15);
+        }
+        
+        .file-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2A2A0F;
+            margin-bottom: 8px;
+        }
+        
+        .file-desc {
+            font-size: 14px;
+            color: #819082;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #3A971E;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 16px;
+            margin-top: 8px;
+        }
+        
+        .info-box {
+            background: linear-gradient(to bottom, #DDF8D4, #F9D5B7);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .info-box h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .code-block {
+            background: #2A2A0F;
+            color: #E1F7DB;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .steps {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border: 2px solid #E1F7DB;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #3A971E;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .download-all {
+            display: inline-block;
+            background: #3A971E;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.2s;
+            margin: 20px 0;
+        }
+        
+        .download-all:hover {
+            background: #67AD51;
+            transform: scale(1.05);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .file-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .steps {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Design System</h1>
+        <p class="subtitle">Скачайте все файлы дизайн-системы для вашего Next.js проекта</p>
+        
+        <div class="info-box">
+            <h3>✨ Что включено:</h3>
+            <ul>
+                <li>✅ 10+ готовых UI компонентов с TypeScript</li>
+                <li>✅ Полная конфигурация Tailwind CSS</li>
+                <li>✅ Адаптивная типографика (mobile/tablet/desktop)</li>
+                <li>✅ Цветовая палитра из Figma</li>
+                <li>✅ Токены дизайн-системы</li>
+                <li>✅ Интерактивная showcase страница</li>
+            </ul>
+        </div>
+        
+        <h2>🎯 UI Компоненты</h2>
+        <div class="file-grid">
+            <a href="computer:///mnt/user-data/outputs/components/ui/Avatar.tsx" class="file-card">
+                <div class="file-name">Avatar.tsx</div>
+                <div class="file-desc">Аватары с группировкой, статусом online/offline, 6 размеров</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Badge.tsx" class="file-card">
+                <div class="file-name">Badge.tsx</div>
+                <div class="file-desc">Бейджи и метки, 5 вариантов, 3 размера</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Button.tsx" class="file-card">
+                <div class="file-name">Button.tsx</div>
+                <div class="file-desc">Кнопки с 5 вариантами, loading state, disabled</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Card.tsx" class="file-card">
+                <div class="file-name">Card.tsx</div>
+                <div class="file-desc">Карточки с суб-компонентами, градиенты</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Container.tsx" class="file-card">
+                <div class="file-name">Container.tsx</div>
+                <div class="file-desc">Адаптивный контейнер для layout</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Input.tsx" class="file-card">
+                <div class="file-name">Input.tsx</div>
+                <div class="file-desc">Поля ввода с валидацией, иконками, error states</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Spinner.tsx" class="file-card">
+                <div class="file-name">Spinner.tsx</div>
+                <div class="file-desc">Индикаторы загрузки, 4 размера</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Typography.tsx" class="file-card">
+                <div class="file-name">Typography.tsx</div>
+                <div class="file-desc">Адаптивная типографика, 7 вариантов</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Select.tsx" class="file-card">
+                <div class="file-name">Select.tsx</div>
+                <div class="file-desc">Выпадающие списки с валидацией</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/Textarea.tsx" class="file-card">
+                <div class="file-name">Textarea.tsx</div>
+                <div class="file-desc">Многострочные поля ввода</div>
+                <span class="badge">COMPONENT</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/components/ui/index.ts" class="file-card">
+                <div class="file-name">index.ts</div>
+                <div class="file-desc">Экспорты всех компонентов</div>
+                <span class="badge">INDEX</span>
+            </a>
+        </div>
+        
+        <h2>⚙️ Конфигурация</h2>
+        <div class="file-grid">
+            <a href="computer:///mnt/user-data/outputs/tailwind.config.ts" class="file-card">
+                <div class="file-name">tailwind.config.ts</div>
+                <div class="file-desc">Конфигурация Tailwind с цветами и типографикой</div>
+                <span class="badge">CONFIG</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/app/globals.css" class="file-card">
+                <div class="file-name">globals.css</div>
+                <div class="file-desc">Глобальные стили, анимации, утилиты</div>
+                <span class="badge">STYLES</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/app/layout.tsx" class="file-card">
+                <div class="file-name">layout.tsx</div>
+                <div class="file-desc">Корневой layout с шрифтами</div>
+                <span class="badge">LAYOUT</span>
+            </a>
+        </div>
+        
+        <h2>📚 Библиотеки</h2>
+        <div class="file-grid">
+            <a href="computer:///mnt/user-data/outputs/lib/design-tokens.ts" class="file-card">
+                <div class="file-name">design-tokens.ts</div>
+                <div class="file-desc">Токены: цвета, градиенты, spacing, shadows</div>
+                <span class="badge">TOKENS</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/lib/fonts.ts" class="file-card">
+                <div class="file-name">fonts.ts</div>
+                <div class="file-desc">Конфигурация шрифта Roboto</div>
+                <span class="badge">FONTS</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/lib/utils.ts" class="file-card">
+                <div class="file-name">utils.ts</div>
+                <div class="file-desc">Утилиты (cn helper)</div>
+                <span class="badge">UTILS</span>
+            </a>
+        </div>
+        
+        <h2>🎯 Демо</h2>
+        <div class="file-grid">
+            <a href="computer:///mnt/user-data/outputs/app/design-system/page.tsx" class="file-card">
+                <div class="file-name">page.tsx</div>
+                <div class="file-desc">Интерактивная showcase страница со всеми компонентами</div>
+                <span class="badge">DEMO</span>
+            </a>
+        </div>
+        
+        <h2>📖 Документация</h2>
+        <div class="file-grid">
+            <a href="computer:///mnt/user-data/outputs/README.md" class="file-card">
+                <div class="file-name">README.md</div>
+                <div class="file-desc">Общий обзор и резюме</div>
+                <span class="badge">DOCS</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/DESIGN_SYSTEM.md" class="file-card">
+                <div class="file-name">DESIGN_SYSTEM.md</div>
+                <div class="file-desc">Полная документация (500+ строк)</div>
+                <span class="badge">DOCS</span>
+            </a>
+            
+            <a href="computer:///mnt/user-data/outputs/QUICK_START.md" class="file-card">
+                <div class="file-name">QUICK_START.md</div>
+                <div class="file-desc">Быстрый старт и примеры</div>
+                <span class="badge">DOCS</span>
+            </a>
+        </div>
+        
+        <h2>🚀 Быстрый старт</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Установите зависимости</h3>
+                <div class="code-block">npm install clsx tailwind-merge</div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Скачайте файлы</h3>
+                <p>Нажмите на ссылки выше, чтобы скачать нужные файлы</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Запустите проект</h3>
+                <div class="code-block">npm run dev</div>
+            </div>
+        </div>
+        
+        <h2>📦 Зависимости package.json</h2>
+        <div class="code-block">
+{
+  "dependencies": {
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}
+        </div>
+        
+        <div class="info-box">
+            <h3>💡 Совет</h3>
+            <p>После скачивания всех файлов, разместите их в соответствующих директориях вашего Next.js проекта согласно структуре, указанной в документации.</p>
+        </div>
+        
+        <h2>📂 Структура проекта</h2>
+        <div class="code-block">
+project/
+├── app/
+│   ├── layout.tsx
+│   ├── globals.css
+│   └── design-system/
+│       └── page.tsx
+├── components/
+│   └── ui/
+│       ├── Avatar.tsx
+│       ├── Badge.tsx
+│       ├── Button.tsx
+│       ├── Card.tsx
+│       ├── Container.tsx
+│       ├── Input.tsx
+│       ├── Select.tsx
+│       ├── Spinner.tsx
+│       ├── Textarea.tsx
+│       ├── Typography.tsx
+│       └── index.ts
+├── lib/
+│   ├── design-tokens.ts
+│   ├── fonts.ts
+│   └── utils.ts
+└── tailwind.config.ts
+        </div>
+        
+        <div style="text-align: center; margin-top: 60px; padding-top: 40px; border-top: 2px solid #E1F7DB;">
+            <p style="color: #819082; font-size: 14px;">
+                Создано с ❤️ используя Next.js 14, TypeScript и Tailwind CSS
+            </p>
+            <p style="color: #819082; font-size: 12px; margin-top: 10px;">
+                Все компоненты следуют лучшим практикам и стандартам доступности WCAG 2.1 AA
+            </p>
+        </div>
+    </div>
+</body>
+</html>
