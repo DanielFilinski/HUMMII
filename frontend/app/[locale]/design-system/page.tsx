@@ -73,6 +73,7 @@ export default function DesignSystemShowcase() {
           <section>
 
             <Header/>
+          
           </section>
 
           {/* Colors Section */}
