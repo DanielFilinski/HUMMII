@@ -20,11 +20,11 @@ import {
   Select,
   Spinner,
   Textarea,
-  Toggle,
-  Typography,
+  Toggle
 } from '@/components/ui';
 import { colors, gradients } from '@/lib/design-tokens';
 import { Header } from '@/src/shared/ui/header/Header';
+import { Typography } from '@/src/shared/ui/typography';
 
 export default function DesignSystemShowcase() {
   const [searchValue, setSearchValue] = useState('');

@@ -22,8 +22,7 @@ export { Spinner } from './Spinner';
 export { Textarea } from './Textarea';
 export { Toggle } from './Toggle';
 
-// Typography System - основной компонент
-export { Typography } from './typography/Typography';
+
 
 // Typography System - готовые компоненты-утилиты
 export {
@@ -44,7 +43,7 @@ export {
   EmptyState,
   Counter,
   Breadcrumbs,
-} from './typography/typography-utils';
+} from '../../src/shared/ui/typography/typography-utils';
 
 // Component Types
 export type { AvatarProps, AvatarGroupProps } from './Avatar';
@@ -60,4 +59,3 @@ export type { SelectProps } from './Select';
 export type { SpinnerProps } from './Spinner';
 export type { TextareaProps } from './Textarea';
 export type { ToggleProps } from './Toggle';
-export type { TypographyProps } from './typography/Typography';
