@@ -21,8 +21,8 @@ import {
   Spinner,
   Textarea,
   Toggle
-} from '@/components/ui';
-import { colors, gradients } from '@/lib/design-tokens';
+} from '@/src/shared/ui';
+import { colors, gradients } from '@/src/shared/lib/design-tokens';
 import { Header } from '@/src/shared/ui/header/Header';
 import { Typography } from '@/src/shared/ui/typography';
 

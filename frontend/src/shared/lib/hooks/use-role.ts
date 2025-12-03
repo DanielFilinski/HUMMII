@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/lib/store/auth-store';
+import { useAuthStore } from '@/src/shared/lib/store/auth-store';
 
 export function useRole() {
   const { user } = useAuthStore();

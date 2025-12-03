@@ -1,6 +1,6 @@
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { cn } from '@/src/shared/lib/utils';
+import { LoadingSpinner } from '@/src/shared/ui/LoadingSpinner';
 
 /**
  * PRIMARY BUTTON COMPONENT

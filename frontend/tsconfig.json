@@ -42,7 +42,7 @@
         "./app/*"
       ],
       "@hooks/*": [
-        "./hooks/*"
+        ".src/lib/hooks/*"
       ],
       "@lib/*": [
         "./lib/*"

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/src/shared/ui/button/Button';
-import { cn } from '@/lib/utils';
+import { cn } from '@/src/shared/lib/utils';
 import { LanguageSelector } from './LanguageSelector';
 import { User, LogOut, LayoutDashboard, Briefcase, ShoppingBag } from 'lucide-react';
 

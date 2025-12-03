@@ -16,7 +16,7 @@ import {
   Spinner,
   Typography,
 } from '@/components/ui';
-import { colors, gradients } from '@/lib/design-tokens';
+import { colors, gradients } from '@/src/shared/lib/design-tokens';
 
 export default function DesignSystemShowcase() {
   return (

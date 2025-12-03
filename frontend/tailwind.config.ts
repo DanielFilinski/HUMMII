@@ -14,7 +14,7 @@ import {
   animations,
   lineClamp,
   gridSystem,
-} from './lib/design-tokens';
+} from './src/shared/lib/design-tokens';
 
 /**
  * TAILWIND CONFIG

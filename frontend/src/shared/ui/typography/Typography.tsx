@@ -26,8 +26,8 @@
  */
 
 import { type HTMLAttributes, type ElementType, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
-import { typography } from '@/lib/design-tokens';
+import { cn } from '@/src/shared/lib/utils';
+import { typography } from '@/src/shared/lib/design-tokens';
 
 interface TypographyProps extends HTMLAttributes<HTMLElement> {
   /**

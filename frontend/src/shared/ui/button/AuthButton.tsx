@@ -1,5 +1,5 @@
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/src/shared/lib/utils';
 
 /**
  * AUTH BUTTON COMPONENT (Sign In / Sign Up)
