@@ -24,7 +24,7 @@ import {
   Typography,
 } from '@/components/ui';
 import { colors, gradients } from '@/lib/design-tokens';
-import { Header } from '@/components/ui/header/Header';
+import { Header } from '@/src/shared/ui/header/Header';
 
 export default function DesignSystemShowcase() {
   const [searchValue, setSearchValue] = useState('');
