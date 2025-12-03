@@ -40,15 +40,27 @@
       ],
       "@app/*": [
         "./app/*"
-      ],
-      "@hooks/*": [
-        ".src/lib/hooks/*"
-      ],
+      ],      
       "@lib/*": [
-        "./lib/*"
+        "./src/shared/lib/*"
       ],
       "@types/*": [
         "./types/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      "@entities/*": [
+        "./src/entities/*"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@widgets/*": [
+        "./src/widgets/*"
+      ],
+      "@screens/*": [
+        "./src/screens/*"
       ]
     },
     "forceConsistentCasingInFileNames": true
