@@ -1,6 +1,6 @@
 import { type ButtonHTMLAttributes, type AnchorHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Spinner } from '../Spinner';
+import { Spinner } from '../../../../components/ui/Spinner';
 
 /**
  * BUTTON COMPONENT - Design System

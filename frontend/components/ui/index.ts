@@ -1,9 +1,9 @@
 // UI Components
 export { Avatar, AvatarGroup } from './Avatar';
 export { Badge } from './Badge';
-export { Button } from './button/Button';
-export { PrimaryButton } from './button/PrimaryButton';
-export { AuthButton } from './button/AuthButton';
+export { Button } from '../../src/shared/ui/button/Button';
+export { PrimaryButton } from '../../src/shared/ui/button/PrimaryButton';
+export { AuthButton } from '../../src/shared/ui/button/AuthButton';
 export {
   Card,
   CardHeader,
@@ -49,7 +49,7 @@ export {
 // Component Types
 export type { AvatarProps, AvatarGroupProps } from './Avatar';
 export type { BadgeProps } from './Badge';
-export type { ButtonProps } from './button/Button';
+export type { ButtonProps } from '../../src/shared/ui/button/Button';
 export type { CardProps } from './Card';
 export type { CheckboxProps } from './Checkbox';
 export type { ContainerProps } from './Container';

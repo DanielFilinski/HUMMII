@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button/Button';
+import { Button } from '@/src/shared/ui/button/Button';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useRole } from '@/hooks/use-role';
 import { Logo } from './Logo';
@@ -13,7 +13,7 @@ import { LanguageSelector } from './LanguageSelector';
 import { UserMenu } from './UserMenu';
 import { MobileMenu } from './MobileMenu';
 import { Menu, X } from 'lucide-react';
-import {PrimaryButton} from '@/components/ui/button/PrimaryButton';
+import {PrimaryButton} from '@/src/shared/ui/button/PrimaryButton';
 
 export function Header() {
   const t = useTranslations('landing.header');
