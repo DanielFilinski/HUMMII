@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export default function Error({
@@ -11,8 +10,6 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = useTranslations('common');
-
   useEffect(() => {
     // TODO: Replace with proper error logging service (e.g., Sentry)
     // This is a placeholder - in production, log to error monitoring service
@@ -24,18 +21,19 @@ export default function Error({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h2 className="text-2xl font-bold mb-4">{t('error')}</h2>
+      <h2 className="text-2xl font-bold mb-4">Ошибка</h2>
+      <p className="text-text-secondary mb-6">Что-то пошло не так</p>
       <button
         onClick={() => reset()}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        className="px-4 py-2 bg-accent-primary text-white rounded hover:bg-accent-hover transition-colors"
       >
-        {t('tryAgain')}
+        Попробовать снова
       </button>
       <Link
         href="/"
-        className="mt-4 px-4 py-2 bg-gray-200 text-gray-900 rounded hover:bg-gray-300 transition-colors"
+        className="mt-4 px-4 py-2 bg-background-secondary text-text-primary rounded hover:bg-surface-hover transition-colors"
       >
-        {t('returnHome')}
+        Вернуться на главную
       </Link>
     </div>
   );

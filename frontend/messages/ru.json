@@ -1,0 +1,21 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "tryAgain": "Попробовать снова",
+    "returnHome": "Вернуться на главную",
+    "somethingWentWrong": "Что-то пошло не так"
+  },
+  "landing": {
+    "header": {
+      "categories": "Категории",
+      "howItWorks": "Как это работает",
+      "postTask": "Создать заказ",
+      "becomeContractor": "Стать исполнителем",
+      "language": "Язык",
+      "signInSignUp": "Войти / Регистрация"
+    }
+  }
+}

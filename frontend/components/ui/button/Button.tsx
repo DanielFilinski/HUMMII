@@ -30,9 +30,10 @@ interface BaseButtonProps {
   isLoading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  disabled?: boolean;
 }
 
-interface ButtonProps extends BaseButtonProps, ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends BaseButtonProps, Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> {
   href?: never;
 }
 

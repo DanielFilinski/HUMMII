@@ -257,9 +257,8 @@ export default function DesignSystemShowcase() {
                   <div className="flex flex-wrap gap-3">
                     <Button variant="primary">Основная кнопка</Button>
                     <Button variant="secondary">Вторичная кнопка</Button>
-                    <Button variant="outline">Кнопка с обводкой</Button>
-                    <Button variant="ghost">Призрачная кнопка</Button>
-                    <Button variant="danger">Опасная кнопка</Button>
+                    <Button variant="link">Кнопка-ссылка</Button>
+                    <Button variant="icon">🔍</Button>
                   </div>
                 </div>
 
@@ -825,7 +824,7 @@ export default function DesignSystemShowcase() {
                 </CardContent>
                 <CardFooter>
                   <Button size="sm">Посмотреть профиль</Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     Написать
                   </Button>
                 </CardFooter>
@@ -879,7 +878,7 @@ export default function DesignSystemShowcase() {
                 </CardContent>
                 <CardFooter>
                   <Button size="sm">Посмотреть профиль</Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     Написать
                   </Button>
                 </CardFooter>
@@ -1019,7 +1018,7 @@ export default function DesignSystemShowcase() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="outline" size="sm" fullWidth>
+                  <Button variant="secondary" size="sm" fullWidth>
                     Повторить заказ
                   </Button>
                 </CardFooter>
@@ -1048,7 +1047,7 @@ export default function DesignSystemShowcase() {
                     fullWidth
                   />
                   <Button fullWidth>Войти</Button>
-                  <Button variant="outline" fullWidth>
+                  <Button variant="secondary" fullWidth>
                     Зарегистрироваться
                   </Button>
                 </div>
@@ -1087,7 +1086,7 @@ export default function DesignSystemShowcase() {
                 </CardContent>
                 <CardFooter>
                   <Button size="sm">Профиль</Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="secondary" size="sm">
                     Написать
                   </Button>
                 </CardFooter>
