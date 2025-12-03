@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Button } from '@/src/shared/ui/button/Button';
 import { cn } from '@/src/shared/lib/utils';
 import { LanguageSelector } from './LanguageSelector';
 import { User, LogOut, LayoutDashboard, Briefcase, ShoppingBag } from 'lucide-react';
+import { PrimaryButton } from '../button';
 
 interface NavigationItem {
   label: string;
@@ -143,22 +143,17 @@ export function MobileMenu({
                 )}
 
                 <Link href={`/${locale}/dashboard`} onClick={onClose}>
-                  <Button variant="outline" size="md" fullWidth className="gap-2">
+                  <PrimaryButton>
                     <LayoutDashboard className="h-5 w-5" />
                     Dashboard
-                  </Button>
+                  </PrimaryButton>
                 </Link>
 
-                <Button
-                  variant="outline"
-                  size="md"
-                  fullWidth
-                  onClick={handleLogout}
-                  className="gap-2"
+                <PrimaryButton                  
                 >
                   <LogOut className="h-5 w-5" />
                   Logout
-                </Button>
+                </PrimaryButton>
               </div>
             ) : null}
           </div>

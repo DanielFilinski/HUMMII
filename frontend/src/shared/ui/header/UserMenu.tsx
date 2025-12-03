@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@/src/shared/ui/button/Button';
 import { User, LogOut, Briefcase, ShoppingBag } from 'lucide-react';
+import { PrimaryButton } from '../button';
 
 interface UserMenuProps {
   user: {
@@ -38,15 +38,12 @@ export function UserMenu({ user, activeRole, locale, onLogout }: UserMenuProps) 
         <span>{user?.name}</span>
       </Link>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onLogout}
-        className="gap-2"
+      <PrimaryButton
+       
       >
         <LogOut className="h-4 w-4" />
         Logout
-      </Button>
+      </PrimaryButton>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export { Header } from './Header';
+export { Header } from '../../../widgets/header/Header';
 export { Logo } from './Logo';
 export { Navigation } from './Navigation';
 export { LanguageSelector } from './LanguageSelector';

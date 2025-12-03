@@ -3,26 +3,26 @@ import { cn } from '@/src/shared/lib/utils';
 import { LoadingSpinner } from '@/src/shared/ui/spinner/LoadingSpinner';
 
 /**
- * PRIMARY BUTTON COMPONENT
+ * SECONDARY BUTTON COMPONENT
  * 
- * Основная кнопка дизайн-системы Hummii согласно макету.
+ * Вторичная кнопка дизайн-системы Hummii согласно макету.
  * 
  * Состояния:
- * 1. Default: bg-accent-primary (#3A971E в light mode, #67AD51 в dark mode)
- * 2. Hover: bg-accent-secondary (#67AD51 в light mode, #86C06E в dark mode)
- * 3. Pressed: bg-accent-tertiary (#AAC89A в light mode, #5A8D47 в dark mode)
+ * 1. Default: bg-background (белый/темный), border-accent-primary (зеленая обводка), text-accent-primary (зеленый текст)
+ * 2. Hover: bg-accent-secondary (зеленый фон), text-text-inverse (белый текст)
+ * 3. Pressed: bg-accent-tertiary (темно-зеленый фон), text-text-primary (темный текст)
  * 4. Loading: с индикатором загрузки
  * 5. Disabled: прозрачность 40%
  * 
  * @example
  * ```tsx
- * <PrimaryButton>View all services</PrimaryButton>
- * <PrimaryButton isLoading>Loading...</PrimaryButton>
- * <PrimaryButton disabled>Disabled</PrimaryButton>
+ * <SecondaryButton>Cancel</SecondaryButton>
+ * <SecondaryButton isLoading>Loading...</SecondaryButton>
+ * <SecondaryButton disabled>Disabled</SecondaryButton>
  * ```
  */
 
-interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface SecondaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Состояние загрузки
    * Показывает спиннер и делает кнопку неактивной
@@ -35,7 +35,7 @@ interface PrimaryButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
 }
 
-export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
+export const SecondaryButton = forwardRef<HTMLButtonElement, SecondaryButtonProps>(
   (
     {
       className,
@@ -61,17 +61,18 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
           'rounded-full px-8 py-3',
           'transition-all duration-200 ease-in-out',
           
-          // Состояния цвета
-          'bg-accent-primary',
-          'hover:enabled:bg-accent-secondary',
-          'active:enabled:bg-accent-tertiary',
+          // Состояния цвета и обводки
+          'bg-background border-2 border-accent-primary',
+          'text-accent-primary',
           
-          // Цвет текста (для Typography внутри)
-          'text-text-primary',
-          'active:enabled:text-text-inverse',
+          // Hover состояние
+          'hover:enabled:bg-accent-secondary hover:enabled:text-text-inverse hover:enabled:border-accent-secondary',
+          
+          // Active/Pressed состояние
+          'active:enabled:bg-accent-tertiary active:enabled:text-text-primary active:enabled:border-accent-tertiary',
           
           // Состояние disabled
-          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent-primary',
+          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background',
           
           // Focus состояние (accessibility)
           'focus:outline-none',
@@ -85,11 +86,11 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <LoadingSpinner className="h-5 w-5 text-text-inverse animate-spin" />}
+        {isLoading && <LoadingSpinner className="h-5 w-5 text-current animate-spin" />}
         {children}
       </button>
     );
   }
 );
 
-PrimaryButton.displayName = 'PrimaryButton';
+SecondaryButton.displayName = 'SecondaryButton';

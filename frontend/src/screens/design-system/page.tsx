@@ -5,7 +5,6 @@ import {
   Avatar,
   AvatarGroup,
   Badge,
-  Button,
   Card,
   CardHeader,
   CardTitle,
@@ -20,10 +19,10 @@ import {
   Select,
   Spinner,
   Textarea,
-  Toggle
+  Toggle,
+  PrimaryButton
 } from '@/src/shared/ui';
-import { colors, gradients } from '@/src/shared/lib/design-tokens';
-import { Header } from '@/src/shared/ui/header/Header';
+import { Header } from '@/src/widgets/header/Header';
 import { Typography } from '@/src/shared/ui/typography';
 
 export default function DesignSystemShowcase() {
@@ -33,16 +32,16 @@ export default function DesignSystemShowcase() {
   const [toggleValue, setToggleValue] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background-3 py-12">
+    <div className="min-h-screen bg-background-tertiary py-12">
       <Container maxWidth="2xl">
         {/* Logo and Header */}
         <div className="mb-12 text-center">
           <div className="mb-6 flex justify-center">
             <div className="flex items-center gap-4">
-              <Typography as="h1" variant="h1" className="text-accent-1">
+              <Typography as="h1" variant="h1" className="text-accent-primary">
                 HUMMII
               </Typography>
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-1">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-primary">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -87,25 +86,50 @@ export default function DesignSystemShowcase() {
                 Фоновые цвета
               </Typography>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {Object.entries(colors.background).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="overflow-hidden rounded-lg border border-text-unfocused/20 shadow"
-                  >
-                    <div
-                      className="h-24 w-full"
-                      style={{ backgroundColor: value }}
-                    />
-                    <div className="bg-background-1 p-3">
-                      <Typography variant="bodySm" weight="semibold">
-                        Background {key}
-                      </Typography>
-                      <Typography variant="note" color="secondary">
-                        {value}
-                      </Typography>
-                    </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-background-primary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Primary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      background-primary
+                    </Typography>
                   </div>
-                ))}
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-background-secondary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Secondary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      background-secondary
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-background-tertiary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Tertiary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      background-tertiary
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-background-card" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Card
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      background-card
+                    </Typography>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -115,25 +139,50 @@ export default function DesignSystemShowcase() {
                 Цвета текста
               </Typography>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                {Object.entries(colors.text).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="overflow-hidden rounded-lg border border-text-unfocused/20 shadow"
-                  >
-                    <div
-                      className="h-24 w-full"
-                      style={{ backgroundColor: value }}
-                    />
-                    <div className="bg-background-1 p-3">
-                      <Typography variant="bodySm" weight="semibold">
-                        Text {key}
-                      </Typography>
-                      <Typography variant="note" color="secondary">
-                        {value}
-                      </Typography>
-                    </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-text-primary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Primary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      text-primary
+                    </Typography>
                   </div>
-                ))}
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-text-secondary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Secondary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      text-secondary
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-text-tertiary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Tertiary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      text-tertiary
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-text-link" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Link
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      text-link
+                    </Typography>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -143,25 +192,39 @@ export default function DesignSystemShowcase() {
                 Акцентные цвета
               </Typography>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {Object.entries(colors.accent).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="overflow-hidden rounded-lg border border-text-unfocused/20 shadow"
-                  >
-                    <div
-                      className="h-24 w-full"
-                      style={{ backgroundColor: value }}
-                    />
-                    <div className="bg-background-1 p-3">
-                      <Typography variant="bodySm" weight="semibold">
-                        Accent {key}
-                      </Typography>
-                      <Typography variant="note" color="secondary">
-                        {value}
-                      </Typography>
-                    </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-accent-primary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Primary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      accent-primary
+                    </Typography>
                   </div>
-                ))}
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-accent-secondary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Secondary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      accent-secondary
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-accent-tertiary" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Tertiary
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      accent-tertiary
+                    </Typography>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -171,25 +234,50 @@ export default function DesignSystemShowcase() {
                 Цвета обратной связи
               </Typography>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {Object.entries(colors.feedback).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="overflow-hidden rounded-lg border border-text-unfocused/20 shadow"
-                  >
-                    <div
-                      className="h-24 w-full"
-                      style={{ backgroundColor: value }}
-                    />
-                    <div className="bg-background-1 p-3">
-                      <Typography variant="bodySm" weight="semibold">
-                        {key}
-                      </Typography>
-                      <Typography variant="note" color="secondary">
-                        {value}
-                      </Typography>
-                    </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-feedback-error" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Error
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      feedback-error
+                    </Typography>
                   </div>
-                ))}
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-feedback-success" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Success
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      feedback-success
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-feedback-warning" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Warning
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      feedback-warning
+                    </Typography>
+                  </div>
+                </div>
+                <div className="overflow-hidden rounded-lg border border-border-primary shadow">
+                  <div className="h-24 w-full bg-feedback-info" />
+                  <div className="bg-background-card p-3">
+                    <Typography variant="bodySm" weight="semibold">
+                      Info
+                    </Typography>
+                    <Typography variant="note" color="secondary">
+                      feedback-info
+                    </Typography>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -254,12 +342,7 @@ export default function DesignSystemShowcase() {
                   <Typography variant="h3" className="mb-3">
                     Варианты
                   </Typography>
-                  <div className="flex flex-wrap gap-3">
-                    <Button variant="primary">Основная кнопка</Button>
-                    <Button variant="secondary">Вторичная кнопка</Button>
-                    <Button variant="link">Кнопка-ссылка</Button>
-                    <Button variant="icon">🔍</Button>
-                  </div>
+                
                 </div>
 
                 <div>
@@ -271,27 +354,24 @@ export default function DesignSystemShowcase() {
                       <Typography variant="bodySm" color="secondary">
                         Default
                       </Typography>
-                      <Button>Default</Button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <Typography variant="bodySm" color="secondary">
                         Hovered
                       </Typography>
-                      <Button className="hover:bg-accent-2">Hovered</Button>
                     </div>
                     <div className="flex flex-col gap-2">
                       <Typography variant="bodySm" color="secondary">
                         Pressed
                       </Typography>
-                      <Button className="scale-95 bg-accent-2">
+                      <PrimaryButton className="scale-95 bg-accent-hover">
                         Pressed
-                      </Button>
-                    </div>
+                      </PrimaryButton>
                     <div className="flex flex-col gap-2">
                       <Typography variant="bodySm" color="secondary">
                         Disabled
                       </Typography>
-                      <Button disabled>Disabled</Button>
+                      <PrimaryButton disabled>Disabled</PrimaryButton>
                     </div>
                   </div>
                 </div>
@@ -301,9 +381,9 @@ export default function DesignSystemShowcase() {
                     Размеры
                   </Typography>
                   <div className="flex flex-wrap items-center gap-3">
-                    <Button size="sm">Маленькая</Button>
-                    <Button size="md">Средняя</Button>
-                    <Button size="lg">Большая</Button>
+                    <PrimaryButton >Маленькая</PrimaryButton>
+                    <PrimaryButton >Средняя</PrimaryButton>
+                    <PrimaryButton >Большая</PrimaryButton>
                   </div>
                 </div>
 
@@ -312,8 +392,8 @@ export default function DesignSystemShowcase() {
                     Состояния загрузки
                   </Typography>
                   <div className="flex flex-wrap gap-3">
-                    <Button>Обычная</Button>
-                    <Button isLoading>Загрузка</Button>
+                    <PrimaryButton>Обычная</PrimaryButton>
+                    <PrimaryButton isLoading>Загрузка</PrimaryButton>
                   </div>
                 </div>
 
@@ -321,8 +401,9 @@ export default function DesignSystemShowcase() {
                   <Typography variant="h3" className="mb-3">
                     Полная ширина
                   </Typography>
-                  <Button fullWidth>Кнопка на всю ширину</Button>
+                  <PrimaryButton fullWidth>Кнопка на всю ширину</PrimaryButton>
                 </div>
+              </div>
               </div>
             </Card>
           </section>
@@ -553,7 +634,7 @@ export default function DesignSystemShowcase() {
                   </Typography>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Действие</Button>
+                  <PrimaryButton size="sm">Действие</PrimaryButton>
                 </CardFooter>
               </Card>
 
@@ -570,7 +651,7 @@ export default function DesignSystemShowcase() {
                   </Typography>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Действие</Button>
+                  <PrimaryButton size="sm">Действие</PrimaryButton>
                 </CardFooter>
               </Card>
 
@@ -587,7 +668,7 @@ export default function DesignSystemShowcase() {
                   </Typography>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Действие</Button>
+                  <PrimaryButton size="sm">Действие</PrimaryButton>
                 </CardFooter>
               </Card>
             </div>
@@ -684,7 +765,7 @@ export default function DesignSystemShowcase() {
                   <div className="flex flex-wrap gap-6">
                     <Spinner variant="accent" />
                     <Spinner variant="secondary" />
-                    <div className="rounded-lg bg-accent-1 p-4">
+                    <div className="rounded-lg bg-accent-primary p-4">
                       <Spinner variant="inverse" />
                     </div>
                   </div>
@@ -699,22 +780,39 @@ export default function DesignSystemShowcase() {
               Градиенты
             </Typography>
             <div className="grid gap-6 lg:grid-cols-3">
-              {Object.entries(gradients).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="overflow-hidden rounded-xl border border-text-unfocused/20 shadow"
-                >
-                  <div className="h-48 w-full" style={{ background: value }} />
-                  <div className="bg-background-1 p-4">
-                    <Typography variant="bodySm" weight="semibold">
-                      {key.charAt(0).toUpperCase() + key.slice(1)} градиент
-                    </Typography>
-                    <Typography variant="note" color="secondary">
-                      {value}
-                    </Typography>
-                  </div>
+              <div className="overflow-hidden rounded-xl border border-border-primary shadow">
+                <div className="h-48 w-full bg-gradient-main" />
+                <div className="bg-background-card p-4">
+                  <Typography variant="bodySm" weight="semibold">
+                    Main градиент
+                  </Typography>
+                  <Typography variant="note" color="secondary">
+                    bg-gradient-main
+                  </Typography>
                 </div>
-              ))}
+              </div>
+              <div className="overflow-hidden rounded-xl border border-border-primary shadow">
+                <div className="h-48 w-full bg-gradient-card" />
+                <div className="bg-background-card p-4">
+                  <Typography variant="bodySm" weight="semibold">
+                    Card градиент
+                  </Typography>
+                  <Typography variant="note" color="secondary">
+                    bg-gradient-card
+                  </Typography>
+                </div>
+              </div>
+              <div className="overflow-hidden rounded-xl border border-border-primary shadow">
+                <div className="h-48 w-full bg-gradient-banner" />
+                <div className="bg-background-card p-4">
+                  <Typography variant="bodySm" weight="semibold">
+                    Banner градиент
+                  </Typography>
+                  <Typography variant="note" color="secondary">
+                    bg-gradient-banner
+                  </Typography>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -823,10 +921,10 @@ export default function DesignSystemShowcase() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Посмотреть профиль</Button>
-                  <Button variant="secondary" size="sm">
+                  <PrimaryButton size="sm">Посмотреть профиль</PrimaryButton>
+                  <PrimaryButton variant="secondary" size="sm">
                     Написать
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
 
@@ -877,10 +975,10 @@ export default function DesignSystemShowcase() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Посмотреть профиль</Button>
-                  <Button variant="secondary" size="sm">
+                  <PrimaryButton size="sm">Посмотреть профиль</PrimaryButton>
+                  <PrimaryButton variant="secondary" size="sm">
                     Написать
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
             </div>
@@ -926,16 +1024,16 @@ export default function DesignSystemShowcase() {
                       <Typography variant="bodySm" color="secondary">
                         Бюджет:
                       </Typography>
-                      <Typography variant="h3" className="text-accent-1">
+                      <Typography variant="h3" className="text-accent-primary">
                         150 000 ₽
                       </Typography>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm" fullWidth>
+                  <PrimaryButton size="sm" fullWidth>
                     Посмотреть детали
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
 
@@ -961,15 +1059,15 @@ export default function DesignSystemShowcase() {
                     <Typography variant="bodySm" color="secondary">
                       Откликов: 5
                     </Typography>
-                    <Typography variant="h3" className="text-accent-1">
+                    <Typography variant="h3" className="text-accent-primary">
                       8 000 ₽
                     </Typography>
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm" fullWidth>
+                  <PrimaryButton size="sm" fullWidth>
                     Посмотреть отклики
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
 
@@ -1018,9 +1116,9 @@ export default function DesignSystemShowcase() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="secondary" size="sm" fullWidth>
+                  <PrimaryButton variant="secondary" size="sm" fullWidth>
                     Повторить заказ
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
             </div>
@@ -1046,10 +1144,10 @@ export default function DesignSystemShowcase() {
                     placeholder="••••••••"
                     fullWidth
                   />
-                  <Button fullWidth>Войти</Button>
-                  <Button variant="secondary" fullWidth>
+                  <PrimaryButton fullWidth>Войти</PrimaryButton>
+                  <PrimaryButton variant="secondary" fullWidth>
                     Зарегистрироваться
-                  </Button>
+                  </PrimaryButton>
                 </div>
               </Card>
 
@@ -1085,10 +1183,10 @@ export default function DesignSystemShowcase() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button size="sm">Профиль</Button>
-                  <Button variant="secondary" size="sm">
+                  <PrimaryButton size="sm">Профиль</PrimaryButton>
+                  <PrimaryButton variant="secondary" size="sm">
                     Написать
-                  </Button>
+                  </PrimaryButton>
                 </CardFooter>
               </Card>
             </div>

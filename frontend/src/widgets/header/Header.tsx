@@ -4,16 +4,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/src/shared/ui/button/Button';
 import { useAuthStore } from '@/src/shared/lib/store/auth-store';
 import { useRole } from '@/src/shared/lib/hooks/use-role';
-import { Logo } from './Logo';
-import { Navigation } from './Navigation';
-import { LanguageSelector } from './LanguageSelector';
-import { UserMenu } from './UserMenu';
-import { MobileMenu } from './MobileMenu';
+import { Logo } from '../../shared/ui/header/Logo';
+import { Navigation } from '../../shared/ui/header/Navigation';
+import { LanguageSelector } from '../../shared/ui/header/LanguageSelector';
+import { UserMenu } from '../../shared/ui/header/UserMenu';
+import { MobileMenu } from '../../shared/ui/header/MobileMenu';
 import { Menu, X } from 'lucide-react';
 import {PrimaryButton} from '@/src/shared/ui/button/PrimaryButton';
+import { Typography } from '@/src/shared/ui/typography';
+import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
 
 export function Header() {
   const t = useTranslations('landing.header');
@@ -98,7 +99,7 @@ export function Header() {
               label={t('language')}
             />
 
-            <PrimaryButton isLoading>Register</PrimaryButton>
+            <SecondaryButton>Registering...</SecondaryButton>
 
             {/* Auth Buttons */}
             {isAuthenticated ? (
@@ -110,9 +111,9 @@ export function Header() {
               />
             ) : (
               <Link href={`/${locale}/auth/login`}>
-                <Button variant="primary" size="md">
+                <PrimaryButton >
                   {t('signInSignUp')}
-                </Button>
+                </PrimaryButton>
               </Link>
             )}
           </div>
@@ -123,9 +124,9 @@ export function Header() {
             {!isAuthenticated && (
               <Link href={`/${locale}/auth/login`}>
                 
-                <Button variant="primary" size="sm">
+                <PrimaryButton>
                   {t('signInSignUp')}
-                </Button>
+                </PrimaryButton>
               </Link>
             )}
 

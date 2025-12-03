@@ -23,7 +23,7 @@
   --color-background-secondary: #E1F7DB;
   --color-background-tertiary: #F6FBF7;
   --color-background-card: #FFFFFF;
-  --color-background-overlay: rgba(22, 22, 14, 0.7);
+  --color-background-overlay: rgba(84, 84, 63, 0.7);
   
   /* Градиенты */
   --gradient-main: linear-gradient(to top, #CDF2C2, #FCFFFD);

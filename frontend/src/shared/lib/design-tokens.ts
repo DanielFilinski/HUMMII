@@ -25,7 +25,7 @@ export const lightPalette = {
     secondary: '#E1F7DB',
     tertiary: '#F6FBF7',
     card: '#FFFFFF',
-    overlay: 'rgba(22, 22, 14, 0.7)',
+    overlay: 'rgba(84, 84, 63, 0.7)',
     gradient: {
       main: 'linear-gradient(to top, #CDF2C2, #FCFFFD)',
       card: 'linear-gradient(to bottom, #DDF8D4, #F9D5B7)',
