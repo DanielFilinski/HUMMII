@@ -11,10 +11,10 @@ export {
   CardContent,
   CardFooter,
 } from './Card';
-export { Checkbox } from './Checkbox';
+export { Checkbox } from './checkbox/Checkbox';
 export { Container } from './Container';
 export { Input } from './Input';
-export { Radio } from './Radio';
+export { Radio } from './radio-button/Radio';
 export { SearchInput } from './searchPanel/SearchInput';
 export { Select } from './Select';
 export { Spinner } from './spinner/Spinner';
@@ -24,6 +24,9 @@ export { ChatInput } from './inputs/ChatInput';
 
 // Icons
 export { Icon } from './icons';
+
+// Tags
+export { Tag, ClaimedTag, DoneTag, ReviewedTag } from './tags';
 
 // Typography System - готовые компоненты-утилиты
 export {
@@ -50,10 +53,10 @@ export {
 export type { AvatarProps, AvatarGroupProps } from './Avatar';
 export type { BadgeProps } from './Badge';
 export type { CardProps } from './Card';
-export type { CheckboxProps } from './Checkbox';
+export type { CheckboxProps } from './checkbox/Checkbox';
 export type { ContainerProps } from './Container';
 export type { InputProps } from './Input';
-export type { RadioProps } from './Radio';
+export type { RadioProps } from './radio-button/Radio';
 export type { SearchInputProps } from './searchPanel/SearchInput';
 export type { SelectProps } from './Select';
 export type { SpinnerProps } from './spinner/Spinner';
@@ -61,3 +64,4 @@ export type { TextareaProps } from './Textarea';
 export type { ToggleProps } from './Toggle';
 export type { IconProps, IconName, IconSize, IconColor } from './icons';
 export type { ChatInputProps } from './inputs/ChatInput';
+export type { TagVariant, TagSize } from './tags';

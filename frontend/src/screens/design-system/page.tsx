@@ -12,7 +12,7 @@ import {
   CardContent,
   CardFooter,
   Checkbox,
-  Container,  
+  Container,
   Radio,
   SearchInput,
   Select,
@@ -20,7 +20,11 @@ import {
   Textarea,
   Toggle,
   PrimaryButton,
-  Icon
+  Icon,
+  Tag,
+  ClaimedTag,
+  DoneTag,
+  ReviewedTag
 } from '@/src/shared/ui';
 import { Header } from '@/src/widgets/header/Header';
 import { Typography } from '@shared/ui/typography';
@@ -52,47 +56,7 @@ export default function DesignSystemShowcase() {
     <div className="min-h-screen bg-background-tertiary py-12">
       <Container maxWidth="2xl">
         {/* Logo and Header */}
-        <div className="mb-12 text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="flex items-center gap-4">
-              <Typography as="h1" variant="h1" className="text-accent-primary">
-                HUMMII
-              </Typography>
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-primary">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="h-10 w-10"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M20 6L9 17L4 12"
-                    stroke="white"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <Typography as="h2" variant="h2" className="mb-4">
-            Component Library
-          </Typography>
-          <Typography variant="body" color="secondary">
-            Комплексный обзор всех токенов дизайна и компонентов
-          </Typography>
-        </div>
-
-
-
-
-
-
-
-
-
-
+      
         <div className="space-y-16">
           {/* Header Variants Section */}
           
@@ -114,7 +78,7 @@ export default function DesignSystemShowcase() {
 <Input placeholder="Text" leftIcon="email" />
 
 
-<Input placeholder="Text" value="Filled info" filled />
+<Input placeholder="Text" value="Filled info" filled readOnly />
 
 
 <Input placeholder="Text" error errorText="Invalid Email" />
@@ -507,82 +471,7 @@ export default function DesignSystemShowcase() {
             </Card>
           </section>
 
-          {/* Buttons Section */}
-          <section>
-            <Typography as="h2" variant="h2" className="mb-6">
-              Кнопки
-            </Typography>
-            <Card padding="lg">
-              <div className="space-y-6">
-                <div>
-                  <Typography variant="h3" className="mb-3">
-                    Варианты
-                  </Typography>
-                
-                </div>
-
-                <div>
-                  <Typography variant="h3" className="mb-3">
-                    Состояния (Default → Hovered → Pressed → Disabled)
-                  </Typography>
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    <div className="flex flex-col gap-2">
-                      <Typography variant="bodySm" color="secondary">
-                        Default
-                      </Typography>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Typography variant="bodySm" color="secondary">
-                        Hovered
-                      </Typography>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <Typography variant="bodySm" color="secondary">
-                        Pressed
-                      </Typography>
-                      <PrimaryButton className="scale-95 bg-accent-hover">
-                        Pressed
-                      </PrimaryButton>
-                    <div className="flex flex-col gap-2">
-                      <Typography variant="bodySm" color="secondary">
-                        Disabled
-                      </Typography>
-                      <PrimaryButton disabled>Disabled</PrimaryButton>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Typography variant="h3" className="mb-3">
-                    Размеры
-                  </Typography>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <PrimaryButton >Маленькая</PrimaryButton>
-                    <PrimaryButton >Средняя</PrimaryButton>
-                    <PrimaryButton >Большая</PrimaryButton>
-                  </div>
-                </div>
-
-                <div>
-                  <Typography variant="h3" className="mb-3">
-                    Состояния загрузки
-                  </Typography>
-                  <div className="flex flex-wrap gap-3">
-                    <PrimaryButton>Обычная</PrimaryButton>
-                    <PrimaryButton isLoading>Загрузка</PrimaryButton>
-                  </div>
-                </div>
-
-                <div>
-                  <Typography variant="h3" className="mb-3">
-                    Полная ширина
-                  </Typography>
-                  <PrimaryButton fullWidth>Кнопка на всю ширину</PrimaryButton>
-                </div>
-              </div>
-              </div>
-            </Card>
-          </section>
+         
 
           {/* Inputs Section */}
           <section>
@@ -784,6 +673,107 @@ export default function DesignSystemShowcase() {
                     <Badge size="sm">Маленький</Badge>
                     <Badge size="md">Средний</Badge>
                     <Badge size="lg">Большой</Badge>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </section>
+
+          {/* Tags Section */}
+          <section>
+            <Typography as="h2" variant="h2" className="mb-6">
+              Task Tags
+            </Typography>
+            <Card padding="lg">
+              <div className="space-y-6">
+                <div>
+                  <Typography variant="h3" className="mb-3">
+                    Варианты
+                  </Typography>
+                  <div className="flex flex-wrap gap-3">
+                    <ClaimedTag />
+                    <DoneTag />
+                    <ReviewedTag />
+                  </div>
+                </div>
+
+                <div>
+                  <Typography variant="h3" className="mb-3">
+                    С кастомными текстами
+                  </Typography>
+                  <div className="flex flex-wrap gap-3">
+                    <ClaimedTag label="В работе" />
+                    <DoneTag label="Выполнено" />
+                    <ReviewedTag label="Проверено" />
+                  </div>
+                </div>
+
+                <div>
+                  <Typography variant="h3" className="mb-3">
+                    Размеры
+                  </Typography>
+                  <div className="space-y-3">
+                    <div>
+                      <Typography variant="bodySm" color="secondary" className="mb-2">
+                        Small (sm)
+                      </Typography>
+                      <div className="flex flex-wrap gap-2">
+                        <ClaimedTag size="sm" />
+                        <DoneTag size="sm" />
+                        <ReviewedTag size="sm" />
+                      </div>
+                    </div>
+                    <div>
+                      <Typography variant="bodySm" color="secondary" className="mb-2">
+                        Medium (md) - Default
+                      </Typography>
+                      <div className="flex flex-wrap gap-2">
+                        <ClaimedTag size="md" />
+                        <DoneTag size="md" />
+                        <ReviewedTag size="md" />
+                      </div>
+                    </div>
+                    <div>
+                      <Typography variant="bodySm" color="secondary" className="mb-2">
+                        Large (lg)
+                      </Typography>
+                      <div className="flex flex-wrap gap-2">
+                        <ClaimedTag size="lg" />
+                        <DoneTag size="lg" />
+                        <ReviewedTag size="lg" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Typography variant="h3" className="mb-3">
+                    В списке задач
+                  </Typography>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between rounded-lg bg-background-secondary p-3">
+                      <Typography variant="bodySm">Fix login bug</Typography>
+                      <ClaimedTag size="sm" />
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-background-secondary p-3">
+                      <Typography variant="bodySm">Update documentation</Typography>
+                      <DoneTag size="sm" />
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-background-secondary p-3">
+                      <Typography variant="bodySm">Code review</Typography>
+                      <ReviewedTag size="sm" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Typography variant="h3" className="mb-3">
+                    Базовый компонент Tag
+                  </Typography>
+                  <div className="flex flex-wrap gap-3">
+                    <Tag variant="claimed">Claimed</Tag>
+                    <Tag variant="done">Done</Tag>
+                    <Tag variant="reviewed">Reviewed</Tag>
                   </div>
                 </div>
               </div>
