@@ -4,8 +4,11 @@ import {
   fontSizes,
   fontWeights,
   spacing,
+  componentSpacing,
   responsiveSpacing,
+  componentSizes,
   borderRadius,
+  componentBorderRadius,
   extendedShadows,
   transitionDurations,
   transitionTimingFunctions,
@@ -130,19 +133,92 @@ const config: Config = {
       boxShadow: extendedShadows,
       /**
        * СКРУГЛЕНИЯ
-       * Импортированы из design-tokens.ts
+       * Расширенная система border radius из design-tokens.ts
+       * Включает базовые значения + семантические имена для компонентов
        */
-      borderRadius: borderRadius,
+      borderRadius: {
+        ...borderRadius,
+        // Семантические радиусы для компонентов
+        'btn-sm': componentBorderRadius.button.sm,
+        'btn-md': componentBorderRadius.button.md,
+        'btn-lg': componentBorderRadius.button.lg,
+        'btn-pill': componentBorderRadius.button.pill,
+        'input': componentBorderRadius.input.default,
+        'input-sm': componentBorderRadius.input.sm,
+        'card-sm': componentBorderRadius.card.sm,
+        'card-md': componentBorderRadius.card.md,
+        'card-lg': componentBorderRadius.card.lg,
+        'modal': componentBorderRadius.modal.default,
+        'modal-lg': componentBorderRadius.modal.lg,
+        'avatar-sm': componentBorderRadius.avatar.sm,
+        'avatar-md': componentBorderRadius.avatar.md,
+        'avatar-lg': componentBorderRadius.avatar.lg,
+        'avatar-full': componentBorderRadius.avatar.full,
+        'badge': componentBorderRadius.badge.default,
+        'badge-square': componentBorderRadius.badge.square,
+      },
+      /**
+       * COMPONENT HEIGHTS
+       * Стандартизированные высоты для компонентов
+       */
+      height: {
+        'btn-xs': componentSizes.button.height.xs,
+        'btn-sm': componentSizes.button.height.sm,
+        'btn-md': componentSizes.button.height.md,
+        'btn-lg': componentSizes.button.height.lg,
+        'btn-xl': componentSizes.button.height.xl,
+        'input-sm': componentSizes.input.height.sm,
+        'input-md': componentSizes.input.height.md,
+        'input-lg': componentSizes.input.height.lg,
+        'avatar-xs': componentSizes.avatar.xs,
+        'avatar-sm': componentSizes.avatar.sm,
+        'avatar-md': componentSizes.avatar.md,
+        'avatar-lg': componentSizes.avatar.lg,
+        'avatar-xl': componentSizes.avatar.xl,
+        'avatar-2xl': componentSizes.avatar['2xl'],
+      },
+      /**
+       * COMPONENT WIDTHS
+       * Ширины для компонентов (совпадают с высотами для квадратных элементов)
+       */
+      width: {
+        'avatar-xs': componentSizes.avatar.xs,
+        'avatar-sm': componentSizes.avatar.sm,
+        'avatar-md': componentSizes.avatar.md,
+        'avatar-lg': componentSizes.avatar.lg,
+        'avatar-xl': componentSizes.avatar.xl,
+        'avatar-2xl': componentSizes.avatar['2xl'],
+        'icon-xs': componentSizes.icon.xs,
+        'icon-sm': componentSizes.icon.sm,
+        'icon-md': componentSizes.icon.md,
+        'icon-lg': componentSizes.icon.lg,
+        'icon-xl': componentSizes.icon.xl,
+        'icon-2xl': componentSizes.icon['2xl'],
+      },
       /**
        * SPACING
-       * Базовый spacing из design-tokens.ts
-       * Дополнительные значения для адаптивных layout'ов
+       * Унифицированная система spacing из design-tokens.ts
+       * Включает базовые значения + адаптивные размеры
        */
       spacing: {
         ...Object.fromEntries(
           Object.entries(spacing).map(([key, value]) => [key, value])
         ),
         ...responsiveSpacing,
+      },
+      /**
+       * PADDING & MARGIN SHORTCUTS
+       * Семантические значения для компонентов
+       */
+      padding: {
+        'btn-xs': componentSizes.button.padding.xs,
+        'btn-sm': componentSizes.button.padding.sm,
+        'btn-md': componentSizes.button.padding.md,
+        'btn-lg': componentSizes.button.padding.lg,
+        'btn-xl': componentSizes.button.padding.xl,
+        'input-sm': componentSizes.input.padding.sm,
+        'input-md': componentSizes.input.padding.md,
+        'input-lg': componentSizes.input.padding.lg,
       },
       /**
        * MAX WIDTH

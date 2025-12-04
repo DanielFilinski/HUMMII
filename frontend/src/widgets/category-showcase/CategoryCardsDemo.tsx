@@ -9,7 +9,7 @@
 import { CategoryCard } from '@/src/shared/ui';
 import { Container } from '@/src/shared/ui';
 import { Typography } from '@/src/shared/ui/typography/Typography';
-import { cleaningCategory, mockCategories } from '@/src/shared/ui/category-card/mock-categories';
+import { cleaningCategory, mockCategories } from '@/src/shared/ui/cards/category-card/mock-categories';
 
 export function CategoryCardsDemo() {
   const handleCategoryClick = (categoryId: string) => {

@@ -95,39 +95,71 @@
  * ===================================
  */
 @layer components {
+  /* === КНОПКИ === */
   /* Кнопка Primary */
   .btn-primary {
-    @apply bg-accent-primary text-text-inverse px-6 py-3 rounded-lg font-semibold;
+    @apply bg-accent-primary text-text-inverse font-semibold;
     @apply hover:bg-accent-hover active:bg-accent-active;
     @apply transition-colors duration-200 ease-in-out;
     @apply focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2;
     @apply disabled:bg-accent-tertiary disabled:cursor-not-allowed;
   }
   
+  /* Размеры кнопок с унифицированными токенами */
+  .btn-xs { @apply h-btn-xs px-3 py-1 text-sm rounded-btn-sm; }
+  .btn-sm { @apply h-btn-sm px-4 py-2 text-sm rounded-btn-md; }
+  .btn-md { @apply h-btn-md px-6 py-3 text-base rounded-btn-md; }
+  .btn-lg { @apply h-btn-lg px-8 py-4 text-lg rounded-btn-lg; }
+  .btn-xl { @apply h-btn-xl px-10 py-5 text-xl rounded-btn-lg; }
+  
   /* Кнопка Secondary */
   .btn-secondary {
-    @apply bg-transparent text-accent-primary border-2 border-accent-primary px-6 py-3 rounded-lg font-semibold;
+    @apply bg-transparent text-accent-primary border-2 border-accent-primary font-semibold;
     @apply hover:bg-accent-primary hover:text-text-inverse;
     @apply transition-all duration-200 ease-in-out;
     @apply focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2;
     @apply disabled:border-accent-tertiary disabled:text-accent-tertiary disabled:cursor-not-allowed;
   }
   
-  /* Карточка */
+  /* === КАРТОЧКИ === */
   .card {
-    @apply bg-background-card border border-border-primary rounded-xl p-6;
+    @apply bg-background-card border border-border-primary;
     @apply shadow-card hover:shadow-elevated;
     @apply transition-shadow duration-200 ease-in-out;
   }
   
-  /* Инпут */
+  /* Размеры карточек */
+  .card-sm { @apply rounded-card-sm p-4; }
+  .card-md { @apply rounded-card-md p-5; }
+  .card-lg { @apply rounded-card-lg p-6; }
+  
+  /* === ИНПУТЫ === */
   .input {
-    @apply w-full px-4 py-3 bg-background border border-border-primary rounded-lg;
+    @apply w-full bg-background border border-border-primary;
     @apply text-text-primary placeholder:text-text-tertiary;
     @apply focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent;
     @apply disabled:bg-surface-sunken disabled:text-text-disabled disabled:cursor-not-allowed;
     @apply transition-all duration-200 ease-in-out;
   }
+  
+  /* Размеры инпутов */
+  .input-sm { @apply h-input-sm px-3 py-2 text-sm rounded-input-sm; }
+  .input-md { @apply h-input-md px-4 py-3 text-base rounded-input; }
+  .input-lg { @apply h-input-lg px-5 py-4 text-lg rounded-input; }
+  
+  /* === АВАТАРЫ === */
+  .avatar {
+    @apply bg-surface-elevated border border-border-secondary overflow-hidden;
+    @apply flex items-center justify-center text-text-secondary;
+  }
+  
+  .avatar-xs { @apply w-avatar-xs h-avatar-xs text-xs rounded-avatar-sm; }
+  .avatar-sm { @apply w-avatar-sm h-avatar-sm text-sm rounded-avatar-md; }
+  .avatar-md { @apply w-avatar-md h-avatar-md text-base rounded-avatar-lg; }
+  .avatar-lg { @apply w-avatar-lg h-avatar-lg text-lg rounded-avatar-lg; }
+  .avatar-xl { @apply w-avatar-xl h-avatar-xl text-xl rounded-avatar-lg; }
+  .avatar-2xl { @apply w-avatar-2xl h-avatar-2xl text-2xl rounded-avatar-lg; }
+  .avatar-round { @apply rounded-avatar-full; }
   
   /* Инпут с ошибкой */
   .input-error {
@@ -181,6 +213,59 @@
     background-image: linear-gradient(90deg, #3A971E, #67AD51);
   }
   
+  /* === SPACING UTILITIES === */
+  /* Семантические отступы */
+  .space-xs { @apply space-y-1; }        /* 4px */
+  .space-sm { @apply space-y-2; }        /* 8px */
+  .space-md { @apply space-y-4; }        /* 16px */
+  .space-lg { @apply space-y-6; }        /* 24px */
+  .space-xl { @apply space-y-8; }        /* 32px */
+  .space-2xl { @apply space-y-12; }      /* 48px */
+  
+  /* Padding классы для компонентов */
+  .p-component-xs { @apply p-2; }        /* 8px */
+  .p-component-sm { @apply p-3; }        /* 12px */
+  .p-component-md { @apply p-4; }        /* 16px */
+  .p-component-lg { @apply p-6; }        /* 24px */
+  .p-component-xl { @apply p-8; }        /* 32px */
+  
+  /* Margin классы для компонентов */
+  .m-component-xs { @apply m-1; }        /* 4px */
+  .m-component-sm { @apply m-2; }        /* 8px */
+  .m-component-md { @apply m-4; }        /* 16px */
+  .m-component-lg { @apply m-6; }        /* 24px */
+  .m-component-xl { @apply m-8; }        /* 32px */
+  
+  /* Gap классы для Flexbox/Grid */
+  .gap-xs { @apply gap-1; }              /* 4px */
+  .gap-sm { @apply gap-2; }              /* 8px */
+  .gap-md { @apply gap-3; }              /* 12px */
+  .gap-lg { @apply gap-4; }              /* 16px */
+  .gap-xl { @apply gap-6; }              /* 24px */
+  .gap-2xl { @apply gap-8; }             /* 32px */
+  
+  /* === RESPONSIVE SPACING === */
+  /* Адаптивные отступы для контейнеров */
+  .container-padding {
+    @apply px-4 md:px-6 lg:px-8;        /* mobile: 16px, tablet: 24px, desktop: 32px */
+  }
+  
+  .section-padding {
+    @apply py-8 md:py-12 lg:py-16;      /* mobile: 32px, tablet: 48px, desktop: 64px */
+  }
+  
+  .card-padding {
+    @apply p-4 md:p-5 lg:p-6;           /* mobile: 16px, tablet: 20px, desktop: 24px */
+  }
+  
+  /* === BORDER RADIUS UTILITIES === */
+  .rounded-component-xs { @apply rounded-xs; }     /* 2px */
+  .rounded-component-sm { @apply rounded-sm; }     /* 4px */
+  .rounded-component-md { @apply rounded-md; }     /* 8px */
+  .rounded-component-lg { @apply rounded-lg; }     /* 12px */
+  .rounded-component-xl { @apply rounded-xl; }     /* 16px */
+  
+  /* === ANIMATIONS === */
   /* Анимация появления */
   .animate-in {
     animation: slideIn 0.2s ease-out;

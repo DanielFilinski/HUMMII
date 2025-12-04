@@ -1,5 +1,5 @@
 // UI Components
-export { Avatar, AvatarGroup } from './Avatar';
+export { Avatar, AvatarGroup } from './avatars/Avatar';
 export { Badge } from './Badge';
 export { PrimaryButton } from './button/PrimaryButton';
 export { AuthButton } from './button/AuthButton';
@@ -11,7 +11,7 @@ export {
   CardContent,
   CardFooter,
 } from './Card';
-export { CategoryCard } from './category-card';
+export { CategoryCard } from './cards/category-card';
 export { Checkbox } from './checkbox/Checkbox';
 export { Container } from './Container';
 export { Input } from './Input';
@@ -51,7 +51,7 @@ export {
 } from './typography/typography-utils';
 
 // Component Types
-export type { AvatarProps, AvatarGroupProps } from './Avatar';
+export type { AvatarProps, AvatarGroupProps } from './avatars/Avatar';
 export type { BadgeProps } from './Badge';
 export type { CardProps } from './Card';
 export type { CheckboxProps } from './checkbox/Checkbox';

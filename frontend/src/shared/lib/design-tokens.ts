@@ -237,30 +237,140 @@ export const typography = {
   note: 'text-mobile-note md:text-tablet-note lg:text-desktop-note',
 } as const;
 
-// Spacing Tokens
+// ============================================================================
+// SPACING SYSTEM (PADDING & MARGIN)
+// ============================================================================
+
+/**
+ * Базовая система spacing для padding, margin и gap
+ * Используется во всех компонентах для единообразия
+ */
 export const spacing = {
-  xs: '4px',
-  sm: '8px',
-  md: '12px',
-  lg: '16px',
-  xl: '20px',
-  '2xl': '24px',
-  '3xl': '32px',
-  '4xl': '40px',
-  '5xl': '48px',
-  '6xl': '64px',
+  0: '0px',      // 0px
+  px: '1px',     // 1px border
+  0.5: '2px',    // 2px
+  1: '4px',      // 4px
+  1.5: '6px',    // 6px
+  2: '8px',      // 8px
+  2.5: '10px',   // 10px
+  3: '12px',     // 12px
+  3.5: '14px',   // 14px
+  4: '16px',     // 16px
+  5: '20px',     // 20px
+  6: '24px',     // 24px
+  7: '28px',     // 28px
+  8: '32px',     // 32px
+  9: '36px',     // 36px
+  10: '40px',    // 40px
+  11: '44px',    // 44px
+  12: '48px',    // 48px
+  14: '56px',    // 56px
+  16: '64px',    // 64px
+  18: '72px',    // 72px
+  20: '80px',    // 80px
+  24: '96px',    // 96px
+  28: '112px',   // 112px
+  32: '128px',   // 128px
+  36: '144px',   // 144px
+  40: '160px',   // 160px
+  44: '176px',   // 176px
+  48: '192px',   // 192px
+  52: '208px',   // 208px
+  56: '224px',   // 224px
+  60: '240px',   // 240px
+  64: '256px',   // 256px
+  72: '288px',   // 288px
+  80: '320px',   // 320px
+  96: '384px',   // 384px
 } as const;
 
-// Border Radius Tokens
+/**
+ * Семантические spacing значения для компонентов
+ */
+export const componentSpacing = {
+  // Внутренние отступы
+  padding: {
+    xs: spacing[2],     // 8px - минимальные отступы
+    sm: spacing[3],     // 12px - маленькие отступы
+    md: spacing[4],     // 16px - стандартные отступы
+    lg: spacing[6],     // 24px - большие отступы
+    xl: spacing[8],     // 32px - очень большие отступы
+    '2xl': spacing[12], // 48px - максимальные отступы
+  },
+  // Внешние отступы
+  margin: {
+    xs: spacing[1],     // 4px - минимальные отступы
+    sm: spacing[2],     // 8px - маленькие отступы
+    md: spacing[4],     // 16px - стандартные отступы
+    lg: spacing[6],     // 24px - большие отступы
+    xl: spacing[8],     // 32px - очень большие отступы
+    '2xl': spacing[12], // 48px - максимальные отступы
+  },
+  // Отступы между элементами (gap)
+  gap: {
+    xs: spacing[1],     // 4px
+    sm: spacing[2],     // 8px
+    md: spacing[3],     // 12px
+    lg: spacing[4],     // 16px
+    xl: spacing[6],     // 24px
+    '2xl': spacing[8],  // 32px
+  },
+} as const;
+
+// ============================================================================
+// BORDER RADIUS SYSTEM
+// ============================================================================
+
+/**
+ * Система радиусов скругления
+ * Унифицированные значения для всех компонентов
+ */
 export const borderRadius = {
-  none: '0',
-  sm: '4px',
-  default: '8px',
-  md: '12px',
-  lg: '16px',
-  xl: '20px',
-  '2xl': '24px',
-  full: '9999px',
+  none: '0px',       // Без скругления
+  xs: '2px',         // Очень маленькое скругление
+  sm: '4px',         // Маленькое скругление
+  default: '6px',    // Стандартное скругление (изменено с 8px на 6px)
+  md: '8px',         // Среднее скругление
+  lg: '12px',        // Большое скругление
+  xl: '16px',        // Очень большое скругление
+  '2xl': '20px',     // Максимальное скругление
+  '3xl': '24px',     // Экстра большое скругление
+  full: '9999px',    // Полное скругление (круг/pill)
+} as const;
+
+/**
+ * Семантические радиусы для компонентов
+ */
+export const componentBorderRadius = {
+  button: {
+    sm: borderRadius.sm,      // 4px - маленькие кнопки
+    md: borderRadius.md,      // 8px - стандартные кнопки
+    lg: borderRadius.lg,      // 12px - большие кнопки
+    pill: borderRadius.full,  // Полное скругление для pill-кнопок
+  },
+  input: {
+    default: borderRadius.md, // 8px - стандартные инпуты
+    sm: borderRadius.sm,      // 4px - компактные инпуты
+  },
+  card: {
+    sm: borderRadius.lg,      // 12px - маленькие карточки
+    md: borderRadius.xl,      // 16px - стандартные карточки
+    lg: borderRadius['2xl'],  // 20px - большие карточки
+  },
+  modal: {
+    default: borderRadius['2xl'], // 20px - модальные окна
+    lg: borderRadius['3xl'],      // 24px - большие модалки
+  },
+  avatar: {
+    sm: borderRadius.sm,      // 4px - маленькие аватары
+    md: borderRadius.md,      // 8px - средние аватары
+    lg: borderRadius.lg,      // 12px - большие аватары
+    full: borderRadius.full,  // Круглые аватары
+  },
+  badge: {
+    default: borderRadius.full, // Полное скругление для бейджей
+    square: borderRadius.sm,    // 4px - квадратные бейджи
+  },
 } as const;
 
 // Shadow Tokens
@@ -375,6 +485,60 @@ export const fontWeights = {
 } as const;
 
 // ============================================================================
+// COMPONENT SIZES
+// ============================================================================
+
+/**
+ * Размеры для различных компонентов
+ */
+export const componentSizes = {
+  button: {
+    height: {
+      xs: '24px',    // Очень маленькие кнопки
+      sm: '32px',    // Маленькие кнопки
+      md: '40px',    // Стандартные кнопки
+      lg: '48px',    // Большие кнопки
+      xl: '56px',    // Очень большие кнопки
+    },
+    padding: {
+      xs: `${spacing[2]} ${spacing[3]}`,  // 8px 12px
+      sm: `${spacing[2]} ${spacing[4]}`,  // 8px 16px
+      md: `${spacing[3]} ${spacing[6]}`,  // 12px 24px
+      lg: `${spacing[4]} ${spacing[8]}`,  // 16px 32px
+      xl: `${spacing[5]} ${spacing[10]}`, // 20px 40px
+    },
+  },
+  input: {
+    height: {
+      sm: '32px',    // Компактные инпуты
+      md: '40px',    // Стандартные инпуты
+      lg: '48px',    // Большие инпуты
+    },
+    padding: {
+      sm: `${spacing[2]} ${spacing[3]}`,  // 8px 12px
+      md: `${spacing[3]} ${spacing[4]}`,  // 12px 16px
+      lg: `${spacing[4]} ${spacing[5]}`,  // 16px 20px
+    },
+  },
+  avatar: {
+    xs: '24px',    // Очень маленькие аватары
+    sm: '32px',    // Маленькие аватары
+    md: '40px',    // Стандартные аватары
+    lg: '48px',    // Большие аватары
+    xl: '64px',    // Очень большие аватары
+    '2xl': '80px', // Максимальные аватары
+  },
+  icon: {
+    xs: '12px',    // Очень маленькие иконки
+    sm: '16px',    // Маленькие иконки
+    md: '20px',    // Стандартные иконки
+    lg: '24px',    // Большие иконки
+    xl: '32px',    // Очень большие иконки
+    '2xl': '40px', // Максимальные иконки
+  },
+} as const;
+
+// ============================================================================
 // RESPONSIVE SPACING
 // ============================================================================
 
@@ -382,12 +546,36 @@ export const fontWeights = {
  * Дополнительные spacing значения для адаптивных layout'ов
  */
 export const responsiveSpacing = {
+  14: '3.5rem',   // 56px
   18: '4.5rem',   // 72px
   22: '5.5rem',   // 88px
+  26: '6.5rem',   // 104px
+  30: '7.5rem',   // 120px
   88: '22rem',    // 352px
   100: '25rem',   // 400px
   112: '28rem',   // 448px
   128: '32rem',   // 512px
+} as const;
+
+/**
+ * Адаптивные отступы для различных экранов
+ */
+export const responsivePadding = {
+  container: {
+    mobile: spacing[4],    // 16px - мобильные устройства
+    tablet: spacing[6],    // 24px - планшеты
+    desktop: spacing[8],   // 32px - десктоп
+  },
+  section: {
+    mobile: spacing[8],    // 32px - между секциями на мобилке
+    tablet: spacing[12],   // 48px - между секциями на планшете
+    desktop: spacing[16],  // 64px - между секциями на десктопе
+  },
+  card: {
+    mobile: spacing[4],    // 16px - внутри карточек на мобилке
+    tablet: spacing[5],    // 20px - внутри карточек на планшете
+    desktop: spacing[6],   // 24px - внутри карточек на десктопе
+  },
 } as const;
 
 // ============================================================================
@@ -522,6 +710,7 @@ export const lineClamp = {
  * 
  * type PrimaryColor = DesignTokens.ColorPalette;
  * type SpacingKey = DesignTokens.Spacing;
+ * type ButtonSize = DesignTokens.ComponentSize['button'];
  * ```
  */
 export namespace DesignTokens {
@@ -542,8 +731,14 @@ export namespace DesignTokens {
   
   // Spacing types
   export type Spacing = keyof typeof spacing;
+  export type ComponentSpacing = typeof componentSpacing;
   export type ResponsiveSpacing = keyof typeof responsiveSpacing;
+  export type ResponsivePadding = typeof responsivePadding;
   export type IconSize = keyof typeof iconSizes;
+  
+  // Component types
+  export type ComponentSize = typeof componentSizes;
+  export type ComponentBorderRadius = typeof componentBorderRadius;
   
   // Other types
   export type BorderRadius = keyof typeof borderRadius;
@@ -561,21 +756,25 @@ export namespace DesignTokens {
 
 /**
  * Полный экспорт всех токенов для использования в других проектах
- * @version 2.0.0
+ * @version 2.1.0
  */
 export const designTokens = {
-  version: '2.0.0',
+  version: '2.1.0',
   colors: colorPalettes,
   typography,
   baseFontSizes,
   fontSizes,
   fontWeights,
   spacing,
+  componentSpacing,
   responsiveSpacing,
+  responsivePadding,
+  componentSizes,
   iconSizes,
   gridSystem,
   opacities,
   borderRadius,
+  componentBorderRadius,
   shadows: extendedShadows,
   transitions,
   transitionDurations,

@@ -35,7 +35,7 @@ import { IconButton } from '@/src/shared/ui/button/IconButton';
 import { LinkButton } from '@shared/ui/button';
 import { Input, PasswordInput, EmailInput, ChatInput } from '@shared/ui/inputs';
 import { TextArea } from '@shared/ui/text-area';
-import { mockCategories } from '@shared/ui/category-card';
+import { mockCategories } from '@/src/shared/ui/cards/category-card';
 
 export default function DesignSystemShowcase() {
     const t = useTranslations('landing.header');
