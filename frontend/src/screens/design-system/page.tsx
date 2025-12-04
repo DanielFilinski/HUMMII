@@ -12,8 +12,7 @@ import {
   CardContent,
   CardFooter,
   Checkbox,
-  Container,
-  Input,
+  Container,  
   Radio,
   SearchInput,
   Select,
@@ -28,6 +27,10 @@ import { Typography } from '@shared/ui/typography';
 import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
 import { useTranslations } from 'next-intl';
 import { IconButton } from '@/src/shared/ui/button/IconButton';
+import { LinkButton } from '@shared/ui/button';
+import { Input, PasswordInput, EmailInput, ChatInput } from '@shared/ui/inputs';
+import { TextArea } from '@shared/ui/text-area';
+
 
 export default function DesignSystemShowcase() {
     const t = useTranslations('landing.header');
@@ -36,6 +39,14 @@ export default function DesignSystemShowcase() {
   const [checked, setChecked] = useState(false);
   const [radioValue, setRadioValue] = useState('option1');
   const [toggleValue, setToggleValue] = useState(false);
+  const [selectedValue, setSelectedValue] = useState<string | undefined>(undefined);
+
+  const cleaningOptions = [
+  { value: 'home', label: 'Home cleaning' },
+  { value: 'renovation', label: 'Post-renovation cleaning' },
+  { value: 'window', label: 'Window cleaning' },
+  { value: 'move', label: 'Move-in / move-out cleaning' },
+];
 
   return (
     <div className="min-h-screen bg-background-tertiary py-12">
@@ -73,6 +84,15 @@ export default function DesignSystemShowcase() {
           </Typography>
         </div>
 
+
+
+
+
+
+
+
+
+
         <div className="space-y-16">
           {/* Header Variants Section */}
           
@@ -83,8 +103,152 @@ export default function DesignSystemShowcase() {
               <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography> 
            </SecondaryButton>
 
-           <IconButton isLoading iconName="google" size="md" ariaLabel="Sign in with Google" />
-         
+           <IconButton iconName="google" size="md" ariaLabel="Sign in with Google" />
+           <LinkButton href="/profile">View Profile</LinkButton>
+
+
+
+<Input placeholder="Text" />
+
+
+<Input placeholder="Text" leftIcon="email" />
+
+
+<Input placeholder="Text" value="Filled info" filled />
+
+
+<Input placeholder="Text" error errorText="Invalid Email" />
+
+
+<Input placeholder="Text" disabled />
+
+
+<PasswordInput placeholder="Password" />
+
+
+<EmailInput placeholder="Email" />
+
+
+<Select
+  options={cleaningOptions}
+  value={selectedValue}
+  onChange={setSelectedValue}
+  placeholder="Search..."
+  searchable
+/>
+
+
+// Default
+<TextArea placeholder="Input text" />
+
+// Focused/Filled с текстом
+<TextArea 
+  value="Looking for a plumber to replace a broken faucet in the bathroom..."
+  placeholder="Input text"
+/>
+
+// Disabled
+<TextArea disabled placeholder="Input text" />
+
+// Error с превышением лимита
+<TextArea 
+  error
+  errorText="Text is too long"
+  value="Looking for a plumber to replace a broken faucet in the bathroom..."
+  maxLength={500}
+/>
+
+// С лейблом
+<TextArea 
+  label="Description"
+  placeholder="Enter your description"
+  maxLength={500}
+/>
+
+// Без счётчика
+<TextArea 
+  placeholder="Input text"
+  showCounter={false}
+/>
+
+// С автоматическим изменением высоты
+<TextArea 
+  placeholder="Input text"
+  autoResize
+/>
+
+          {/* Chat Input Section */}
+          <section>
+            <Card className="p-6">
+              <CardHeader>
+                <CardTitle>Chat Input</CardTitle>
+                <CardDescription>
+                  Компонент для ввода сообщений в чате с поддержкой прикрепления файлов
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Standard */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Standard
+                  </Typography>
+                  <ChatInput
+                    placeholder="Введите сообщение..."
+                    onSend={(message, file) => {
+                      console.log('Message:', message);
+                      console.log('File:', file);
+                    }}
+                  />
+                </div>
+
+                {/* Without Attachment Button */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Without Attachment
+                  </Typography>
+                  <ChatInput
+                    placeholder="Только текст..."
+                    onSend={(message) => console.log('Message:', message)}
+                    showAttachment={false}
+                  />
+                </div>
+
+                {/* Disabled */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Disabled
+                  </Typography>
+                  <ChatInput
+                    placeholder="Недоступно..."
+                    onSend={() => {}}
+                    disabled
+                  />
+                </div>
+
+                {/* Custom Max Length */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Custom Max Length (100 chars)
+                  </Typography>
+                  <ChatInput
+                    placeholder="Короткое сообщение..."
+                    onSend={(message) => console.log('Message:', message)}
+                    maxLength={100}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+
+
+
+
+
+
+
+
+
 
           {/* Colors Section */}
           <section>

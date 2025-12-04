@@ -335,7 +335,7 @@ Phase 12 focuses on implementing a robust background job processing system using
 // src/queues/jobs/cleanup/chat-cleanup.job.ts
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '@/shared/prisma/prisma.service';
+import { PrismaService } from '@shared/prisma/prisma.service';
 
 @Injectable()
 export class ChatCleanupJob {

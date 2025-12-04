@@ -15,11 +15,12 @@ export { Checkbox } from './Checkbox';
 export { Container } from './Container';
 export { Input } from './Input';
 export { Radio } from './Radio';
-export { SearchInput } from './SearchInput';
+export { SearchInput } from './searchPanel/SearchInput';
 export { Select } from './Select';
 export { Spinner } from './spinner/Spinner';
 export { Textarea } from './Textarea';
 export { Toggle } from './Toggle';
+export { ChatInput } from './inputs/ChatInput';
 
 // Icons
 export { Icon } from './icons';
@@ -53,9 +54,10 @@ export type { CheckboxProps } from './Checkbox';
 export type { ContainerProps } from './Container';
 export type { InputProps } from './Input';
 export type { RadioProps } from './Radio';
-export type { SearchInputProps } from './SearchInput';
+export type { SearchInputProps } from './searchPanel/SearchInput';
 export type { SelectProps } from './Select';
 export type { SpinnerProps } from './spinner/Spinner';
 export type { TextareaProps } from './Textarea';
 export type { ToggleProps } from './Toggle';
 export type { IconProps, IconName, IconSize, IconColor } from './icons';
+export type { ChatInputProps } from './inputs/ChatInput';

@@ -1,4 +1,4 @@
-import IconShowcase from '@/shared/ui/icons/IconShowcase';
+
 
 export default function IconsTestPage() {
   return (
@@ -10,7 +10,7 @@ export default function IconsTestPage() {
             Универсальный компонент иконок с поддержкой всех иконок проекта
           </p>
         </div>
-        <IconShowcase />
+       
       </div>
     </main>
   );
