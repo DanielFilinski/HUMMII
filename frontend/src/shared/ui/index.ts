@@ -11,6 +11,7 @@ export {
   CardContent,
   CardFooter,
 } from './Card';
+export { CategoryCard } from './category-card';
 export { Checkbox } from './checkbox/Checkbox';
 export { Container } from './Container';
 export { Input } from './Input';

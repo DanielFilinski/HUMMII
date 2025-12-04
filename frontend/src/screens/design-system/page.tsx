@@ -24,7 +24,8 @@ import {
   Tag,
   ClaimedTag,
   DoneTag,
-  ReviewedTag
+  ReviewedTag,
+  CategoryCard
 } from '@/src/shared/ui';
 import { Header } from '@/src/widgets/header/Header';
 import { Typography } from '@shared/ui/typography';
@@ -34,7 +35,7 @@ import { IconButton } from '@/src/shared/ui/button/IconButton';
 import { LinkButton } from '@shared/ui/button';
 import { Input, PasswordInput, EmailInput, ChatInput } from '@shared/ui/inputs';
 import { TextArea } from '@shared/ui/text-area';
-
+import { mockCategories } from '@shared/ui/category-card';
 
 export default function DesignSystemShowcase() {
     const t = useTranslations('landing.header');
@@ -532,15 +533,129 @@ export default function DesignSystemShowcase() {
               Checkbox
             </Typography>
             <Card padding="lg">
-              <div className="space-y-4">
-                <Checkbox
-                  label="Я согласен с условиями использования"
-                  checked={checked}
-                  onChange={(e) => setChecked(e.target.checked)}
-                />
-                <Checkbox label="Получать уведомления по email" />
-                <Checkbox label="Запомнить меня" checked readOnly />
-                <Checkbox label="Отключенный чекбокс" disabled />
+              <div className="space-y-8">
+                {/* Default States */}
+                <div>
+                  <Typography variant="h3" className="mb-4">
+                    Основные состояния
+                  </Typography>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-6">
+                      <div className="w-48">
+                        <Checkbox />
+                      </div>
+                      <Typography variant="bodySm" color="secondary">
+                        Unchecked
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="w-48">
+                        <Checkbox checked readOnly />
+                      </div>
+                      <Typography variant="bodySm" color="secondary">
+                        Checked
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="w-48">
+                        <Checkbox disabled />
+                      </div>
+                      <Typography variant="bodySm" color="secondary">
+                        Disabled (unchecked)
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="w-48">
+                        <Checkbox checked disabled />
+                      </div>
+                      <Typography variant="bodySm" color="secondary">
+                        Disabled (checked)
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
+
+                {/* With Labels */}
+                <div>
+                  <Typography variant="h3" className="mb-4">
+                    С текстовыми метками
+                  </Typography>
+                  <div className="space-y-4">
+                    <Checkbox
+                      label="Я согласен с условиями использования"
+                      checked={checked}
+                      onChange={(e) => setChecked(e.target.checked)}
+                    />
+                    <Checkbox label="Получать уведомления по email" />
+                    <Checkbox label="Запомнить меня" checked readOnly />
+                    <Checkbox label="Отключенный чекбокс" disabled />
+                    <Checkbox label="Отключенный выбранный" checked disabled />
+                  </div>
+                </div>
+
+                {/* With Error State */}
+                <div>
+                  <Typography variant="h3" className="mb-4">
+                    С состоянием ошибки
+                  </Typography>
+                  <div className="space-y-4">
+                    <Checkbox
+                      label="Необходимо принять условия"
+                      error="Это поле обязательно для заполнения"
+                    />
+                  </div>
+                </div>
+
+                {/* In Form Context */}
+                <div>
+                  <Typography variant="h3" className="mb-4">
+                    В контексте формы
+                  </Typography>
+                  <div className="rounded-lg bg-background-secondary p-6">
+                    <Typography variant="bodySm" weight="semibold" className="mb-4">
+                      Настройки уведомлений
+                    </Typography>
+                    <div className="space-y-3">
+                      <Checkbox label="Email уведомления о новых заказах" defaultChecked />
+                      <Checkbox label="Push-уведомления в браузере" />
+                      <Checkbox label="SMS уведомления (платная услуга)" />
+                      <Checkbox label="Еженедельная сводка активности" defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                {/* In List Context */}
+                <div>
+                  <Typography variant="h3" className="mb-4">
+                    В списке задач
+                  </Typography>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 rounded-lg bg-background-secondary p-3">
+                      <Checkbox defaultChecked />
+                      <Typography variant="bodySm" className="line-through text-text-secondary">
+                        Завершить дизайн главной страницы
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-lg bg-background-secondary p-3">
+                      <Checkbox />
+                      <Typography variant="bodySm">
+                        Провести код-ревью PR #234
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-lg bg-background-secondary p-3">
+                      <Checkbox />
+                      <Typography variant="bodySm">
+                        Обновить документацию API
+                      </Typography>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-lg bg-background-secondary p-3">
+                      <Checkbox defaultChecked />
+                      <Typography variant="bodySm" className="line-through text-text-secondary">
+                        Написать unit тесты для компонентов
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
               </div>
             </Card>
           </section>
@@ -979,6 +1094,21 @@ export default function DesignSystemShowcase() {
                   </Typography>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* Category Cards Section */}
+          <section>
+            <Typography as="h2" variant="h2" className="mb-6">
+              Category Cards (FSD Component)
+            </Typography>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockCategories.map((category) => (
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                />
+              ))}
             </div>
           </section>
 

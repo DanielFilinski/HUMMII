@@ -13,23 +13,29 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
     return (
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <input
             ref={ref}
             type="checkbox"
             id={checkboxId}
             className={cn(
-              'h-5 w-5 cursor-pointer appearance-none rounded border-2 transition-all duration-200',
-              'focus:outline-none focus:ring-2 focus:ring-accent-1 focus:ring-opacity-20 focus:ring-offset-2',
-              'checked:border-accent-1 checked:bg-accent-1',
-              'disabled:cursor-not-allowed disabled:bg-background-2 disabled:border-text-unfocused',
+              'h-6 w-6 cursor-pointer appearance-none rounded-[10px] transition-all duration-200',
+              'focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2',
               'relative',
-              // Checkmark using pseudo-element
+              // Unchecked state - white background with green border
+              'border-3 border-accent-primary bg-background',
+              // Hover state (unchecked)
+              'hover:bg-accent-primary/5',
+              // Checked state - green background with white checkmark
+              'checked:border-accent-primary checked:bg-accent-primary',
+              // Checkmark using pseudo-element - white checkmark on green background
               'checked:after:absolute checked:after:left-[4px] checked:after:top-[1px] checked:after:h-[10px] checked:after:w-[6px]',
-              'checked:after:rotate-45 checked:after:border-b-2 checked:after:border-r-2 checked:after:border-white checked:after:content-[""]',
-              error
-                ? 'border-feedback-error'
-                : 'border-text-unfocused hover:border-accent-2',
+              'checked:after:rotate-45 checked:after:border-b-[2.5px] checked:after:border-r-[2.5px] checked:after:border-white checked:after:content-[""]',
+              // Disabled state
+              'disabled:cursor-not-allowed disabled:opacity-50',
+              'disabled:border-border-primary disabled:bg-surface-sunken',
+              'checked:disabled:bg-accent-disabled checked:disabled:border-accent-disabled',
+              error && 'border-feedback-error',
               className
             )}
             disabled={disabled}
@@ -52,7 +58,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         {error && (
           <p
             id={`${checkboxId}-error`}
-            className="text-mobile-body-sm md:text-tablet-body-sm lg:text-desktop-body-sm text-feedback-error ml-7"
+            className="text-mobile-body-sm md:text-tablet-body-sm lg:text-desktop-body-sm text-feedback-error ml-8"
             role="alert"
           >
             {error}
