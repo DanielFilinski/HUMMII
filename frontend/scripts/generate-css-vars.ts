@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { lightPalette, darkPalette, extendedShadows } from '../../shared/lib/design-tokens';
+import { lightPalette, darkPalette, extendedShadows } from '../src/shared/lib/design-tokens';
 
 /**
  * Конвертирует camelCase в kebab-case

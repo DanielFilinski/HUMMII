@@ -99,7 +99,7 @@ export function Header() {
               label={t('language')}
             />
 
-            <SecondaryButton>Registering...</SecondaryButton>
+            <SecondaryButton>{t('register')}</SecondaryButton>
 
             {/* Auth Buttons */}
             {isAuthenticated ? (
@@ -111,7 +111,7 @@ export function Header() {
               />
             ) : (
               <Link href={`/${locale}/auth/login`}>
-                <PrimaryButton >
+                <PrimaryButton disabled>
                   {t('signInSignUp')}
                 </PrimaryButton>
               </Link>

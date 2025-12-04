@@ -28,18 +28,9 @@
       ],
       "@assets/*": [
         "./assets/*"
-      ],
-      "@components/*": [
-        "./components/*"
-      ],
-      "@ui/*": [
-        "./components/ui/*"
-      ],
-      "@pages/*": [
-        "./components/pages/*"
-      ],
+      ],    
       "@app/*": [
-        "./app/*"
+        "./src/app/*"
       ],      
       "@lib/*": [
         "./src/shared/lib/*"

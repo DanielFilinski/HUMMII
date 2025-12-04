@@ -58,20 +58,21 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         disabled={isDisabled}
         className={cn(
           // Базовые стили
-          'inline-flex items-center justify-center gap-2',
+          'relative inline-flex items-center justify-center gap-2',
           'rounded-full px-8 py-3',
           'transition-all duration-200 ease-in-out',
           
           // Состояния цвета фона
-          'bg-accent-primary',
-          'hover:enabled:bg-accent-secondary',
-          'active:enabled:bg-background-secondary',
+          !isLoading && 'bg-accent-primary',
+          !isLoading && 'hover:enabled:bg-accent-secondary',
+          !isLoading && 'active:enabled:bg-background-secondary',
           
           // Состояние disabled
           'disabled:bg-accent-disabled disabled:cursor-not-allowed',
           
-          // Состояние loading
-          isLoading && 'bg-background-secondary',
+          // Состояние loading - приоритет над другими
+          isLoading && '!bg-background-secondary',
+          
           
           // Focus состояние (accessibility)
           'focus:outline-none',
@@ -85,28 +86,26 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <LoadingSpinner className="h-5 w-5 text-primary animate-spin" />}
-        
-        {/* Используем span вместо Typography для полного контроля над цветом текста */}
-        <span
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LoadingSpinner className="h-5 w-5 text-text-primary animate-spin" />
+          </div>
+        )}
+        <Typography
+          variant="h3"
           className={cn(
-            // Базовая типографика из h3
-            'text-lg md:text-xl font-medium',
+            // Default, Hover, Disabled: белый текст
+            'text-text-inverse',
             
-            // Default и Hover: белый текст
-            'text-inverse',
+            // Pressed: чёрный текст
+            'active:text-text-primary',
             
-            // Pressed: темный текст
-            'active:text-primary',
-            
-            // Loading: темный текст
-            isLoading && 'text-primary',
-            
-            // Disabled: белый текст (уже установлен через text-inverse)
+            // Loading: невидимый текст
+            isLoading && 'invisible',
           )}
         >
           {children}
-        </span>
+        </Typography>
       </button>
     );
   }
