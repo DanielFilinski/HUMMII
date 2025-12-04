@@ -15,9 +15,15 @@ import { Typography } from '@/src/shared/ui/typography/Typography';
  * 4. Loading: bg-background-secondary (BG/Background 2), текст text-primary
  * 5. Disabled: bg-accent-disabled (Accents/Accent Disabled), текст text-inverse
  * 
+ * Children поддерживают любой контент (текст, иконки, изображения) - цвет применяется автоматически.
+ * 
  * @example
  * ```tsx
  * <PrimaryButton>View all services</PrimaryButton>
+ * <PrimaryButton>
+ *   <Image src="/icon.svg" alt="" width={20} height={20} />
+ *   <span>With Icon</span>
+ * </PrimaryButton>
  * <PrimaryButton isLoading>Loading...</PrimaryButton>
  * <PrimaryButton disabled>Disabled</PrimaryButton>
  * ```
@@ -73,6 +79,13 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
           // Состояние loading - приоритет над другими
           isLoading && '!bg-background-secondary',
           
+          // Цвет текста и дочерних элементов
+          // Default, Hover, Disabled: белый текст (text-inverse)
+          'text-text-inverse',
+          // Pressed: чёрный текст (text-primary)
+          !disabled && 'active:enabled:text-text-primary',
+          // Loading: чёрный текст под спиннером
+          isLoading && '!text-text-primary',
           
           // Focus состояние (accessibility)
           'focus:outline-none',
@@ -91,21 +104,9 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
             <LoadingSpinner className="h-5 w-5 text-text-primary animate-spin" />
           </div>
         )}
-        <Typography
-          variant="h3"
-          className={cn(
-            // Default, Hover, Disabled: белый текст (text-inverse)
-            'text-text-inverse',
-            
-            // Pressed: чёрный текст (text-primary)
-            !disabled && 'active:text-text-primary',
-            
-            // Loading: невидимый текст + чёрный текст под спиннером
-            isLoading && 'invisible text-text-primary',
-          )}
-        >
+        <span className={cn('inline-flex items-center justify-center gap-2', isLoading && 'invisible')}>
           {children}
-        </Typography>
+        </span>
       </button>
     );
   }

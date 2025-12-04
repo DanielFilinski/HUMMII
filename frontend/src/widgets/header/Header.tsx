@@ -111,8 +111,11 @@ export function Header() {
               />
             ) : (
               // <Link href={`/${locale}/auth/login`}>
-                <PrimaryButton>
-                  {t('signInSignUp')}
+                <PrimaryButton disabled>
+                  
+                  <Typography color="inherit">{t('signInSignUp')}</Typography>
+                  
+                 
                 </PrimaryButton>
               // </Link>
             )}
@@ -125,7 +128,7 @@ export function Header() {
               // <Link href={`/${locale}/auth/login`}>
                 
                 <PrimaryButton>
-                  {t('signInSignUp')}
+                  <Typography color="inherit">{t('signInSignUp')}</Typography>
                 </PrimaryButton>
               // </Link>
             )}

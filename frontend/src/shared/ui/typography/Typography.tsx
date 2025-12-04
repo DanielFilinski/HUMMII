@@ -66,7 +66,7 @@ interface TypographyProps extends HTMLAttributes<HTMLElement> {
    * - **primary**: Основной текст (#2A2A0F в светлой теме)
    * - **secondary**: Второстепенный текст (#819082)
    * - **tertiary**: Неактивный/третичный текст (#96A996)
-   * - **inverse**: Инверсный текст (белый на тёмном фоне)
+   * - **inverse**: Инверсный текст (белый на тёмком фоне)
    * - **disabled**: Отключённый текст (#DBDBDB)
    * - **accent**: Акцентный текст (зелёный #3A971E)
    * - **link**: Цвет ссылок (зелёный #3A971E)
@@ -74,6 +74,7 @@ interface TypographyProps extends HTMLAttributes<HTMLElement> {
    * - **success**: Цвет успеха (зелёный #3A971E)
    * - **warning**: Цвет предупреждения (жёлтый #F59E0B)
    * - **info**: Цвет информации (синий #3B82F6)
+   * - **inherit**: Наследует цвет от родителя (для использования внутри кнопок)
    * 
    * @default 'primary'
    */
@@ -88,7 +89,8 @@ interface TypographyProps extends HTMLAttributes<HTMLElement> {
     | 'error' 
     | 'success'
     | 'warning'
-    | 'info';
+    | 'info'
+    | 'inherit';
   
   /**
    * Выравнивание текста
@@ -178,6 +180,7 @@ const Typography = forwardRef<HTMLElement, TypographyProps>(
       success: 'text-feedback-success',
       warning: 'text-feedback-warning',
       info: 'text-feedback-info',
+      inherit: 'text-inherit',
     };
 
     // Выравнивание текста
