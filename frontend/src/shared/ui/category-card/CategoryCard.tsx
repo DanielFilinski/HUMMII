@@ -45,7 +45,7 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
             <div
               key={`${category.id}-${index}`}
               className={cn(
-                'w-full h-[100px] rounded-[16px] bg-background-card px-5 py-4 transition-all duration-300',
+                'w-full h-[100px] rounded-[16px] bg-background-primary px-5 py-4 transition-all duration-300',
                 'shadow-[0_-4px_8px_rgba(0,0,0,0.1)] shadow-sm',
                 'group-hover:translate-y-[-2px] group-hover:shadow-md group-hover:shadow-[0_-6px_12px_rgba(0,0,0,0.15)]',
                 index === 1 && 'delay-75 -mt-13',
@@ -55,7 +55,7 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
               style={{ zIndex: 20 + index }}
             >
               <Typography 
-                variant="body" 
+                variant="bodySm" 
                 color="primary"
                 weight="medium"
                 className="line-clamp-1"
@@ -75,29 +75,17 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
           </div>
 
           <div className='absolute bottom-0 right-0 h-[100px] w-full bg-background-secondary'></div>
-          {/* <div className="absolute bottom-0 right-0 h-[88px] w-[150px] overflow-hidden">
-            <div className="absolute bottom-[-50px] right-[-50px] w-[180px] h-[180px] rounded-full  overflow-hidden">
-            
-              <img 
-                src="/images/categories/Cleaning.jpg" 
-                alt="Leaves Decoration"              
-                className="h-[202px] w-[202px] object-cover"
-              /> 
-            </div> 
-          </div> */}
 
-           <div className="absolute bottom-[-50px] right-[-60px] rounded-full h-[180px] w-[180px] overflow-hidden">
+          <div className="absolute bottom-[-50px] right-[-60px] rounded-full h-[180px] w-[180px] overflow-hidden">
               <img 
-                src="/images/categories/Cleaning.jpg" 
+                src="/images/categories/Auto.jpg" 
                 alt="Leaves Decoration"              
                 className="h-[120px] w-[250px] absolute top-[12px] right-0"
               /> 
-           </div>   
-
-
+            </div>  
            
-           {/* Title */}
-           <div className="absolute bottom-6 left-6 z-20 max-w-[60%]">
+            {/* Title */}
+            <div className="absolute bottom-6 left-6 z-20 max-w-[60%]">
             <Typography 
               variant="h2" 
               color="primary"
@@ -106,9 +94,7 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
             >
               {category.name}
             </Typography>
-            </div>
-          
-        
+            </div>   
         </div>
          
         
