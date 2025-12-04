@@ -40,16 +40,19 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
         {...props}
       >
         {/* Subcategories List - Top Section */}
-        <div className="relative z-20 flex flex-col gap-2 p-4">
+        <div className="relative z-20 flex flex-col p-4">
           {category.subcategories.slice(0, 3).map((subcategory, index) => (
             <div
               key={`${category.id}-${index}`}
               className={cn(
-                'w-full rounded-[16px] bg-background-card px-5 py-4 shadow-sm transition-all duration-300',
-                'group-hover:translate-y-[-2px] group-hover:shadow-md',
-                index === 1 && 'delay-75',
-                index === 2 && 'delay-150'
+                'w-full h-[100px] rounded-[16px] bg-background-card px-5 py-4 transition-all duration-300',
+                'shadow-[0_-4px_8px_rgba(0,0,0,0.1)] shadow-sm',
+                'group-hover:translate-y-[-2px] group-hover:shadow-md group-hover:shadow-[0_-6px_12px_rgba(0,0,0,0.15)]',
+                index === 1 && 'delay-75 -mt-13',
+                index === 2 && 'delay-150 -mt-13',
+                index > 0 && '-mt-[38px]'
               )}
+              style={{ zIndex: 20 + index }}
             >
               <Typography 
                 variant="body" 
@@ -63,8 +66,36 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
           ))}
         </div>
 
-        {/* Bottom Section */}
-        <div className="absolute bottom-0 left-0 right-0 h-[140px]">
+        <div className="absolute bottom-0 right-0 w-full z-30" >
+
+          <div className="absolute bottom-[100px] right-0">
+            <svg width="199" height="18" viewBox="0 0 199 18" fill="none">
+              <path d="M38.2873 1.61326C40.7743 0.548821 43.4515 0 46.1567 0H199V18H0L38.2873 1.61326Z" fill="#E1F7DB"/>
+            </svg>           
+          </div>
+
+          <div className='absolute bottom-0 right-0 h-[100px] w-full bg-background-secondary'></div>
+          {/* <div className="absolute bottom-0 right-0 h-[88px] w-[150px] overflow-hidden">
+            <div className="absolute bottom-[-50px] right-[-50px] w-[180px] h-[180px] rounded-full  overflow-hidden">
+            
+              <img 
+                src="/images/categories/Cleaning.jpg" 
+                alt="Leaves Decoration"              
+                className="h-[202px] w-[202px] object-cover"
+              /> 
+            </div> 
+          </div> */}
+
+           <div className="absolute bottom-[-50px] right-[-60px] rounded-full h-[180px] w-[180px] overflow-hidden">
+              <img 
+                src="/images/categories/Cleaning.jpg" 
+                alt="Leaves Decoration"              
+                className="h-[120px] w-[250px] absolute top-[12px] right-0"
+              /> 
+           </div>   
+
+
+           
            {/* Title */}
            <div className="absolute bottom-6 left-6 z-20 max-w-[60%]">
             <Typography 
@@ -75,23 +106,12 @@ export const CategoryCard = forwardRef<HTMLDivElement, CategoryCardProps>(
             >
               {category.name}
             </Typography>
-          </div>
-
-          {/* Image & Decoration - Bottom Right */}
-          <div className="absolute bottom-0 right-0 h-[160px] w-[160px]">
-             {/* Decorative Circle */}
-             <div className="absolute bottom-[-30px] right-[-30px] h-[160px] w-[160px] rounded-full bg-feedback-warning/20" />
-             
-             {/* Image */}
-             {category.icon && (
-               <img 
-                 src={category.icon} 
-                 alt={category.name}
-                 className="absolute bottom-0 right-0 h-[140px] w-[140px] object-contain object-bottom transition-transform duration-300 group-hover:scale-110"
-               />
-             )}
-          </div>
+            </div>
+          
+        
         </div>
+         
+        
       </div>
     );
   }
