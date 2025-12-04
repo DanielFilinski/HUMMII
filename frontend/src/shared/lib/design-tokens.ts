@@ -46,6 +46,7 @@ export const lightPalette = {
     tertiary: '#AAC89A',
     hover: '#2d7516',
     active: '#245d0f',
+    disabled: '#DBDBDB',
   },
   feedback: {
     error: '#B52F2F',
@@ -98,6 +99,7 @@ export const darkPalette = {
     tertiary: '#AAC89A',
     hover: '#7DBD62',
     active: '#8FCC78',
+    disabled: '#4B5563',
   },
   feedback: {
     error: '#EF4444',

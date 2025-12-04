@@ -94,14 +94,14 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         <Typography
           variant="h3"
           className={cn(
-            // Default, Hover, Disabled: белый текст
+            // Default, Hover, Disabled: белый текст (text-inverse)
             'text-text-inverse',
             
-            // Pressed: чёрный текст
-            'active:text-text-primary',
+            // Pressed: чёрный текст (text-primary)
+            'active:enabled:text-text-primary',
             
-            // Loading: невидимый текст
-            isLoading && 'invisible',
+            // Loading: невидимый текст + чёрный текст под спиннером
+            isLoading && 'invisible text-text-primary',
           )}
         >
           {children}
