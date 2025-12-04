@@ -20,12 +20,17 @@ import {
   Spinner,
   Textarea,
   Toggle,
-  PrimaryButton
+  PrimaryButton,
+  Icon
 } from '@/src/shared/ui';
 import { Header } from '@/src/widgets/header/Header';
 import { Typography } from '@/src/shared/ui/typography';
+import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
+import { useTranslations } from 'next-intl';
 
 export default function DesignSystemShowcase() {
+    const t = useTranslations('landing.header');
+  
   const [searchValue, setSearchValue] = useState('');
   const [checked, setChecked] = useState(false);
   const [radioValue, setRadioValue] = useState('option1');
@@ -72,6 +77,11 @@ export default function DesignSystemShowcase() {
           
             <Header/>
           
+           <SecondaryButton disabled>
+                        <Icon name="google" className="h-5 w-5" color="inherit" />
+                        <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography>
+          
+                        </SecondaryButton>
          
 
           {/* Colors Section */}

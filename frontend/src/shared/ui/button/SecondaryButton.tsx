@@ -8,11 +8,11 @@ import { LoadingSpinner } from '@/src/shared/ui/spinner/LoadingSpinner';
  * Вторичная кнопка дизайн-системы Hummii согласно макету.
  * 
  * Состояния:
- * 1. Default: bg-background (белый/темный), border-accent-primary (зеленая обводка), text-accent-primary (зеленый текст)
- * 2. Hover: bg-accent-secondary (зеленый фон), text-text-inverse (белый текст)
- * 3. Pressed: bg-accent-tertiary (темно-зеленый фон), text-text-primary (темный текст)
- * 4. Loading: с индикатором загрузки
- * 5. Disabled: прозрачность 40%
+ * 1. Default: bg-transparent, border-accent-primary, text-accent-primary
+ * 2. Hover: bg-transparent, border-accent-primary, text-accent-secondary
+ * 3. Pressed: bg-transparent, border-accent-primary, text-text-primary
+ * 4. Loading: bg-transparent, border-accent-primary, text-text-primary
+ * 5. Disabled: bg-transparent, border-text-disabled, text-text-disabled
  * 
  * @example
  * ```tsx
@@ -57,22 +57,27 @@ export const SecondaryButton = forwardRef<HTMLButtonElement, SecondaryButtonProp
         disabled={isDisabled}
         className={cn(
           // Базовые стили
-          'inline-flex items-center justify-center gap-2',
+          'relative inline-flex items-center justify-center gap-2',
           'rounded-full px-8 py-3',
           'transition-all duration-200 ease-in-out',
           
-          // Состояния цвета и обводки
-          'bg-background border-2 border-accent-primary',
-          'text-accent-primary',
+          // Фон всегда прозрачный
+          'bg-transparent',
+          
+          // Default состояние
+          'border border-accent-primary text-accent-primary',
           
           // Hover состояние
-          'hover:enabled:bg-accent-secondary hover:enabled:text-text-inverse hover:enabled:border-accent-secondary',
+          'hover:enabled:text-accent-secondary',
           
           // Active/Pressed состояние
-          'active:enabled:bg-accent-tertiary active:enabled:text-text-primary active:enabled:border-accent-tertiary',
+          'active:enabled:text-text-primary',
           
-          // Состояние disabled
-          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background',
+          // Loading состояние - текст меняется на text-primary, border остаётся accent-primary
+          isLoading && '!text-text-primary !border-accent-primary',
+          
+          // Disabled состояние
+          'disabled:border-text-disabled disabled:text-text-disabled disabled:cursor-not-allowed',
           
           // Focus состояние (accessibility)
           'focus:outline-none',
@@ -86,8 +91,14 @@ export const SecondaryButton = forwardRef<HTMLButtonElement, SecondaryButtonProp
         )}
         {...props}
       >
-        {isLoading && <LoadingSpinner className="h-5 w-5 text-current animate-spin" />}
-        {children}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LoadingSpinner className="h-5 w-5 text-current animate-spin" />
+          </div>
+        )}
+        <span className={cn('inline-flex items-center justify-center gap-2', isLoading && 'invisible')}>
+          {children}
+        </span>
       </button>
     );
   }

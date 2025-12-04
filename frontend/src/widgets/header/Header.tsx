@@ -100,7 +100,11 @@ export function Header() {
               label={t('language')}
             />
 
-            <SecondaryButton>{t('register')}</SecondaryButton>
+            <SecondaryButton>
+              <Icon name="google" className="h-5 w-5" color="inherit" />
+              <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography>
+
+              </SecondaryButton>
 
             {/* Auth Buttons */}
             {isAuthenticated ? (
@@ -113,8 +117,7 @@ export function Header() {
             ) : (
               // <Link href={`/${locale}/auth/login`}>
                 <PrimaryButton>
-                  <Icon name="google" size="sm" color="inherit" />
-                  <Typography color="inherit">{t('signInSignUp')}</Typography>
+                  <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography>
                 </PrimaryButton>
               // </Link>
             )}
