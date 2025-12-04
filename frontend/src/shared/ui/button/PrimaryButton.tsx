@@ -98,7 +98,7 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
             'text-text-inverse',
             
             // Pressed: чёрный текст (text-primary)
-            'active:enabled:text-text-primary',
+            !disabled && 'active:text-text-primary',
             
             // Loading: невидимый текст + чёрный текст под спиннером
             isLoading && 'invisible text-text-primary',

@@ -110,11 +110,11 @@ export function Header() {
                 onLogout={handleLogout}
               />
             ) : (
-              <Link href={`/${locale}/auth/login`}>
-                <PrimaryButton disabled>
+              // <Link href={`/${locale}/auth/login`}>
+                <PrimaryButton>
                   {t('signInSignUp')}
                 </PrimaryButton>
-              </Link>
+              // </Link>
             )}
           </div>
 
@@ -122,12 +122,12 @@ export function Header() {
           <div className="flex items-center gap-3 desktop:hidden">
             {/* Auth Button - Always visible */}
             {!isAuthenticated && (
-              <Link href={`/${locale}/auth/login`}>
+              // <Link href={`/${locale}/auth/login`}>
                 
                 <PrimaryButton>
                   {t('signInSignUp')}
                 </PrimaryButton>
-              </Link>
+              // </Link>
             )}
 
             {/* Mobile Menu Button */}
