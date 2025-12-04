@@ -24,9 +24,10 @@ import {
   Icon
 } from '@/src/shared/ui';
 import { Header } from '@/src/widgets/header/Header';
-import { Typography } from '@/src/shared/ui/typography';
+import { Typography } from '@shared/ui/typography';
 import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
 import { useTranslations } from 'next-intl';
+import { IconButton } from '@/src/shared/ui/button/IconButton';
 
 export default function DesignSystemShowcase() {
     const t = useTranslations('landing.header');
@@ -77,11 +78,12 @@ export default function DesignSystemShowcase() {
           
             <Header/>
           
-           <SecondaryButton disabled>
-                        <Icon name="google" className="h-5 w-5" color="inherit" />
-                        <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography>
-          
-                        </SecondaryButton>
+           <SecondaryButton isLoading>
+              <Icon name="google" className="h-5 w-5" color="inherit" />
+              <Typography variant='h3' color="inherit">{t('signInSignUp')}</Typography> 
+           </SecondaryButton>
+
+           <IconButton isLoading iconName="google" size="md" ariaLabel="Sign in with Google" />
          
 
           {/* Colors Section */}
