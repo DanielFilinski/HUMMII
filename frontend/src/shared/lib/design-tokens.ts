@@ -93,9 +93,9 @@ export const darkPalette = {
     link: '#67AD51',
   },
   accent: {
-    primary: '#67AD51',
-    secondary: '#86C06E',
-    tertiary: '#5A8D47',
+    primary: '#3A971E',
+    secondary: '#67AD51',
+    tertiary: '#AAC89A',
     hover: '#7DBD62',
     active: '#8FCC78',
   },

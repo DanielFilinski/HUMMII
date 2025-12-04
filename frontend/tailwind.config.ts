@@ -83,6 +83,7 @@ const config: Config = {
           tertiary: 'var(--color-accent-tertiary)',
           hover: 'var(--color-accent-hover)',
           active: 'var(--color-accent-active)',
+          disabled: 'var(--color-accent-disabled)',
         },
         // Обратная связь (статусы)
         feedback: {

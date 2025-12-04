@@ -1,6 +1,7 @@
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/src/shared/lib/utils';
 import { LoadingSpinner } from '@/src/shared/ui/spinner/LoadingSpinner';
+import { Typography } from '@/src/shared/ui/typography/Typography';
 
 /**
  * PRIMARY BUTTON COMPONENT
@@ -8,11 +9,11 @@ import { LoadingSpinner } from '@/src/shared/ui/spinner/LoadingSpinner';
  * Основная кнопка дизайн-системы Hummii согласно макету.
  * 
  * Состояния:
- * 1. Default: bg-accent-primary (#3A971E в light mode, #67AD51 в dark mode)
- * 2. Hover: bg-accent-secondary (#67AD51 в light mode, #86C06E в dark mode)
- * 3. Pressed: bg-accent-tertiary (#AAC89A в light mode, #5A8D47 в dark mode)
- * 4. Loading: с индикатором загрузки
- * 5. Disabled: прозрачность 40%
+ * 1. Default: bg-accent-primary (Accents/Accent 1), текст text-inverse
+ * 2. Hover: bg-accent-secondary (Accents/Accent 2), текст text-inverse
+ * 3. Pressed: bg-background-secondary (BG/Background 2), текст text-primary
+ * 4. Loading: bg-background-secondary (BG/Background 2), текст text-primary
+ * 5. Disabled: bg-accent-disabled (Accents/Accent Disabled), текст text-inverse
  * 
  * @example
  * ```tsx
@@ -61,17 +62,16 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
           'rounded-full px-8 py-3',
           'transition-all duration-200 ease-in-out',
           
-          // Состояния цвета
+          // Состояния цвета фона
           'bg-accent-primary',
           'hover:enabled:bg-accent-secondary',
-          'active:enabled:bg-accent-tertiary',
-          
-          // Цвет текста (для Typography внутри)
-          'text-text-primary',
-          'active:enabled:text-text-inverse',
+          'active:enabled:bg-background-secondary',
           
           // Состояние disabled
-          'disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent-primary',
+          'disabled:bg-accent-disabled disabled:cursor-not-allowed',
+          
+          // Состояние loading
+          isLoading && 'bg-background-secondary',
           
           // Focus состояние (accessibility)
           'focus:outline-none',
@@ -85,8 +85,28 @@ export const PrimaryButton = forwardRef<HTMLButtonElement, PrimaryButtonProps>(
         )}
         {...props}
       >
-        {isLoading && <LoadingSpinner className="h-5 w-5 text-text-inverse animate-spin" />}
-        {children}
+        {isLoading && <LoadingSpinner className="h-5 w-5 text-primary animate-spin" />}
+        
+        {/* Используем span вместо Typography для полного контроля над цветом текста */}
+        <span
+          className={cn(
+            // Базовая типографика из h3
+            'text-lg md:text-xl font-medium',
+            
+            // Default и Hover: белый текст
+            'text-inverse',
+            
+            // Pressed: темный текст
+            'active:text-primary',
+            
+            // Loading: темный текст
+            isLoading && 'text-primary',
+            
+            // Disabled: белый текст (уже установлен через text-inverse)
+          )}
+        >
+          {children}
+        </span>
       </button>
     );
   }
