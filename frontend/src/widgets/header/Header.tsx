@@ -15,6 +15,7 @@ import { Menu, X } from 'lucide-react';
 import {PrimaryButton} from '@/src/shared/ui/button/PrimaryButton';
 import { Typography } from '@/src/shared/ui/typography';
 import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
+import { Icon } from '@/src/shared/ui';
 
 export function Header() {
   const t = useTranslations('landing.header');
@@ -111,11 +112,9 @@ export function Header() {
               />
             ) : (
               // <Link href={`/${locale}/auth/login`}>
-                <PrimaryButton disabled>
-                  
+                <PrimaryButton>
+                  <Icon name="google" size="sm" color="inherit" />
                   <Typography color="inherit">{t('signInSignUp')}</Typography>
-                  
-                 
                 </PrimaryButton>
               // </Link>
             )}

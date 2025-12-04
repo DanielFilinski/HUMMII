@@ -21,7 +21,8 @@ export { Spinner } from './spinner/Spinner';
 export { Textarea } from './Textarea';
 export { Toggle } from './Toggle';
 
-
+// Icons
+export { Icon } from './icons';
 
 // Typography System - готовые компоненты-утилиты
 export {
@@ -57,3 +58,4 @@ export type { SelectProps } from './Select';
 export type { SpinnerProps } from './spinner/Spinner';
 export type { TextareaProps } from './Textarea';
 export type { ToggleProps } from './Toggle';
+export type { IconProps, IconName, IconSize, IconColor } from './icons';
