@@ -3,8 +3,8 @@
 import React, { useState, forwardRef } from 'react';
 import { Input, InputProps } from './Input';
 
-export interface PasswordInputProps extends Omit<InputProps, 'type' | 'rightIcon' | 'onRightIconClick'> {
-  /** Показывать ли иконку замка слева */
+export interface PasswordInputProps extends Omit<InputProps, 'type' | 'rightIcon' | 'onRightIconClick' | 'leftIconColor' | 'rightIconColor'> {
+  /** Показывать ли иконку замка слева (по умолчанию true) */
   showLockIcon?: boolean;
 }
 
@@ -21,7 +21,9 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         ref={ref}
         type={showPassword ? 'text' : 'password'}
         leftIcon={showLockIcon ? 'password' : undefined}
+        leftIconColor="success"
         rightIcon={showPassword ? 'eye' : 'eye-slash'}
+        rightIconColor="secondary"
         onRightIconClick={togglePasswordVisibility}
         {...props}
       />

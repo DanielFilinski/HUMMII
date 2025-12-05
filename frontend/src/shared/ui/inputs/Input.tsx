@@ -4,6 +4,7 @@ import React, { useState, forwardRef, InputHTMLAttributes } from 'react';
 import { Icon } from '@shared/ui/icons/Icon';
 import { Typography } from '@shared/ui/typography/Typography';
 import type { IconName } from '@shared/ui/icons/Icon';
+import { cn } from '@shared/lib/utils';
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /** Состояние ошибки */
@@ -24,6 +25,10 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   filled?: boolean;
   /** Полная ширина */
   fullWidth?: boolean;
+  /** Цвет иконки слева */
+  leftIconColor?: 'primary' | 'secondary' | 'success' | 'error' | 'disabled';
+  /** Цвет иконки справа */
+  rightIconColor?: 'primary' | 'secondary' | 'success' | 'error' | 'disabled';
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -39,48 +44,86 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       filled = false,
       fullWidth = false,
       disabled = false,
+      leftIconColor,
+      rightIconColor,
       className = '',
       type = 'text',
+      value,
       ...props
     },
     ref
   ) => {
     const [isFocused, setIsFocused] = useState(false);
 
-    const baseClasses = `
-      w-full
-      px-4 py-3
-      bg-surface-sunken
-      text-text-primary
-      text-base
-      rounded-[10px]
-      border
-      transition-all
-      duration-200
-      placeholder:text-text-tertiary
-      disabled:bg-surface-sunken
-      disabled:text-text-disabled
-      disabled:cursor-not-allowed
-      disabled:border-border-secondary
-    `;
+    // Определяем, заполнено ли поле
+    const hasValue = value !== undefined && value !== '';
+    const isFilledState = filled || hasValue;
 
-    const stateClasses = error
-      ? 'border-feedback-error focus:border-feedback-error'
-      : filled
-      ? 'border-border-secondary bg-surface-sunken'
-      : isFocused
-      ? 'border-border-focus'
-      : 'border-border-primary hover:border-border-focus';
+    const baseClasses = cn(
+      'w-full',
+      'px-4 py-3',
+      'bg-white',
+      'text-text-primary',
+      'text-base',
+      'leading-6',
+      'rounded-full',
+      'border-2',
+      'transition-all',
+      'duration-200',
+      'placeholder:text-text-tertiary',
+      'focus:outline-none'
+    );
 
-    const paddingClasses = `
-      ${leftIcon ? 'pl-11' : 'pl-4'}
-      ${rightIcon ? 'pr-11' : 'pr-4'}
-    `;
+    const stateClasses = cn({
+      // Error state - красная рамка
+      'border-feedback-error focus:border-feedback-error': error,
 
-    const containerClasses = fullWidth ? 'w-full' : '';
+      // Focused state - зеленая рамка
+      'border-accent-primary': !error && isFocused,
+
+      // Default state - серая рамка
+      'border-border-primary': !error && !isFocused,
+
+      // Hover effect для default и filled состояний
+      'hover:border-border-focus': !error && !isFocused && !disabled,
+
+      // Disabled state
+      'disabled:bg-surface-sunken': disabled,
+      'disabled:text-text-disabled': disabled,
+      'disabled:cursor-not-allowed': disabled,
+      'disabled:border-border-secondary': disabled,
+      'disabled:opacity-50': disabled,
+    });
+
+    const paddingClasses = cn({
+      'pl-11': leftIcon,
+      'pl-4': !leftIcon,
+      'pr-11': rightIcon,
+      'pr-4': !rightIcon,
+    });
+
+    const containerClasses = cn({
+      'w-full': fullWidth,
+    }, className);
+
+    // Определяем цвет левой иконки
+    const getLeftIconColor = () => {
+      if (leftIconColor) return leftIconColor;
+      if (error) return 'error';
+      if (disabled) return 'disabled';
+      return 'success'; // По дизайну зеленая по умолчанию
+    };
+
+    // Определяем цвет правой иконки
+    const getRightIconColor = () => {
+      if (rightIconColor) return rightIconColor;
+      if (error) return 'error';
+      if (disabled) return 'disabled';
+      return 'secondary';
+    };
 
     return (
-      <div className={`${containerClasses} ${className}`}>
+      <div className={containerClasses}>
         {label && (
           <label className="block mb-2">
             <Typography variant="bodySm" color="primary" weight="medium">
@@ -91,11 +134,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
               <Icon
                 name={leftIcon}
                 size="sm"
-                color={error ? 'error' : disabled ? 'disabled' : 'secondary'}
+                color={getLeftIconColor()}
               />
             </div>
           )}
@@ -104,7 +147,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={type}
             disabled={disabled}
-            className={`${baseClasses} ${stateClasses} ${paddingClasses} focus:outline-none`}
+            value={value}
+            className={cn(baseClasses, stateClasses, paddingClasses)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             {...props}
@@ -112,22 +156,31 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
           {rightIcon && (
             <div
-              className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                onRightIconClick ? 'cursor-pointer' : 'pointer-events-none'
-              }`}
+              className={cn(
+                'absolute right-3 top-1/2 -translate-y-1/2 z-10',
+                onRightIconClick ? 'cursor-pointer hover:opacity-70 transition-opacity' : 'pointer-events-none'
+              )}
               onClick={onRightIconClick}
+              role={onRightIconClick ? 'button' : undefined}
+              tabIndex={onRightIconClick ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (onRightIconClick && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onRightIconClick();
+                }
+              }}
             >
               <Icon
                 name={rightIcon}
                 size="sm"
-                color={error ? 'error' : disabled ? 'disabled' : 'secondary'}
+                color={getRightIconColor()}
               />
             </div>
           )}
         </div>
 
         {errorText && error && (
-          <div className="mt-1.5">
+          <div className="mt-1.5 ml-4">
             <Typography variant="note" color="error">
               {errorText}
             </Typography>
@@ -135,7 +188,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {helperText && !error && (
-          <div className="mt-1.5">
+          <div className="mt-1.5 ml-4">
             <Typography variant="note" color="secondary">
               {helperText}
             </Typography>

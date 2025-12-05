@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef, KeyboardEvent, ChangeEvent, FC } from 'react';
 import { Icon } from '@shared/ui/icons';
 import { cn } from '@shared/lib/utils';
@@ -31,6 +33,14 @@ export interface ChatInputProps {
    * Auto-focus при монтировании
    */
   autoFocus?: boolean;
+  /**
+   * Состояние ошибки
+   */
+  error?: boolean;
+  /**
+   * Текст ошибки
+   */
+  errorText?: string;
 }
 
 /**
@@ -59,9 +69,12 @@ export const ChatInput: FC<ChatInputProps> = ({
   maxLength = 5000,
   className,
   autoFocus = false,
+  error = false,
+  errorText,
 }) => {
   const [message, setMessage] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,7 +97,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       onSend(message.trim(), attachedFile || undefined);
       setMessage('');
       setAttachedFile(null);
-      
+
       // Сброс высоты textarea
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
@@ -141,7 +154,18 @@ export const ChatInput: FC<ChatInputProps> = ({
       )}
 
       {/* Основной инпут */}
-      <div className="relative flex items-end gap-2 p-3 bg-background-card rounded-2xl shadow-sm">
+      <div
+        className={cn(
+          'relative flex items-end gap-2 p-3 bg-white rounded-full border-2 transition-all duration-200',
+          {
+            'border-feedback-error': error,
+            'border-accent-primary': !error && isFocused,
+            'border-border-primary': !error && !isFocused,
+            'hover:border-border-focus': !error && !isFocused && !disabled,
+            'opacity-50': disabled,
+          }
+        )}
+      >
         {/* Скрытый input для файлов */}
         <input
           ref={fileInputRef}
@@ -157,6 +181,8 @@ export const ChatInput: FC<ChatInputProps> = ({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}
@@ -184,16 +210,23 @@ export const ChatInput: FC<ChatInputProps> = ({
             disabled={disabled}
             className={cn(
               'flex-shrink-0 p-2 rounded-lg transition-all',
-              'hover:bg-surface-hover active:bg-surface-pressed',
+              'hover:opacity-70',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'focus:outline-none focus:ring-2 focus:ring-accent-primary/30'
+              'focus:outline-none'
             )}
             aria-label="Прикрепить файл"
           >
-            <Icon name="clip" size="md" color="secondary" />
+            <Icon name="clip" size="md" color={error ? 'error' : 'secondary'} />
           </button>
         )}
       </div>
+
+      {/* Текст ошибки */}
+      {errorText && error && (
+        <div className="mt-1.5 ml-4 text-sm text-feedback-error">
+          {errorText}
+        </div>
+      )}
     </div>
   );
 };
