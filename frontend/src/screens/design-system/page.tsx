@@ -24,9 +24,9 @@ import {
   Tag,
   ClaimedTag,
   DoneTag,
-  ReviewedTag,
-  CategoryCard
+  ReviewedTag
 } from '@/src/shared/ui';
+import { CategoryCard, mockCategories } from '@/src/entities/category';
 import { Header } from '@/src/widgets/header/Header';
 import { Typography } from '@shared/ui/typography';
 import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
@@ -35,9 +35,8 @@ import { IconButton } from '@/src/shared/ui/button/IconButton';
 import { LinkButton, LogoButton } from '@shared/ui/button';
 import { Input, PasswordInput, EmailInput, ChatInput } from '@shared/ui/inputs';
 import { TextArea } from '@shared/ui/text-area';
-import { mockCategories } from '@/src/shared/ui/cards/category-card';
-import { ContractorCard } from '@/src/shared/ui/cards/contractor';
-import { OrderCard } from '@/src/shared/ui/cards/order';
+import { ContractorCard } from '@/src/entities/contractor';
+import { OrderCard } from '@/src/entities/order';
 import { Dropdown } from '@/src/shared/ui';
 
 const options = [

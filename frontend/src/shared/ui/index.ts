@@ -11,8 +11,6 @@ export {
   CardContent,
   CardFooter,
 } from './Card';
-export { CategoryCard } from './cards/category-card';
-export { OrderCard } from './cards/order';
 export { Checkbox } from './checkbox/Checkbox';
 export { Container } from './Container';
 export { Input } from './Input';
@@ -56,7 +54,6 @@ export {
 export type { AvatarProps, AvatarGroupProps } from './avatars/Avatar';
 export type { BadgeProps } from './Badge';
 export type { CardProps } from './Card';
-export type { OrderCardProps } from './cards/order';
 export type { CheckboxProps } from './checkbox/Checkbox';
 export type { ContainerProps } from './Container';
 export type { InputProps } from './Input';
