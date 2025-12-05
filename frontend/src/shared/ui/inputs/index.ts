@@ -12,3 +12,6 @@ export type { SelectProps, SelectOption } from './Select';
 
 export { ChatInput } from './ChatInput';
 export type { ChatInputProps } from './ChatInput';
+
+export { Dropdown } from './dropdown';
+export type { DropdownProps, DropdownOption } from './dropdown';

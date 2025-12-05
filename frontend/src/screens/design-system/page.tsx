@@ -32,10 +32,22 @@ import { Typography } from '@shared/ui/typography';
 import { SecondaryButton } from '@/src/shared/ui/button/SecondaryButton';
 import { useTranslations } from 'next-intl';
 import { IconButton } from '@/src/shared/ui/button/IconButton';
-import { LinkButton } from '@shared/ui/button';
+import { LinkButton, LogoButton } from '@shared/ui/button';
 import { Input, PasswordInput, EmailInput, ChatInput } from '@shared/ui/inputs';
 import { TextArea } from '@shared/ui/text-area';
 import { mockCategories } from '@/src/shared/ui/cards/category-card';
+import { ContractorCard } from '@/src/shared/ui/cards/contractor';
+import { OrderCard } from '@/src/shared/ui/cards/order';
+import { Dropdown } from '@/src/shared/ui';
+
+const options = [
+  { value: 'home-cleaning', label: 'Home cleaning' },
+  { value: 'post-renovation', label: 'Post-renovation cleaning' },
+  { value: 'window-cleaning', label: 'Window cleaning' },
+  { value: 'move-in-out', label: 'Move-in / move-out cleaning' },
+];
+
+
 
 export default function DesignSystemShowcase() {
     const t = useTranslations('landing.header');
@@ -71,6 +83,110 @@ export default function DesignSystemShowcase() {
            <IconButton iconName="google" size="md" ariaLabel="Sign in with Google" />
            <LinkButton href="/profile">View Profile</LinkButton>
 
+          {/* Logo Button Section */}
+          <section>
+            <Card className="p-6">
+              <CardHeader>
+                <CardTitle>Logo Button</CardTitle>
+                <CardDescription>
+                  Circular logo button with different states
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Default State */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Default
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <LogoButton onClick={() => console.log('Logo button clicked')} />
+                    <Typography variant="note" color="secondary">
+                      Normal state - green background with white checkmark icon
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* Hover State */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Hover
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <LogoButton onClick={() => console.log('Logo button clicked')} />
+                    <Typography variant="note" color="secondary">
+                      Hover over the button to see lighter green background
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* Pressed State */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Pressed
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <LogoButton onClick={() => console.log('Logo button clicked')} />
+                    <Typography variant="note" color="secondary">
+                      Click and hold to see light green background with darker icon
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* Disabled State */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Disabled
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <LogoButton disabled />
+                    <Typography variant="note" color="secondary">
+                      Disabled state - muted green background, not clickable
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* Loading State */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    Loading
+                  </Typography>
+                  <div className="flex items-center gap-4">
+                    <LogoButton isLoading />
+                    <Typography variant="note" color="secondary">
+                      Loading state - light green background with spinner
+                    </Typography>
+                  </div>
+                </div>
+
+                {/* All States Together */}
+                <div>
+                  <Typography variant="bodySm" weight="semibold" className="mb-3">
+                    All States
+                  </Typography>
+                  <div className="flex items-center gap-6 flex-wrap">
+                    <div className="flex flex-col items-center gap-2">
+                      <LogoButton onClick={() => console.log('Default clicked')} />
+                      <Typography variant="note" color="secondary">
+                        Default
+                      </Typography>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <LogoButton disabled />
+                      <Typography variant="note" color="secondary">
+                        Disabled
+                      </Typography>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <LogoButton isLoading />
+                      <Typography variant="note" color="secondary">
+                        Loading
+                      </Typography>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
 
 <Input placeholder="Text" />
@@ -94,12 +210,31 @@ export default function DesignSystemShowcase() {
 <EmailInput placeholder="Email" />
 
 
+<ContractorCard
+  id="1"
+  category="Plumbing"
+  name="John Smith"
+  photo="/images/contractors/john-smith.jpg"
+  location="Toronto"
+  hourlyRate={40}
+  rating={4.9}
+  tasksCompleted={43}
+  onViewProfile={(id) => console.log('View profile:', id)}
+/>
+
 <Select
   options={cleaningOptions}
   value={selectedValue}
   onChange={setSelectedValue}
   placeholder="Search..."
   searchable
+/>
+
+<Dropdown
+  options={options}
+  value={selectedValue}
+  onChange={setSelectedValue}
+  placeholder="Cle"
 />
 
 
@@ -1161,6 +1296,42 @@ export default function DesignSystemShowcase() {
                   </Typography>
                 </div>
               </Card>
+            </div>
+          </section>
+
+          {/* Order Cards Section */}
+          <section>
+            <Typography as="h2" variant="h2" className="mb-6">
+              Order Cards
+            </Typography>
+            <div className="space-y-6">
+              <OrderCard
+                id="1"
+                clientName="Mary K."
+                clientPhoto="/images/clients/mary-k.jpg"
+                title="Cleaning of 2-floors House"
+                description="Need full cleaning of a two-floor house, including floors, dusting, bathrooms, and kitchen. Looking for a thorough, detailed clean."
+                location="Toronto"
+                startDate="2024-11-13"
+                endDate="2024-11-20"
+                startTime="10:00"
+                endTime="14:00"
+                onRespond={(id) => console.log('Respond to order:', id)}
+                onLocationClick={(id) => console.log('View location:', id)}
+              />
+              <OrderCard
+                id="2"
+                clientName="John S."
+                title="Plumbing Repair - Kitchen Sink"
+                description="Kitchen sink is leaking underneath. Need urgent plumbing repair. The leak is getting worse and water is pooling under the cabinet."
+                location="Vancouver"
+                startDate="2024-11-14"
+                endDate="2024-11-14"
+                startTime="09:00"
+                endTime="12:00"
+                onRespond={(id) => console.log('Respond to order:', id)}
+                onLocationClick={(id) => console.log('View location:', id)}
+              />
             </div>
           </section>
 
